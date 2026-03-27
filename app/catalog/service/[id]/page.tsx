@@ -1,6 +1,6 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { redirect, notFound } from "next/navigation"
-import { Briefcase, ArrowLeft } from "lucide-react"
+import { Briefcase, ArrowLeft, BadgeCheck } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency } from "@/lib/utils"
