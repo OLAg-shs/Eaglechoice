@@ -23,7 +23,7 @@ export default async function AdminDashboard() {
     { data: payments },
     { data: allPaidOrders },
   ] = await Promise.all([
-    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "client").eq("is_verified", true),
+    supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "client"),
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "user"),
     supabase.from("orders").select("*", { count: "exact", head: true }),
     supabase.from("orders").select("*", { count: "exact", head: true }).eq("status", "pending"),

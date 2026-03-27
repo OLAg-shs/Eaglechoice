@@ -17,12 +17,11 @@ export default async function AdminProductsPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Fetch all verified agents
   const { data: agents } = await supabase
     .from('profiles')
     .select('id, full_name')
     .eq('role', 'client')
-    .eq('is_verified', true)
+    .order('full_name')
 
   return (
     <div className="space-y-6 animate-fade-in max-w-6xl mx-auto pb-12">
