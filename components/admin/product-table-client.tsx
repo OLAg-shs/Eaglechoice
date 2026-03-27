@@ -102,11 +102,11 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                 <Button 
                   size="icon" 
                   variant="ghost" 
-                  className={product.is_available ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-500/10" : "text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-500/10"}
+                  className={product.is_available ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-500/10" : "text-green-600 hover:text-green-700 hover:hover:bg-green-50 dark:hover:bg-green-500/10"}
                   onClick={() => handleToggleStatus(product.id, product.is_available)}
                   disabled={loadingId === product.id}
                 >
-                  {product.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {loadingId === product.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (product.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
                 </Button>
                 <Button 
                   size="icon" 

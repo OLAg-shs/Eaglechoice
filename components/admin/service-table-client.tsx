@@ -102,7 +102,7 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
                   onClick={() => handleToggleStatus(service.id, service.is_available)}
                   disabled={loadingId === service.id}
                 >
-                  {service.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {loadingId === service.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (service.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
                 </Button>
                 <Button 
                   size="icon" 
