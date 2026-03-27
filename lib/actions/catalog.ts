@@ -47,6 +47,7 @@ export async function createProduct(formData: FormData) {
       stock_quantity,
       price,
       images: imagePublicUrl ? [imagePublicUrl] : [],
+      agent_id: agent_id || null,
       is_available: true,
     })
     
@@ -97,6 +98,7 @@ export async function createService(formData: FormData) {
       description: description || null,
       base_price,
       cover_image_url: image_url,
+      agent_id: agent_id || null,
       is_available: true,
     })
     
