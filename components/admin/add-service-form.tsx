@@ -47,7 +47,7 @@ export function AddServiceForm({ agents }: { agents: { id: string; full_name: st
   }
 
   return (
-    <Card className="glass-card mt-6">
+    <Card className="mt-6 bg-white dark:bg-[#111111] border border-gray-100 dark:border-gray-800 shadow-sm transition-colors ring-1 ring-black/5 dark:ring-white/5">
       <CardContent className="p-6">
         <form id="add-service-form" action={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
