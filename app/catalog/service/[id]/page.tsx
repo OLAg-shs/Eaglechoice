@@ -28,7 +28,7 @@ export async function generateMetadata({
   const supabase = await createAdminClient()
   const { data: service } = await supabase
     .from("services")
-    .select("name, description, base_price, cover_image_url")
+    .select("name, description, base_price, cover_image_url, required_documents")
     .eq("id", id)
     .single()
 
@@ -38,7 +38,16 @@ export async function generateMetadata({
   ogImageUrl.searchParams.set("title", service.name)
   ogImageUrl.searchParams.set("price", `GH₵ ${service.base_price}`)
   ogImageUrl.searchParams.set("type", "service")
+  
   if (service.cover_image_url) ogImageUrl.searchParams.set("image", service.cover_image_url)
+  
+  // Pass top 3 required docs as highlights
+  if (service.required_documents && Array.isArray(service.required_documents)) {
+    const highlights = service.required_documents.slice(0, 3)
+    highlights.forEach((doc: string, i: number) => {
+      ogImageUrl.searchParams.set(`s${i+1}`, doc)
+    })
+  }
 
   return {
     title: `${service.name} — Eagle Choice`,

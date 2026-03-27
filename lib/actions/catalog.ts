@@ -14,6 +14,7 @@ export async function createProduct(formData: FormData) {
   const brand = formData.get("brand") as string || null
   const file = formData.get("image") as File
   const agent_id = formData.get("agent_id") as string
+  const specifications = formData.get("specifications") as string || "{}"
   
   let imagePublicUrl: string | null = null
   
@@ -48,6 +49,7 @@ export async function createProduct(formData: FormData) {
       price,
       images: imagePublicUrl ? [imagePublicUrl] : [],
       agent_id: agent_id || null,
+      specifications: JSON.parse(specifications),
       is_available: true,
     })
     
@@ -67,6 +69,7 @@ export async function createService(formData: FormData) {
   const category = formData.get("category") as string || 'service'
   const file = formData.get("image") as File
   const agent_id = formData.get("agent_id") as string
+  const required_documents = formData.get("required_documents") as string || "[]"
   
   let image_url = null
   
@@ -99,6 +102,7 @@ export async function createService(formData: FormData) {
       base_price,
       cover_image_url: image_url,
       agent_id: agent_id || null,
+      required_documents: JSON.parse(required_documents),
       is_available: true,
     })
     

@@ -14,6 +14,13 @@ export function AddProductForm({ agents }: { agents: { id: string; full_name: st
   const { toast } = useToast()
   const [pending, setPending] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
+  const [specs, setSpecs] = useState<{key: string, value: string}[]>([])
+
+  const updateSpec = (index: number, field: 'key' | 'value', value: string) => {
+    const newSpecs = [...specs]
+    newSpecs[index][field] = value
+    setSpecs(newSpecs)
+  }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -37,6 +44,7 @@ export function AddProductForm({ agents }: { agents: { id: string; full_name: st
       const form = document.getElementById('add-product-form') as HTMLFormElement
       form.reset()
       setPreview(null)
+      setSpecs([])
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -99,9 +107,58 @@ export function AddProductForm({ agents }: { agents: { id: string; full_name: st
                 </select>
               </div>
 
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Technical Specifications (Optional)</Label>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setSpecs([...specs, { key: "", value: "" }])}
+                    className="h-7 px-2 text-xs border-dashed"
+                  >
+                    + Add Spec
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  {specs.map((spec, index) => (
+                    <div key={index} className="flex gap-2 animate-in slide-in-from-left-2 duration-200">
+                      <Input 
+                        placeholder="Feature (e.g. RAM)" 
+                        value={spec.key} 
+                        onChange={(e) => updateSpec(index, 'key', e.target.value)}
+                        className="flex-1 h-8 text-xs bg-white/50 dark:bg-black/20"
+                      />
+                      <Input 
+                        placeholder="Value (e.g. 16GB)" 
+                        value={spec.value} 
+                        onChange={(e) => updateSpec(index, 'value', e.target.value)}
+                        className="flex-1 h-8 text-xs bg-white/50 dark:bg-black/20"
+                      />
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setSpecs(specs.filter((_, i) => i !== index))}
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                  {specs.length === 0 && (
+                    <p className="text-[10px] text-gray-500 italic">No specific specs added yet</p>
+                  )}
+                </div>
+                <Input type="hidden" name="specifications" value={JSON.stringify(
+                  specs.filter(s => s.key && s.value).reduce((acc, s) => ({ ...acc, [s.key]: s.value }), {})
+                )} />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description (Optional)</Label>
-                <Textarea id="description" name="description" placeholder="Product details and specifications..." className="h-24 bg-white/50 dark:bg-black/20" />
+                <Textarea id="description" name="description" placeholder="Product details and high-level overview..." className="h-24 bg-white/50 dark:bg-black/20" />
               </div>
             </div>
 

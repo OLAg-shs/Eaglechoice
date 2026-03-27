@@ -28,7 +28,7 @@ export async function generateMetadata({
   const supabase = await createAdminClient()
   const { data: product } = await supabase
     .from("products")
-    .select("name, description, price, images, profiles!client_id(full_name)")
+    .select("name, description, price, images, specifications, profiles!client_id(full_name)")
     .eq("id", id)
     .single()
 
@@ -41,8 +41,17 @@ export async function generateMetadata({
   ogImageUrl.searchParams.set("title", product.name)
   ogImageUrl.searchParams.set("price", `GH₵ ${product.price}`)
   ogImageUrl.searchParams.set("type", "product")
+  
   if (imageUrl) ogImageUrl.searchParams.set("image", imageUrl)
   if (agentName) ogImageUrl.searchParams.set("badge", `Expert: ${agentName}`)
+  
+  // Pass top 3 specs as highlights
+  if (product.specifications && typeof product.specifications === 'object') {
+    const highlights = Object.entries(product.specifications).slice(0, 3)
+    highlights.forEach(([k, v], i) => {
+      ogImageUrl.searchParams.set(`s${i+1}`, `${k}: ${v}`)
+    })
+  }
 
   return {
     title: `${product.name} — Eagle Choice`,

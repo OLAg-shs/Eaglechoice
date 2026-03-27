@@ -14,6 +14,15 @@ export function AddServiceForm({ agents }: { agents: { id: string; full_name: st
   const { toast } = useToast()
   const [pending, setPending] = useState(false)
   const [preview, setPreview] = useState<string | null>(null)
+  const [docs, setDocs] = useState<string[]>([])
+
+  const addDoc = () => setDocs([...docs, ""])
+  const updateDoc = (index: number, value: string) => {
+    const newDocs = [...docs]
+    newDocs[index] = value
+    setDocs(newDocs)
+  }
+  const removeDoc = (index: number) => setDocs(docs.filter((_, i) => i !== index))
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -36,6 +45,7 @@ export function AddServiceForm({ agents }: { agents: { id: string; full_name: st
       const form = document.getElementById('add-service-form') as HTMLFormElement
       form.reset()
       setPreview(null)
+      setDocs([])
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -95,6 +105,47 @@ export function AddServiceForm({ agents }: { agents: { id: string; full_name: st
                     <option key={agent.id} value={agent.id} className="text-gray-900">{agent.full_name}</option>
                   ))}
                 </select>
+              </div>
+
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Required Documents (Optional)</Label>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={addDoc}
+                    className="h-7 px-2 text-xs border-dashed"
+                  >
+                    + Add Doc
+                  </Button>
+                </div>
+                
+                <div className="space-y-2">
+                  {docs.map((doc, index) => (
+                    <div key={index} className="flex gap-2 animate-in slide-in-from-left-2 duration-200">
+                      <Input 
+                        placeholder="Document name (e.g. Passport)" 
+                        value={doc} 
+                        onChange={(e) => updateDoc(index, e.target.value)}
+                        className="flex-1 h-8 text-xs bg-white/50 dark:bg-black/20"
+                      />
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => removeDoc(index)}
+                        className="h-8 w-8 p-0 text-gray-400 hover:text-red-500"
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                  {docs.length === 0 && (
+                    <p className="text-[10px] text-gray-500 italic">No specific documents listed</p>
+                  )}
+                </div>
+                <Input type="hidden" name="required_documents" value={JSON.stringify(docs.filter(d => d.trim() !== ""))} />
               </div>
 
               <div className="space-y-2">

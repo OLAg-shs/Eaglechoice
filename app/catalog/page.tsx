@@ -1,9 +1,10 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ShoppingBag, Briefcase, BadgeCheck, UserCircle } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { formatCurrency } from "@/lib/utils"
+import { formatCurrency, cn } from "@/lib/utils"
+import { ShoppingBag, Briefcase, BadgeCheck, UserCircle, Download, ExternalLink } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
 export default async function CatalogPage() {
@@ -48,52 +49,99 @@ export default async function CatalogPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {products.map((product: any) => (
-              <Link key={product.id} href={`/catalog/product/${product.id}`} className="group">
-                <Card className="hover-lift overflow-hidden bg-white/50 dark:bg-black/20 backdrop-blur-md border-gray-200 dark:border-gray-800 h-full flex flex-col">
-                  <div className="aspect-square bg-white dark:bg-gray-900 flex items-center justify-center transition-colors border-b border-gray-100 dark:border-gray-800 overflow-hidden">
-                    {product.images?.[0] ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={product.images[0]} alt={product.name} className="h-full w-full object-contain p-2 transition-transform duration-700 group-hover:scale-105" />
-                    ) : (
-                      <ShoppingBag className="h-12 w-12 text-gray-300 dark:text-gray-700" />
-                    )}
-                  </div>
-                  <CardContent className="p-4 flex flex-col flex-1">
-                    <div className="mb-2">
-                      <Badge variant="outline" className="text-xs dark:border-gray-700 text-gray-600 dark:text-gray-300">
-                        {categoryLabels[product.category] || product.category}
-                      </Badge>
-                    </div>
-                    <p className="font-semibold text-gray-900 dark:text-white line-clamp-2 text-sm leading-tight flex-1 mb-3">{product.name}</p>
-                    
-                    {product.agent && (
-                      <div className="flex items-center gap-2 mb-3 bg-amber-50 dark:bg-amber-500/10 p-1.5 rounded border border-amber-100 dark:border-amber-500/20">
-                        {product.agent.avatar_url ? (
+            {products.map((product: any) => {
+              const highlights = product.specifications && typeof product.specifications === 'object'
+                ? Object.entries(product.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
+                : []
+              
+              const downloadUrl = new URL("/api/og", "https://eaglechoice.vercel.app")
+              downloadUrl.searchParams.set("title", product.name)
+              downloadUrl.searchParams.set("price", formatCurrency(product.price))
+              downloadUrl.searchParams.set("type", "product")
+              downloadUrl.searchParams.set("image", product.images?.[0] || "")
+              highlights.forEach((h, i) => downloadUrl.searchParams.set(`s${i+1}`, h))
+              
+              return (
+                <div key={product.id} className="group relative flex flex-col">
+                  <Link href={`/catalog/product/${product.id}`} className="flex-1">
+                    <Card className="hover-lift overflow-hidden bg-white/70 dark:bg-black/40 backdrop-blur-xl border-gray-200 dark:border-gray-800 h-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl">
+                      <div className="aspect-square bg-white dark:bg-gray-950 flex items-center justify-center border-b border-gray-100 dark:border-gray-900 overflow-hidden relative">
+                        {product.images?.[0] ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={product.agent.avatar_url} alt="Agent" className="w-5 h-5 rounded-full object-cover" />
+                          <img 
+                            src={product.images[0]} 
+                            alt={product.name} 
+                            className="h-full w-full object-contain p-4 transition-transform duration-700 group-hover:scale-110" 
+                          />
                         ) : (
-                          <UserCircle className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+                          <ShoppingBag className="h-12 w-12 text-gray-200 dark:text-gray-800" />
                         )}
-                        <span className="text-[10px] font-medium text-amber-700 dark:text-amber-400 truncate">
-                          Expert: {product.agent.full_name}
-                        </span>
-                        {product.agent.is_verified && <BadgeCheck className="w-3 h-3 text-amber-500 ml-auto flex-shrink-0" />}
+                        <div className="absolute top-3 left-3">
+                          <Badge variant="secondary" className="bg-white/90 dark:bg-black/90 backdrop-blur-md shadow-sm border-none text-[10px] font-bold tracking-wider uppercase">
+                            {categoryLabels[product.category] || product.category}
+                          </Badge>
+                        </div>
                       </div>
-                    )}
+                      <CardContent className="p-5 flex flex-col flex-1">
+                        <h3 className="font-bold text-gray-900 dark:text-white line-clamp-2 text-base leading-tight mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors">
+                          {product.name}
+                        </h3>
+                        
+                        {/* Highlights/Specs */}
+                        {highlights.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-4">
+                            {highlights.map((h, i) => (
+                              <span key={i} className="text-[10px] px-2 py-0.5 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 dark:text-gray-400 font-medium">
+                                {h}
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
-                    <div className="mt-auto">
-                      <p className="text-lg font-bold text-amber-600 dark:text-amber-500 tracking-wide transition-colors">{formatCurrency(product.price)}</p>
-                      {product.stock_quantity > 0 ? (
-                        <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-1">{product.stock_quantity} in stock</p>
-                      ) : (
-                        <p className="text-xs font-medium text-red-500 dark:text-red-400 mt-1">Out of stock</p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                        <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-900 flex items-end justify-between">
+                          <div>
+                            <p className="text-xl font-black text-amber-600 dark:text-amber-500">
+                              {formatCurrency(product.price)}
+                            </p>
+                            <p className={cn(
+                              "text-[10px] font-bold uppercase tracking-widest mt-1",
+                              product.stock_quantity > 0 ? "text-green-500" : "text-red-500"
+                            )}>
+                              {product.stock_quantity > 0 ? `${product.stock_quantity} In Stock` : "Out of Stock"}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                  
+                  {/* Action Buttons overlaying the card or below */}
+                  <div className="flex gap-2 mt-3 px-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 h-9 text-[11px] font-bold tracking-tighter uppercase dark:border-gray-800 dark:hover:bg-gray-900 gap-2"
+                      asChild
+                    >
+                      <a href={downloadUrl.toString()} target="_blank" rel="noopener noreferrer">
+                        <Download className="h-3.5 w-3.5" />
+                        Get Card
+                      </a>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9 dark:border-gray-800 dark:hover:bg-gray-900"
+                      asChild
+                    >
+                      <Link href={`/catalog/product/${product.id}`}>
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </section>
@@ -113,54 +161,93 @@ export default async function CatalogPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {services.map((service: any) => (
-              <Link key={service.id} href={`/catalog/service/${service.id}`} className="group">
-                <Card className="hover-lift cursor-pointer bg-white/50 dark:bg-black/20 backdrop-blur-md border-gray-200 dark:border-gray-800 overflow-hidden h-full flex flex-col">
-                  {service.cover_image_url && (
-                    <div className="h-32 w-full overflow-hidden border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={service.cover_image_url} alt={service.name} className="w-full h-full object-contain p-2 transition-transform duration-700 group-hover:scale-105" />
-                    </div>
-                  )}
-                  <CardContent className={service.cover_image_url ? "p-5 flex flex-col flex-1" : "p-6 flex flex-col flex-1"}>
-                    <div className="mb-3">
-                      <Badge variant="outline" className="text-xs text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/50 bg-indigo-50 dark:bg-indigo-500/10">
-                        {categoryLabels[service.category] || service.category}
-                      </Badge>
-                    </div>
-                    <h3 className="font-bold text-gray-900 dark:text-white transition-colors leading-tight mb-2">{service.name}</h3>
-                    {service.description && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 flex-1">{service.description}</p>
-                    )}
-                    
-                    {service.agent && (
-                      <div className="flex items-center gap-2 mb-4 bg-indigo-50 dark:bg-indigo-500/10 p-2 rounded-md border border-indigo-100 dark:border-indigo-500/20">
-                        {service.agent.avatar_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={service.agent.avatar_url} alt="Agent" className="w-6 h-6 rounded-full object-cover" />
-                        ) : (
-                          <UserCircle className="w-6 h-6 text-indigo-500" />
-                        )}
-                        <div className="flex flex-col">
-                          <span className="text-[10px] text-gray-500 uppercase tracking-wider font-semibold">Expert Handler</span>
-                          <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-300 flex items-center gap-1">
-                            {service.agent.full_name}
-                            {service.agent.is_verified && <BadgeCheck className="w-3 h-3 text-indigo-500" />}
-                          </span>
-                        </div>
-                      </div>
-                    )}
+            {services.map((service: any) => {
+              const highlights = service.required_documents && Array.isArray(service.required_documents)
+                ? service.required_documents.slice(0, 2)
+                : []
 
-                    <div className="mt-auto pt-4 border-t border-gray-100 dark:border-gray-800 flex items-end justify-between">
-                      <div>
-                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider mb-1">Starting At</p>
-                        <p className="text-xl font-black text-gray-900 dark:text-white transition-colors">{formatCurrency(service.base_price)}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+              const downloadUrl = new URL("/api/og", "https://eaglechoice.vercel.app")
+              downloadUrl.searchParams.set("title", service.name)
+              downloadUrl.searchParams.set("price", formatCurrency(service.base_price))
+              downloadUrl.searchParams.set("type", "service")
+              downloadUrl.searchParams.set("image", service.cover_image_url || "")
+              highlights.forEach((h: string, i: number) => downloadUrl.searchParams.set(`s${i+1}`, h))
+
+              return (
+                <div key={service.id} className="group relative flex flex-col">
+                  <Link href={`/catalog/service/${service.id}`} className="flex-1">
+                    <Card className="hover-lift overflow-hidden bg-white/70 dark:bg-black/40 backdrop-blur-xl border-gray-200 dark:border-gray-800 h-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl">
+                      {service.cover_image_url && (
+                        <div className="h-40 w-full overflow-hidden border-b border-gray-100 dark:border-gray-900 bg-white dark:bg-gray-950 relative">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img 
+                            src={service.cover_image_url} 
+                            alt={service.name} 
+                            className="w-full h-full object-contain p-4 transition-transform duration-700 group-hover:scale-110" 
+                          />
+                          <div className="absolute top-3 left-3">
+                            <Badge variant="secondary" className="bg-white/90 dark:bg-black/90 backdrop-blur-md shadow-sm border-none text-[10px] font-bold tracking-wider uppercase">
+                              {categoryLabels[service.category] || service.category}
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
+                      <CardContent className="p-6 flex flex-col flex-1">
+                        <h3 className="font-bold text-gray-900 dark:text-white leading-tight mb-2 text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                          {service.name}
+                        </h3>
+                        
+                        {highlights.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-4">
+                            {highlights.map((h: string, i: number) => (
+                              <span key={i} className="text-[10px] px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950 rounded-full text-indigo-600 dark:text-indigo-400 font-medium border border-indigo-100 dark:border-indigo-900/50">
+                                {h}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-6 flex-1">
+                          {service.description}
+                        </p>
+                        
+                        <div className="mt-auto pt-4 border-t border-gray-50 dark:border-gray-900 flex items-center justify-between">
+                          <div>
+                            <p className="text-[9px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-widest mb-0.5">Starting At</p>
+                            <p className="text-xl font-black text-gray-900 dark:text-white">{formatCurrency(service.base_price)}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 mt-3 px-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 h-9 text-[11px] font-bold tracking-tighter uppercase dark:border-gray-800 dark:hover:bg-gray-900 gap-2"
+                      asChild
+                    >
+                      <a href={downloadUrl.toString()} target="_blank" rel="noopener noreferrer">
+                        <Download className="h-3.5 w-3.5" />
+                        Get Card
+                      </a>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-9 w-9 dark:border-gray-800 dark:hover:bg-gray-900"
+                      asChild
+                    >
+                      <Link href={`/catalog/service/${service.id}`}>
+                        <ExternalLink className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </section>
