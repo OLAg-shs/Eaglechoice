@@ -54,7 +54,7 @@ export default async function CatalogPage() {
                   <div className="aspect-square bg-white dark:bg-gray-900 flex items-center justify-center transition-colors border-b border-gray-100 dark:border-gray-800 overflow-hidden">
                     {product.images?.[0] ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <img src={product.images[0]} alt={product.name} className="h-full w-full object-contain p-2 transition-transform duration-700 group-hover:scale-105" />
                     ) : (
                       <ShoppingBag className="h-12 w-12 text-gray-300 dark:text-gray-700" />
                     )}
@@ -117,9 +117,9 @@ export default async function CatalogPage() {
               <Link key={service.id} href={`/catalog/service/${service.id}`} className="group">
                 <Card className="hover-lift cursor-pointer bg-white/50 dark:bg-black/20 backdrop-blur-md border-gray-200 dark:border-gray-800 overflow-hidden h-full flex flex-col">
                   {service.cover_image_url && (
-                    <div className="h-32 w-full overflow-hidden border-b border-gray-100 dark:border-gray-800">
+                    <div className="h-32 w-full overflow-hidden border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={service.cover_image_url} alt={service.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <img src={service.cover_image_url} alt={service.name} className="w-full h-full object-contain p-2 transition-transform duration-700 group-hover:scale-105" />
                     </div>
                   )}
                   <CardContent className={service.cover_image_url ? "p-5 flex flex-col flex-1" : "p-6 flex flex-col flex-1"}>

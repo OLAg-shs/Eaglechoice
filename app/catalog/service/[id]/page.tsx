@@ -16,8 +16,9 @@ import { headers } from "next/headers"
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }): Promise<Metadata> {
+  const { id } = await params
   const headersList = await headers()
   const domain = headersList.get("host") || "eaglechoice.vercel.app"
   const protocol = domain.includes("localhost") ? "http" : "https"
@@ -27,7 +28,7 @@ export async function generateMetadata({
   const { data: service } = await supabase
     .from("services")
     .select("name, description, base_price, cover_image_url")
-    .eq("id", params.id)
+    .eq("id", id)
     .single()
 
   if (!service) return { title: "Service - Eagle Choice" }
@@ -60,8 +61,9 @@ export async function generateMetadata({
 export default async function ServiceDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const headersList = await headers()
   const domain = headersList.get("host") || "eaglechoice.vercel.app"
   const protocol = domain.includes("localhost") ? "http" : "https"
@@ -73,7 +75,7 @@ export default async function ServiceDetailPage({
   // DELETED: if (!user) redirect("/login")
 
   const [{ data: service }, { data: clients }] = await Promise.all([
-    adminSupabase.from("services").select("*").eq("id", params.id).eq("is_available", true).single(),
+    adminSupabase.from("services").select("*").eq("id", id).eq("is_available", true).single(),
     adminSupabase.from("profiles").select("id, full_name, email").eq("role", "client").eq("is_active", true).order("full_name"),
   ])
 

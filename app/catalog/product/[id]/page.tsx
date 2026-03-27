@@ -16,8 +16,9 @@ import { headers } from "next/headers"
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }): Promise<Metadata> {
+  const { id } = await params
   const headersList = await headers()
   const domain = headersList.get("host") || "eaglechoice.vercel.app"
   const protocol = domain.includes("localhost") ? "http" : "https"
@@ -27,7 +28,7 @@ export async function generateMetadata({
   const { data: product } = await supabase
     .from("products")
     .select("name, description, price, images, profiles!client_id(full_name)")
-    .eq("id", params.id)
+    .eq("id", id)
     .single()
 
   if (!product) return { title: "Product - Eagle Choice" }
@@ -64,8 +65,9 @@ export async function generateMetadata({
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const headersList = await headers()
   const domain = headersList.get("host") || "eaglechoice.vercel.app"
   const protocol = domain.includes("localhost") ? "http" : "https"
@@ -77,7 +79,7 @@ export default async function ProductDetailPage({
   // DELETED: if (!user) redirect("/login")
 
   const [{ data: product }, { data: clients }] = await Promise.all([
-    adminSupabase.from("products").select("*, profiles!client_id(id, full_name, is_verified)").eq("id", params.id).eq("is_available", true).single(),
+    adminSupabase.from("products").select("*, profiles!client_id(id, full_name, is_verified)").eq("id", id).eq("is_available", true).single(),
     adminSupabase.from("profiles").select("id, full_name, email").eq("role", "client").eq("is_active", true).order("full_name"),
   ])
 
