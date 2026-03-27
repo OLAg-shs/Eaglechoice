@@ -6,6 +6,9 @@ export const runtime = "edge"
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
+    if (searchParams.get("debug") === "true") {
+      return new Response(`OG Route Reachable. Title: ${searchParams.get("title")}`, { status: 200 })
+    }
 
     const title = searchParams.get("title") || "Eagle Choice"
     const price = searchParams.get("price") || ""
@@ -97,31 +100,21 @@ export async function GET(req: NextRequest) {
               </div>
             </div>
 
-            {/* Right Column: Image */}
+            {/* Right Column: Placeholder */}
             <div
               style={{
                 width: "450px",
                 height: "100%",
                 display: "flex",
-                backgroundColor: "#000",
+                backgroundColor: "#222",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "120px",
+                color: accentColor,
+                fontWeight: "bold",
               }}
             >
-              {image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={image}
-                  alt={title}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              ) : (
-                <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "center", fontSize: "100px" }}>
-                  E
-                </div>
-              )}
+              {type === "service" ? "SVC" : "PRD"}
             </div>
           </div>
         </div>
