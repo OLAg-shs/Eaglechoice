@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Share2, Check, Copy, MessageCircle, Twitter, Facebook } from "lucide-react"
+import { Share2, Check, Copy, MessageCircle, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -116,7 +116,7 @@ export function ShareButton({
         </DropdownMenuItem>
         
         <DropdownMenuItem onClick={shareFacebook} className="cursor-pointer gap-3 py-2.5 focus:bg-blue-600/10 focus:text-blue-600 dark:focus:text-blue-400">
-          <Facebook className="h-4 w-4 text-blue-600" />
+          <ExternalLink className="h-4 w-4 text-blue-600" />
           <div className="flex flex-col">
             <span className="font-semibold text-sm">Facebook</span>
             <span className="text-[10px] text-gray-500">Post to your feed</span>
@@ -124,7 +124,7 @@ export function ShareButton({
         </DropdownMenuItem>
         
         <DropdownMenuItem onClick={shareTwitter} className="cursor-pointer gap-3 py-2.5 focus:bg-sky-500/10 focus:text-sky-500 dark:focus:text-sky-400">
-          <Twitter className="h-4 w-4 text-sky-500" />
+          <ExternalLink className="h-4 w-4 text-sky-500" />
           <div className="flex flex-col">
             <span className="font-semibold text-sm">Twitter (X)</span>
             <span className="text-[10px] text-gray-500">Share with followers</span>
