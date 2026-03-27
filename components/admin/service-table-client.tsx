@@ -5,9 +5,12 @@ import { formatCurrency } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Briefcase, Eye, EyeOff, Trash2, Loader2 } from "lucide-react"
+import { Briefcase, Eye, EyeOff, Trash2, Loader2, Share2 } from "lucide-react"
 import { toggleServiceStatus, deleteService } from "@/lib/actions/catalog"
 import { useToast } from "@/components/ui/use-toast"
+import { ShareButton } from "@/components/share-button"
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://eaglechoice.vercel.app"
 
 export function ServiceTableClient({ initialServices }: { initialServices: any[] }) {
   const { toast } = useToast()
@@ -95,6 +98,12 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
                 </Badge>
               </TableCell>
               <TableCell className="text-right space-x-2">
+                <ShareButton 
+                  url={`${APP_URL}/user/catalog/service/${service.id}`} 
+                  title={service.name}
+                  variant="ghost"
+                  size="icon"
+                />
                 <Button 
                   size="icon" 
                   variant="ghost" 

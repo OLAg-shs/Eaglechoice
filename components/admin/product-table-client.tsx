@@ -5,9 +5,12 @@ import { formatCurrency } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Package, Eye, EyeOff, Trash2, Loader2 } from "lucide-react"
+import { Package, Eye, EyeOff, Trash2, Loader2, Share2 } from "lucide-react"
 import { toggleProductStatus, deleteProduct } from "@/lib/actions/catalog"
 import { useToast } from "@/components/ui/use-toast"
+import { ShareButton } from "@/components/share-button"
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://eaglechoice.vercel.app"
 
 export function ProductTableClient({ initialProducts }: { initialProducts: any[] }) {
   const { toast } = useToast()
@@ -108,6 +111,12 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                 >
                   {loadingId === product.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (product.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
                 </Button>
+                <ShareButton 
+                  url={`${APP_URL}/user/catalog/product/${product.id}`} 
+                  title={product.name}
+                  variant="ghost"
+                  size="icon"
+                />
                 <Button 
                   size="icon" 
                   variant="ghost" 

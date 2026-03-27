@@ -48,7 +48,22 @@ export function AddServiceForm({ agents }: { agents: { id: string; full_name: st
   }
 
   return (
-    <Card className="mt-6 bg-white dark:bg-[#111111] border border-gray-100 dark:border-gray-800 shadow-sm transition-colors ring-1 ring-black/5 dark:ring-white/5">
+    <>
+      {pending && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/60 backdrop-blur-md transition-all duration-300 animate-in fade-in">
+          <div className="relative">
+            <div className="h-24 w-24 rounded-full border-t-4 border-b-4 border-purple-500 animate-spin shadow-[0_0_30px_rgba(168,85,247,0.3)]"></div>
+            <div className="absolute inset-0 flex items-center justify-center text-purple-500 font-bold text-xl">
+              E
+            </div>
+          </div>
+          <div className="mt-8 text-center space-y-2">
+            <h3 className="text-2xl font-bold text-white tracking-tight">Preparing your service...</h3>
+            <p className="text-gray-400 text-sm animate-pulse">Securing catalog data and optimizing thumbnails</p>
+          </div>
+        </div>
+      )}
+      <Card className="mt-6 bg-white dark:bg-[#111111] border border-gray-100 dark:border-gray-800 shadow-sm transition-colors ring-1 ring-black/5 dark:ring-white/5">
       <CardContent className="p-6">
         <form id="add-service-form" action={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -132,5 +147,6 @@ export function AddServiceForm({ agents }: { agents: { id: string; full_name: st
         </form>
       </CardContent>
     </Card>
+    </>
   )
 }
