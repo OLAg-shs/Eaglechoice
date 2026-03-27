@@ -73,10 +73,7 @@ export function ChatWindow({
     }
     setMessages(prev => [...prev, optimisticMsg])
 
-    const formData = new FormData()
-    formData.set("conversation_id", conversationId)
-    formData.set("content", content)
-    const result = await sendMessage(formData)
+    const result = await sendMessage(conversationId, content)
 
     if (!result.error && result.data) {
       // Replace optimistic message with real one
