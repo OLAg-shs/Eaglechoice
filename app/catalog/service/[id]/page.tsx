@@ -2,6 +2,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { redirect, notFound } from "next/navigation"
 import { Briefcase, ArrowLeft } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -45,9 +46,10 @@ export async function generateMetadata({
     openGraph: {
       title: service.name,
       description: service.description || `Starting from GH₵ ${service.base_price} — Eagle Choice`,
-      images: [{ url: ogImageUrl.toString(), width: 1200, height: 630, alt: service.name }],
+      images: [{ url: ogImageUrl.toString(), width: 1200, height: 630, alt: service.name, type: "image/png" }],
       type: "website",
       siteName: "Eagle Choice",
+      url: `${currentUrl}/catalog/service/${id}`,
     },
     twitter: {
       card: "summary_large_image",
@@ -75,7 +77,7 @@ export default async function ServiceDetailPage({
   // DELETED: if (!user) redirect("/login")
 
   const [{ data: service }, { data: clients }] = await Promise.all([
-    adminSupabase.from("services").select("*").eq("id", id).eq("is_available", true).single(),
+    adminSupabase.from("services").select("*, agent:profiles!agent_id(id, full_name, is_verified, avatar_url)").eq("id", id).eq("is_available", true).single(),
     adminSupabase.from("profiles").select("id, full_name, email").eq("role", "client").eq("is_active", true).order("full_name"),
   ])
 
@@ -100,33 +102,75 @@ export default async function ServiceDetailPage({
 
       <Card className="bg-white dark:bg-[#111111] border-gray-200 dark:border-gray-800">
         <CardContent className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
-              <Briefcase className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+          {service.cover_image_url && (
+            <div className="aspect-video w-full overflow-hidden rounded-xl border border-gray-100 dark:border-gray-800 mb-6 bg-gray-50/50 dark:bg-gray-900/50">
+              <img src={service.cover_image_url} alt={service.name} className="w-full h-full object-contain p-4" />
             </div>
-            <div>
-              <p className="text-sm text-purple-600 dark:text-purple-400 font-medium">{categoryLabels[service.category] || service.category}</p>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{service.name}</h1>
+          )}
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
+                <Briefcase className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <p className="text-xs text-purple-600 dark:text-purple-400 font-bold uppercase tracking-wider">{categoryLabels[service.category] || service.category}</p>
+                <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">{service.name}</h1>
+              </div>
+            </div>
+            <div className="text-left md:text-right">
+              <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Starting At</p>
+              <p className="text-3xl font-black text-purple-600 dark:text-purple-400 tracking-tight">{formatCurrency(service.base_price)}</p>
             </div>
           </div>
-          <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{formatCurrency(service.base_price)}</p>
+
+          {service.agent && (
+             <div className="flex items-center gap-3 p-4 bg-purple-50/50 dark:bg-purple-500/5 rounded-xl border border-purple-100 dark:border-purple-500/10 mb-6">
+               <div className="h-12 w-12 rounded-full bg-white dark:bg-black/50 shadow-sm flex items-center justify-center border border-purple-200 dark:border-purple-500/20">
+                 {service.agent.avatar_url ? (
+                   <img src={service.agent.avatar_url} alt="Agent" className="h-full w-full rounded-full object-cover" />
+                 ) : (
+                   <Briefcase className="h-6 w-6 text-purple-500" />
+                 )}
+               </div>
+               <div>
+                 <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Expert Handler</p>
+                 <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1">
+                   {service.agent.full_name}
+                   {service.agent.is_verified && <BadgeCheck className="w-4 h-4 text-purple-500" />}
+                 </p>
+               </div>
+               <div className="ml-auto">
+                 <Badge variant="outline" className="text-[10px] border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-400">Verified Expert</Badge>
+               </div>
+             </div>
+          )}
+
           {service.processing_time_days && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Processing time: {service.processing_time_days} working days</p>
+            <div className="flex items-center gap-2 mb-6 p-3 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5">
+               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Estimated Time:</span>
+               <span className="text-sm font-bold dark:text-white">{service.processing_time_days} working days</span>
+            </div>
           )}
+
           {service.description && (
-            <p className="mt-4 text-gray-600 dark:text-gray-300">{service.description}</p>
+            <div className="space-y-2 mb-6">
+              <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider">Service Overview</h3>
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm">{service.description}</p>
+            </div>
           )}
+
           {service.required_documents?.length > 0 && (
-            <div className="mt-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Required Documents</h3>
-              <ul className="space-y-1">
+            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
+              <h3 className="font-bold text-gray-900 dark:text-white uppercase tracking-widest text-[10px] mb-4">Documentation Needed</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {service.required_documents.map((doc: string) => (
-                  <li key={doc} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                    <span className="h-1.5 w-1.5 rounded-full bg-purple-400" />
-                    {doc}
-                  </li>
+                  <div key={doc} className="flex items-center gap-2 p-3 rounded-lg bg-indigo-50/30 dark:bg-white/5 border border-indigo-100/50 dark:border-white/5">
+                    <div className="h-1.5 w-1.5 rounded-full bg-purple-500" />
+                    <span className="text-xs font-medium dark:text-white">{doc}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
         </CardContent>
