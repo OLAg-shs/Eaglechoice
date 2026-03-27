@@ -41,13 +41,12 @@ export async function createProduct(formData: FormData) {
     .from('products')
     .insert({
       name,
-      category: 'laptop',        // products table CHECK: 'laptop' | 'accessory'
+      category: 'laptop',
       description: description || null,
       brand,
-      stock_quantity,             // correct column name
-      price,                      // correct column name
-      images: imagePublicUrl ? [imagePublicUrl] : [],  // images is TEXT[]
-      agent_id: agent_id || null,
+      stock_quantity,
+      price,
+      images: imagePublicUrl ? [imagePublicUrl] : [],
       is_available: true,
     })
     
@@ -94,11 +93,10 @@ export async function createService(formData: FormData) {
     .from('services')
     .insert({
       name,
-      category: category || 'ghana_card',  // must match CHECK constraint
+      category: category || 'ghana_card',
       description: description || null,
       base_price,
-      cover_image_url: image_url,           // correct column name for services
-      agent_id: agent_id || null,
+      cover_image_url: image_url,
       is_available: true,
     })
     
