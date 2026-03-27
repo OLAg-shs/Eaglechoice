@@ -38,10 +38,12 @@ export async function updateSession(request: NextRequest) {
   // Public routes that don't need auth
   const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/auth/callback"]
   const isPublicRoute = publicRoutes.some((route) => pathname === route)
+  const isCatalogRoute = pathname.startsWith("/user/catalog")
+  const isOgRoute = pathname.startsWith("/api/og")
   const isApiWebhook = pathname.startsWith("/api/webhooks")
 
-  // Allow webhooks through without auth
-  if (isApiWebhook) {
+  // Allow webhooks, catalog viewing, and OG images through without auth
+  if (isApiWebhook || isCatalogRoute || isOgRoute) {
     return supabaseResponse
   }
 
