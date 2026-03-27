@@ -54,15 +54,20 @@ export function ShareButton({
   }
 
   const shareTitle = `${title} — Eagle Choice`
-  const shareText = `Check out ${title} on Eagle Choice! 🦅\n\n`
+  
+  // High-conversion sales copy for WhatsApp/Socials
+  const getShareText = () => {
+    const action = type === 'product' ? 'Buy' : 'Get'
+    return `Want to ${action} the new ${title}? 🦅\nDon't know where to find it? Look no further! 🚀\n\nAt Eagle Choice, we provide Verified and Authentic ${type === 'product' ? 'products' : 'services'} at affordable prices. ✅\n\nCheck it out on our website 👇\n`
+  }
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(getShareUrl())
+      await navigator.clipboard.writeText(`${getShareText()}${getShareUrl()}`)
       setCopied(true)
       toast({
-        title: "Link Copied",
-        description: "Public link with branding info copied to clipboard.",
+        title: "Copied with Sales Copy",
+        description: "Branded link and attractive text copied to clipboard.",
       })
       setTimeout(() => setCopied(false), 2500)
     } catch (err) {
@@ -76,13 +81,13 @@ export function ShareButton({
 
   const shareWhatsApp = () => {
     const finalUrl = getShareUrl()
-    const encodedText = encodeURIComponent(shareText + finalUrl)
+    const encodedText = encodeURIComponent(getShareText() + finalUrl)
     window.open(`https://wa.me/?text=${encodedText}`, "_blank")
   }
 
   const shareTwitter = () => {
     const finalUrl = getShareUrl()
-    const encodedText = encodeURIComponent(shareText)
+    const encodedText = encodeURIComponent(getShareText())
     const encodedUrl = encodeURIComponent(finalUrl)
     window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, "_blank")
   }
