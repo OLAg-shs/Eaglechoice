@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { ShoppingBag, Briefcase, BadgeCheck, UserCircle } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -6,14 +6,14 @@ import { Badge } from "@/components/ui/badge"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 
-export default async function UserCatalogPage() {
+export default async function CatalogPage() {
   const supabase = await createClient()
+  const adminSupabase = await createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/login")
 
   const [{ data: products }, { data: services }] = await Promise.all([
-    supabase.from("products").select("*, agent:profiles!agent_id(full_name, is_verified, avatar_url)").eq("is_active", true).order("created_at", { ascending: false }),
-    supabase.from("services").select("*, agent:profiles!agent_id(full_name, is_verified, avatar_url)").eq("is_active", true).order("created_at", { ascending: false }),
+    adminSupabase.from("products").select("*, agent:profiles!agent_id(full_name, is_verified, avatar_url)").eq("is_available", true).order("created_at", { ascending: false }),
+    adminSupabase.from("services").select("*, agent:profiles!agent_id(full_name, is_verified, avatar_url)").eq("is_available", true).order("created_at", { ascending: false }),
   ])
 
   const categoryLabels: Record<string, string> = {
@@ -52,9 +52,9 @@ export default async function UserCatalogPage() {
               <Link key={product.id} href={`/user/catalog/product/${product.id}`} className="group">
                 <Card className="hover-lift overflow-hidden bg-white/50 dark:bg-black/20 backdrop-blur-md border-gray-200 dark:border-gray-800 h-full flex flex-col">
                   <div className="aspect-square bg-white dark:bg-gray-900 flex items-center justify-center transition-colors border-b border-gray-100 dark:border-gray-800 overflow-hidden">
-                    {product.image_url ? (
+                    {product.images?.[0] ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={product.image_url} alt={product.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     ) : (
                       <ShoppingBag className="h-12 w-12 text-gray-300 dark:text-gray-700" />
                     )}
@@ -83,9 +83,9 @@ export default async function UserCatalogPage() {
                     )}
 
                     <div className="mt-auto">
-                      <p className="text-lg font-bold text-amber-600 dark:text-amber-500 tracking-wide transition-colors">{formatCurrency(product.base_price)}</p>
-                      {product.stock > 0 ? (
-                        <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-1">{product.stock} in stock</p>
+                      <p className="text-lg font-bold text-amber-600 dark:text-amber-500 tracking-wide transition-colors">{formatCurrency(product.price)}</p>
+                      {product.stock_quantity > 0 ? (
+                        <p className="text-xs font-medium text-green-600 dark:text-green-400 mt-1">{product.stock_quantity} in stock</p>
                       ) : (
                         <p className="text-xs font-medium text-red-500 dark:text-red-400 mt-1">Out of stock</p>
                       )}
@@ -116,13 +116,13 @@ export default async function UserCatalogPage() {
             {services.map((service: any) => (
               <Link key={service.id} href={`/user/catalog/service/${service.id}`} className="group">
                 <Card className="hover-lift cursor-pointer bg-white/50 dark:bg-black/20 backdrop-blur-md border-gray-200 dark:border-gray-800 overflow-hidden h-full flex flex-col">
-                  {service.image_url && (
+                  {service.cover_image_url && (
                     <div className="h-32 w-full overflow-hidden border-b border-gray-100 dark:border-gray-800">
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={service.image_url} alt={service.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={service.cover_image_url} alt={service.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     </div>
                   )}
-                  <CardContent className={service.image_url ? "p-5 flex flex-col flex-1" : "p-6 flex flex-col flex-1"}>
+                  <CardContent className={service.cover_image_url ? "p-5 flex flex-col flex-1" : "p-6 flex flex-col flex-1"}>
                     <div className="mb-3">
                       <Badge variant="outline" className="text-xs text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800/50 bg-indigo-50 dark:bg-indigo-500/10">
                         {categoryLabels[service.category] || service.category}

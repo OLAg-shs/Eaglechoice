@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { redirect, notFound } from "next/navigation"
 import { ShoppingBag, ArrowLeft, BadgeCheck } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,7 +23,7 @@ export async function generateMetadata({
   const protocol = domain.includes("localhost") ? "http" : "https"
   const currentUrl = `${protocol}://${domain}`
 
-  const supabase = await createClient()
+  const supabase = await createAdminClient()
   const { data: product } = await supabase
     .from("products")
     .select("name, description, price, images, profiles!client_id(full_name)")
@@ -67,12 +67,13 @@ export default async function ProductDetailPage({
   params: { id: string }
 }) {
   const supabase = await createClient()
+  const adminSupabase = await createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   // DELETED: if (!user) redirect("/login")
 
   const [{ data: product }, { data: clients }] = await Promise.all([
-    supabase.from("products").select("*, profiles!client_id(id, full_name, is_verified)").eq("id", params.id).eq("is_available", true).single(),
-    supabase.from("profiles").select("id, full_name, email").eq("role", "client").eq("is_active", true).order("full_name"),
+    adminSupabase.from("products").select("*, profiles!client_id(id, full_name, is_verified)").eq("id", params.id).eq("is_available", true).single(),
+    adminSupabase.from("profiles").select("id, full_name, email").eq("role", "client").eq("is_active", true).order("full_name"),
   ])
 
   if (!product) notFound()
