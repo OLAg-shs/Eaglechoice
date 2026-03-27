@@ -16,19 +16,26 @@ export async function GET(req: NextRequest) {
     const image = searchParams.get("image") || ""
     const badge = searchParams.get("badge") || ""
 
-    const accentColor = type === "service" ? "rgba(168, 85, 247, 1)" : "rgba(245, 158, 11, 1)"
-    const accentBg = type === "service" ? "rgba(168, 85, 247, 0.1)" : "rgba(245, 158, 11, 0.1)"
-
     // Fetch image and convert to base64 for robustness in Edge Runtime
     let imageData: string | null = null
-    if (image) {
+    if (image && image.startsWith("http")) {
       try {
-        const res = await fetch(image)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s timeout
+
+        const res = await fetch(image, {
+          signal: controller.signal,
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+          }
+        })
+        
+        clearTimeout(timeoutId);
+
         if (res.ok) {
           const buffer = await res.arrayBuffer()
-          const base64 = btoa(
-            new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
-          )
+          // Robust base64 conversion using Buffer (available in Vercel Edge)
+          const base64 = Buffer.from(buffer).toString('base64')
           const contentType = res.headers.get("content-type") || "image/jpeg"
           imageData = `data:${contentType};base64,${base64}`
         }
@@ -137,7 +144,9 @@ export async function GET(req: NextRequest) {
               )}
 
               <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginTop: "10px" }}>
-                <span style={{ fontSize: "56px", fontWeight: "900", color: "white" }}>{price}</span>
+                <span style={{ fontSize: "56px", fontWeight: "900", color: "white" }}>
+                  {price.replace('GH₵', 'GH')}
+                </span>
               </div>
             </div>
 
