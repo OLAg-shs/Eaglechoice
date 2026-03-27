@@ -137,7 +137,7 @@ export async function GET(req: NextRequest) {
 
           {/* Footer */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ color: "#4b5563", fontSize: "15px" }}>eaglechoice.vercel.app</span>
+            <span style={{ color: "#4b5563", fontSize: "15px" }}>{req.nextUrl.host}</span>
             <span style={{ color: "#374151", fontSize: "15px" }}>•</span>
             <span style={{ color: "#4b5563", fontSize: "15px" }}>Premium Quality. Trusted Agents.</span>
           </div>

@@ -11,11 +11,18 @@ import { ShareButton } from "@/components/share-button"
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://eagle-choice.vercel.app"
 
+import { headers } from "next/headers"
+
 export async function generateMetadata({
   params,
 }: {
   params: { id: string }
 }): Promise<Metadata> {
+  const headersList = await headers()
+  const domain = headersList.get("host") || "eagle-choice.vercel.app"
+  const protocol = domain.includes("localhost") ? "http" : "https"
+  const currentUrl = `${protocol}://${domain}`
+
   const supabase = await createClient()
   const { data: service } = await supabase
     .from("services")
@@ -25,7 +32,7 @@ export async function generateMetadata({
 
   if (!service) return { title: "Service - Eagle Choice" }
 
-  const ogImageUrl = new URL(`${APP_URL}/api/og`)
+  const ogImageUrl = new URL(`${currentUrl}/api/og`)
   ogImageUrl.searchParams.set("title", service.name)
   ogImageUrl.searchParams.set("price", `GH₵ ${service.base_price}`)
   ogImageUrl.searchParams.set("type", "service")
