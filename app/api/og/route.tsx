@@ -19,6 +19,24 @@ export async function GET(req: NextRequest) {
     const accentColor = type === "service" ? "rgba(168, 85, 247, 1)" : "rgba(245, 158, 11, 1)"
     const accentBg = type === "service" ? "rgba(168, 85, 247, 0.1)" : "rgba(245, 158, 11, 0.1)"
 
+    // Fetch image and convert to base64 for robustness in Edge Runtime
+    let imageData: string | null = null
+    if (image) {
+      try {
+        const res = await fetch(image)
+        if (res.ok) {
+          const buffer = await res.arrayBuffer()
+          const base64 = btoa(
+            new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
+          )
+          const contentType = res.headers.get("content-type") || "image/jpeg"
+          imageData = `data:${contentType};base64,${base64}`
+        }
+      } catch (e) {
+        console.error("Failed to fetch image for OG:", e)
+      }
+    }
+
     return new ImageResponse(
       (
         <div
@@ -26,16 +44,15 @@ export async function GET(req: NextRequest) {
             height: "100%",
             width: "100%",
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
+            flexDirection: "row",
             backgroundColor: "#0a0a0a",
             color: "white",
-            padding: "40px",
             fontFamily: "sans-serif",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
-          {/* Background Gradient */}
+          {/* Main Background with Dark Gradient */}
           <div
             style={{
               position: "absolute",
@@ -43,79 +60,142 @@ export async function GET(req: NextRequest) {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundImage: "linear-gradient(to bottom right, #111, #000)",
+              background: "linear-gradient(135deg, #0a0a0a 0%, #151515 100%)",
               zIndex: -1,
             }}
           />
 
+          {/* Left Side: Product Info */}
           <div
             style={{
+              flex: 1,
               display: "flex",
-              flexDirection: "row",
-              width: "100%",
-              height: "100%",
-              borderRadius: "20px",
-              overflow: "hidden",
-              border: "1px solid #333",
-              backgroundColor: "#111",
+              flexDirection: "column",
+              padding: "60px",
+              justifyContent: "space-between",
+              zIndex: 10,
             }}
           >
-            {/* Left Column: Info */}
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                padding: "60px",
-                justifyContent: "center",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", marginBottom: "20px" }}>
-                <div 
-                  style={{
-                    backgroundColor: accentColor,
-                    padding: "4px 12px",
-                    borderRadius: "6px",
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    color: "white",
-                  }}
-                >
+            {/* Header: Logo */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "14px",
+                  background: accentColor,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "24px",
+                  fontWeight: "bold",
+                  color: "#000",
+                }}
+              >
+                E
+              </div>
+              <span style={{ fontSize: "24px", fontWeight: "800", letterSpacing: "0.5px" }}>Eagle Choice</span>
+            </div>
+
+            {/* Middle: Title & Price */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  padding: "6px 14px",
+                  borderRadius: "999px",
+                  width: "fit-content",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: accentColor }} />
+                <span style={{ fontSize: "14px", fontWeight: "bold", color: accentColor, letterSpacing: "1px" }}>
                   {type.toUpperCase()}
-                </div>
+                </span>
               </div>
 
-              <h1 style={{ fontSize: "64px", fontWeight: "bold", marginBottom: "10px", color: "white" }}>
+              <div
+                style={{
+                  fontSize: title.length > 25 ? "42px" : "56px",
+                  fontWeight: "900",
+                  lineHeight: "1.1",
+                  color: "white",
+                  textShadow: "0 2px 10px rgba(0,0,0,0.5)",
+                }}
+              >
                 {title}
-              </h1>
-              
+              </div>
+
               {badge && (
-                <div style={{ fontSize: "20px", color: "#888", marginBottom: "20px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#9ca3af", fontSize: "18px" }}>
+                  <div style={{ width: "12px", height: "1px", background: "#4b5563" }} />
                   {badge}
                 </div>
               )}
 
-              <div style={{ fontSize: "48px", fontWeight: "bold", color: accentColor }}>
-                {price}
+              <div style={{ display: "flex", alignItems: "baseline", gap: "12px", marginTop: "10px" }}>
+                <span style={{ fontSize: "56px", fontWeight: "900", color: "white" }}>{price}</span>
               </div>
             </div>
 
-            {/* Right Column: Placeholder */}
+            {/* Footer */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#4b5563" }}>
+              <span style={{ fontSize: "16px", fontWeight: "bold" }}>eaglechoice.vercel.app</span>
+              <span style={{ fontSize: "16px" }}>•</span>
+              <span style={{ fontSize: "16px" }}>Premium Catalog</span>
+            </div>
+          </div>
+
+          {/* Right Side: Image Placeholder or Product Image */}
+          <div
+            style={{
+              width: "480px",
+              height: "100%",
+              display: "flex",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Elegant Side Fade */}
             <div
               style={{
-                width: "450px",
-                height: "100%",
-                display: "flex",
-                backgroundColor: "#222",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "120px",
-                color: accentColor,
-                fontWeight: "bold",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                bottom: 0,
+                width: "120px",
+                background: "linear-gradient(to right, #0a0a0a, transparent)",
+                zIndex: 2,
               }}
-            >
-              {type === "service" ? "SVC" : "PRD"}
-            </div>
+            />
+
+            {imageData ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageData}
+                alt={title}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "#151515",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "120px",
+                  color: accentColor,
+                  borderLeft: "1px solid rgba(255,255,255,0.05)",
+                }}
+              >
+                {type === "service" ? "SVC" : "PRD"}
+              </div>
+            )}
           </div>
         </div>
       ),
