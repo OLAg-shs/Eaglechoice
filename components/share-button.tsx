@@ -55,10 +55,15 @@ export function ShareButton({
 
   const shareTitle = `${title} — Eagle Choice`
   
-  // High-conversion sales copy for WhatsApp/Socials
+  // High-conversion sales copy for WhatsApp/Socials - Using CodePoints for encoding safety
   const getShareText = () => {
     const action = type === 'product' ? 'Buy' : 'Get'
-    return `Want to ${action} the new ${title}? 🦅\nDon't know where to find it? Look no further! 🚀\n\nAt Eagle Choice, we provide Verified and Authentic ${type === 'product' ? 'products' : 'services'} at affordable prices. ✅\n\nCheck it out on our website 👇\n`
+    const eagle = String.fromCodePoint(0x1F985)
+    const rocket = String.fromCodePoint(0x1F680)
+    const check = String.fromCodePoint(0x2705)
+    const fingerDown = String.fromCodePoint(0x1F447)
+    
+    return `Want to ${action} the new ${title}? ${eagle}\nDon't know where to find it? Look no further! ${rocket}\n\nAt Eagle Choice, we provide Verified and Authentic ${type === 'product' ? 'products' : 'services'} at affordable prices. ${check}\n\nCheck it out on our website ${fingerDown}\n`
   }
 
   const copyToClipboard = async () => {
