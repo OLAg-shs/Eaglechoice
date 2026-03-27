@@ -114,28 +114,17 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
                   {loadingId === service.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (service.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
                 </Button>
 
-                {/* Download Branded Card */}
                 <Button
                   size="icon"
                   variant="ghost"
                   className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
                   title="Download Branded Card"
                   onClick={() => {
-                    const params = new URLSearchParams({
-                      title: service.name,
-                      price: formatCurrency(service.base_price),
-                      type: 'service',
-                      image: service.cover_image_url || '',
-                    })
-                    
-                    // Add "docs" as specs for services
-                    if (service.required_documents) {
-                      service.required_documents.slice(0, 3).forEach((doc: string, i: number) => {
-                        params.set(`s${i+1}`, doc)
-                      })
-                    }
-                    
-                    window.open(`/api/og?${params.toString()}`, '_blank')
+                    const downloadUrl = new URL("/api/og", baseUrl)
+                    downloadUrl.searchParams.set("id", service.id)
+                    downloadUrl.searchParams.set("type", "service")
+                    downloadUrl.searchParams.set("download", "1")
+                    window.open(downloadUrl.toString(), '_blank')
                   }}
                 >
                   <Download className="h-4 w-4" />
@@ -144,6 +133,8 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
                 <ShareButton 
                   url={`${baseUrl}/catalog/service/${service.id}`} 
                   title={service.name}
+                  id={service.id}
+                  type="service"
                   variant="ghost"
                   size="icon"
                 />

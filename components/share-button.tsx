@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Share2, Check, Copy, MessageCircle, ExternalLink } from "lucide-react"
+import { Share2, Check, Copy, MessageCircle, ExternalLink, Download } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +17,12 @@ import { useToast } from "@/components/ui/use-toast"
 interface ShareButtonProps {
   url: string
   title: string
+  // Dynamic branding support
+  id?: string
+  price?: string
+  type?: 'product' | 'service'
+  image?: string
+  specs?: string[]
   variant?: "outline" | "ghost" | "secondary" | "default" | "link" | "destructive"
   size?: "default" | "sm" | "lg" | "icon"
   className?: string
@@ -26,6 +32,11 @@ interface ShareButtonProps {
 export function ShareButton({ 
   url, 
   title, 
+  id = "",
+  price = "",
+  type = "product",
+  image = "",
+  specs = [],
   variant = "outline", 
   size = "sm", 
   className,
@@ -82,6 +93,33 @@ export function ShareButton({
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, "_blank")
   }
 
+  const downloadBrandedCard = () => {
+    const params = new URLSearchParams()
+    
+    if (id) {
+      // Short URL version
+      params.set("id", id)
+      params.set("type", type)
+    } else {
+      // Legacy/Manual version
+      params.set("title", title)
+      params.set("price", price)
+      params.set("type", type)
+      params.set("image", image)
+      specs.forEach((spec, i) => {
+        params.set(`s${i+1}`, spec)
+      })
+    }
+    
+    params.set("download", "1")
+    window.open(`/api/og?${params.toString()}`, "_blank")
+    
+    toast({
+      title: "Generating Card",
+      description: "Preparing your branded asset for download.",
+    })
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -128,6 +166,16 @@ export function ShareButton({
           <div className="flex flex-col">
             <span className="font-semibold text-sm">Twitter (X)</span>
             <span className="text-[10px] text-gray-500">Share with followers</span>
+          </div>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem onClick={downloadBrandedCard} className="cursor-pointer gap-3 py-2.5 focus:bg-amber-500/10 focus:text-amber-600 dark:focus:text-amber-400">
+          <Download className="h-4 w-4 text-amber-500" />
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm">Download Card</span>
+            <span className="text-[10px] text-gray-500">High-res branded asset</span>
           </div>
         </DropdownMenuItem>
         

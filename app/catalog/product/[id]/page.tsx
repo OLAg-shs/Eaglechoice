@@ -38,20 +38,10 @@ export async function generateMetadata({
   const agentName = (product.profiles as any)?.full_name
 
   const ogImageUrl = new URL(`${currentUrl}/api/og`)
-  ogImageUrl.searchParams.set("title", product.name)
-  ogImageUrl.searchParams.set("price", `GH₵ ${product.price}`)
+  ogImageUrl.searchParams.set("id", id)
   ogImageUrl.searchParams.set("type", "product")
   
-  if (imageUrl) ogImageUrl.searchParams.set("image", imageUrl)
   if (agentName) ogImageUrl.searchParams.set("badge", `Expert: ${agentName}`)
-  
-  // Pass top 3 specs as highlights
-  if (product.specifications && typeof product.specifications === 'object') {
-    const highlights = Object.entries(product.specifications).slice(0, 3)
-    highlights.forEach(([k, v], i) => {
-      ogImageUrl.searchParams.set(`s${i+1}`, `${k}: ${v}`)
-    })
-  }
 
   return {
     title: `${product.name} — Eagle Choice`,
@@ -104,7 +94,12 @@ export default async function ProductDetailPage({
         <Link href="/catalog" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />Back to Catalog
         </Link>
-        <ShareButton url={shareUrl} title={product.name} />
+        <ShareButton 
+          url={shareUrl} 
+          title={product.name} 
+          id={product.id}
+          type="product"
+        />
       </div>
 
       <Card className="bg-white dark:bg-[#111111] border-gray-200 dark:border-gray-800">

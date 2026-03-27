@@ -116,7 +116,6 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                   {loadingId === product.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (product.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
                 </Button>
                 
-                {/* Download Branded Card */}
                 <Button
                   size="icon"
                   variant="ghost"
@@ -124,19 +123,10 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                   title="Download Branded Card"
                   onClick={() => {
                     const params = new URLSearchParams({
-                      title: product.name,
-                      price: formatCurrency(product.price),
+                      id: product.id,
                       type: 'product',
-                      image: product.images?.[0] || '',
+                      download: '1'
                     })
-                    
-                    // Add specs if available
-                    if (product.specifications) {
-                      Object.entries(product.specifications).slice(0, 3).forEach(([key, val], i) => {
-                        params.set(`s${i+1}`, `${key}: ${val}`)
-                      })
-                    }
-                    
                     window.open(`/api/og?${params.toString()}`, '_blank')
                   }}
                 >
@@ -146,6 +136,8 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                 <ShareButton 
                   url={`${baseUrl}/catalog/product/${product.id}`} 
                   title={product.name}
+                  id={product.id}
+                  type="product"
                   variant="ghost"
                   size="icon"
                 />

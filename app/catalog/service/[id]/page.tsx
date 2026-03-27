@@ -35,19 +35,8 @@ export async function generateMetadata({
   if (!service) return { title: "Service - Eagle Choice" }
 
   const ogImageUrl = new URL(`${currentUrl}/api/og`)
-  ogImageUrl.searchParams.set("title", service.name)
-  ogImageUrl.searchParams.set("price", `GH₵ ${service.base_price}`)
+  ogImageUrl.searchParams.set("id", id)
   ogImageUrl.searchParams.set("type", "service")
-  
-  if (service.cover_image_url) ogImageUrl.searchParams.set("image", service.cover_image_url)
-  
-  // Pass top 3 required docs as highlights
-  if (service.required_documents && Array.isArray(service.required_documents)) {
-    const highlights = service.required_documents.slice(0, 3)
-    highlights.forEach((doc: string, i: number) => {
-      ogImageUrl.searchParams.set(`s${i+1}`, doc)
-    })
-  }
 
   return {
     title: `${service.name} — Eagle Choice`,
@@ -106,7 +95,12 @@ export default async function ServiceDetailPage({
         <Link href="/catalog" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />Back to Catalog
         </Link>
-        <ShareButton url={shareUrl} title={service.name} />
+        <ShareButton 
+          url={shareUrl} 
+          title={service.name} 
+          id={service.id}
+          type="service"
+        />
       </div>
 
       <Card className="bg-white dark:bg-[#111111] border-gray-200 dark:border-gray-800">

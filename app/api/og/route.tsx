@@ -1,5 +1,7 @@
 import { ImageResponse } from "next/og"
 import { NextRequest } from "next/server"
+import { createAdminClient } from "@/lib/supabase/server"
+import { formatCurrency } from "@/lib/utils"
 
 export const runtime = "edge"
 
@@ -7,20 +9,46 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
     if (searchParams.get("debug") === "true") {
-      return new Response(`OG Route Reachable. Title: ${searchParams.get("title")}`, { status: 200 })
+      return new Response(`OG Route Reachable.`, { status: 200 })
     }
 
-    const title = searchParams.get("title") || "Eagle Choice"
-    const price = searchParams.get("price") || ""
-    const type = searchParams.get("type") || "product"
-    const image = searchParams.get("image") || ""
-    const badge = searchParams.get("badge") || ""
-    // New robust highlight passing
-    const specs = [
+    let title = searchParams.get("title") || "Eagle Choice"
+    let price = searchParams.get("price") || ""
+    let type = searchParams.get("type") || "product"
+    let image = searchParams.get("image") || ""
+    let specs: string[] = [
       searchParams.get("s1"),
       searchParams.get("s2"),
       searchParams.get("s3")
     ].filter(Boolean) as string[]
+
+    const id = searchParams.get("id")
+    
+    // Server-side lookup for shorter URLs
+    if (id) {
+      const supabase = await createAdminClient()
+      if (type === "product") {
+        const { data: p } = await supabase.from("products").select("name, price, images, specifications").eq("id", id).single()
+        if (p) {
+          title = p.name
+          price = formatCurrency(p.price)
+          image = p.images?.[0] || image
+          if (p.specifications && typeof p.specifications === 'object') {
+            specs = Object.entries(p.specifications).slice(0, 3).map(([k, v]) => `${k}: ${v}`)
+          }
+        }
+      } else if (type === "service") {
+        const { data: s } = await supabase.from("services").select("name, base_price, cover_image_url, required_documents").eq("id", id).single()
+        if (s) {
+          title = s.name
+          price = formatCurrency(s.base_price)
+          image = s.cover_image_url || image
+          if (Array.isArray(s.required_documents)) {
+            specs = s.required_documents.slice(0, 3)
+          }
+        }
+      }
+    }
 
     // Robust colors inspired by the site's UI
     const accentColor = "#f59e0b" // Orange/Amber
@@ -53,7 +81,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    return new ImageResponse(
+    const response = new ImageResponse(
       (
         <div
           style={{
@@ -210,6 +238,14 @@ export async function GET(req: NextRequest) {
         height: 630,
       }
     )
+
+    // Force download if requested
+    if (searchParams.get("download") === "1") {
+      const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_branded_card.png`
+      response.headers.set("Content-Disposition", `attachment; filename="${filename}"`)
+    }
+
+    return response
   } catch (e: any) {
     console.error(`OG Image Error: ${e.message}`)
     return new Response(`Failed to generate the image`, { status: 500 })

@@ -55,11 +55,9 @@ export default async function CatalogPage() {
                 : []
               
               const downloadUrl = new URL("/api/og", "https://eaglechoice.vercel.app")
-              downloadUrl.searchParams.set("title", product.name)
-              downloadUrl.searchParams.set("price", formatCurrency(product.price))
+              downloadUrl.searchParams.set("id", product.id)
               downloadUrl.searchParams.set("type", "product")
-              downloadUrl.searchParams.set("image", product.images?.[0] || "")
-              highlights.forEach((h, i) => downloadUrl.searchParams.set(`s${i+1}`, h))
+              downloadUrl.searchParams.set("download", "1")
               
               return (
                 <div key={product.id} className="group relative flex flex-col">
@@ -167,11 +165,9 @@ export default async function CatalogPage() {
                 : []
 
               const downloadUrl = new URL("/api/og", "https://eaglechoice.vercel.app")
-              downloadUrl.searchParams.set("title", service.name)
-              downloadUrl.searchParams.set("price", formatCurrency(service.base_price))
+              downloadUrl.searchParams.set("id", service.id)
               downloadUrl.searchParams.set("type", "service")
-              downloadUrl.searchParams.set("image", service.cover_image_url || "")
-              highlights.forEach((h: string, i: number) => downloadUrl.searchParams.set(`s${i+1}`, h))
+              downloadUrl.searchParams.set("download", "1")
 
               return (
                 <div key={service.id} className="group relative flex flex-col">
