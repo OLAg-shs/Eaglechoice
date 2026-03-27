@@ -6,7 +6,7 @@ export const productSchema = z.object({
   price: z.coerce.number().positive("Price must be greater than 0"),
   category: z.enum(["laptop", "accessory"]),
   brand: z.string().optional(),
-  specifications: z.record(z.string()).optional(),
+  specifications: z.record(z.string(), z.string()).optional(),
   images: z.array(z.string()).optional(),
   stock_quantity: z.coerce.number().int().min(0).default(0),
   is_available: z.boolean().default(true),

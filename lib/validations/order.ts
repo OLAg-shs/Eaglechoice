@@ -7,7 +7,7 @@ export const orderSchema = z.object({
   client_id: z.string().uuid("Please select a client"),
   quantity: z.coerce.number().int().min(1).default(1),
   notes: z.string().optional(),
-  form_data: z.record(z.any()).optional(),
+  form_data: z.record(z.string(), z.any()).optional(),
 }).refine(
   (data) => {
     if (data.order_type === "product") return !!data.product_id
