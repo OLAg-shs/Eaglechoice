@@ -113,7 +113,7 @@ export async function toggleProductStatus(id: string, currentlyActive: boolean) 
   const supabase = await createClient()
   const { error } = await supabase
     .from('products')
-    .update({ is_active: !currentlyActive })
+    .update({ is_available: !currentlyActive })
     .eq('id', id)
     
   if (error) throw new Error(error.message)
@@ -126,7 +126,7 @@ export async function toggleServiceStatus(id: string, currentlyActive: boolean) 
   const supabase = await createClient()
   const { error } = await supabase
     .from('services')
-    .update({ is_active: !currentlyActive })
+    .update({ is_available: !currentlyActive })
     .eq('id', id)
     
   if (error) throw new Error(error.message)

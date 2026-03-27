@@ -18,7 +18,7 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
     setLoadingId(id)
     try {
       await toggleProductStatus(id, currentlyActive)
-      setProducts(products.map(p => p.id === id ? { ...p, is_active: !currentlyActive } : p))
+      setProducts(products.map(p => p.id === id ? { ...p, is_available: !currentlyActive } : p))
       toast({
         title: currentlyActive ? "Product Hidden" : "Product Published",
         description: "The product visibility status has been updated.",
@@ -57,9 +57,9 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
           {products.map((product) => (
             <TableRow key={product.id} className="border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
               <TableCell>
-                {product.image_url ? (
+                {product.images?.[0] ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={product.image_url} alt={product.name} className="h-12 w-12 rounded-md object-cover border border-gray-200 dark:border-gray-700 shadow-sm" />
+                  <img src={product.images[0]} alt={product.name} className="h-12 w-12 rounded-md object-cover border border-gray-200 dark:border-gray-700 shadow-sm" />
                 ) : (
                   <div className="h-12 w-12 rounded-md bg-gray-100 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700">
                     <Package className="h-6 w-6 text-gray-400" />
@@ -68,27 +68,27 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
               </TableCell>
               <TableCell className="font-medium text-gray-900 dark:text-gray-100">{product.name}</TableCell>
               <TableCell className="text-right font-bold text-blue-600 dark:text-amber-500 tracking-wide">
-                {formatCurrency(product.base_price)}
+                {formatCurrency(product.price)}
               </TableCell>
               <TableCell className="text-center">
-                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${product.stock > 0 ? "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400"}`}>
-                  {product.stock} {product.stock === 1 ? 'unit' : 'units'}
+                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${product.stock_quantity > 0 ? "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400"}`}>
+                  {product.stock_quantity} {product.stock_quantity === 1 ? 'unit' : 'units'}
                 </span>
               </TableCell>
               <TableCell className="text-center">
-                <Badge variant="outline" className={product.is_active ? "border-green-500/50 text-green-600 dark:text-green-400" : "border-gray-400 text-gray-500 dark:text-gray-400"}>
-                  {product.is_active ? "Published" : "Hidden"}
+                <Badge variant="outline" className={product.is_available ? "border-green-500/50 text-green-600 dark:text-green-400" : "border-gray-400 text-gray-500 dark:text-gray-400"}>
+                  {product.is_available ? "Published" : "Hidden"}
                 </Badge>
               </TableCell>
               <TableCell className="text-right space-x-2">
                 <Button 
                   size="icon" 
                   variant="ghost" 
-                  className={product.is_active ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-500/10" : "text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-500/10"}
-                  onClick={() => handleToggleStatus(product.id, product.is_active)}
+                  className={product.is_available ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-500/10" : "text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-500/10"}
+                  onClick={() => handleToggleStatus(product.id, product.is_available)}
                   disabled={loadingId === product.id}
                 >
-                  {product.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {product.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
                 <Button size="icon" variant="ghost" className="text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10">
                   <Trash2 className="h-4 w-4" />
