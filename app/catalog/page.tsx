@@ -51,7 +51,7 @@ export default async function CatalogPage() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {products.map((product: any) => {
               const highlights = product.specifications && typeof product.specifications === 'object'
-                ? Object.entries(product.specifications).slice(0, 2).map(([k, v]) => `${k}: ${v}`)
+                ? Object.entries(product.specifications).slice(0, 3).map(([k, v]) => `${k}: ${v}`)
                 : []
               
               const downloadUrl = new URL("/api/og", "https://eaglechoice.vercel.app")
@@ -163,7 +163,7 @@ export default async function CatalogPage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {services.map((service: any) => {
               const highlights = service.required_documents && Array.isArray(service.required_documents)
-                ? service.required_documents.slice(0, 2)
+                ? service.required_documents.slice(0, 3)
                 : []
 
               const downloadUrl = new URL("/api/og", "https://eaglechoice.vercel.app")

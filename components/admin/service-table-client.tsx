@@ -5,7 +5,7 @@ import { formatCurrency } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Briefcase, Eye, EyeOff, Trash2, Loader2, Share2 } from "lucide-react"
+import { Briefcase, Eye, EyeOff, Trash2, Loader2, Share2, Download } from "lucide-react"
 import { toggleServiceStatus, deleteService } from "@/lib/actions/catalog"
 import { useToast } from "@/components/ui/use-toast"
 import { ShareButton } from "@/components/share-button"
@@ -103,13 +103,7 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
                   {service.is_available ? "Published" : "Hidden"}
                 </Badge>
               </TableCell>
-              <TableCell className="text-right space-x-2">
-                <ShareButton 
-                  url={`${baseUrl}/catalog/service/${service.id}`} 
-                  title={service.name}
-                  variant="ghost"
-                  size="icon"
-                />
+              <TableCell className="text-right space-x-1">
                 <Button 
                   size="icon" 
                   variant="ghost" 
@@ -119,6 +113,41 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
                 >
                   {loadingId === service.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (service.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
                 </Button>
+
+                {/* Download Branded Card */}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:hover:bg-indigo-500/10"
+                  title="Download Branded Card"
+                  onClick={() => {
+                    const params = new URLSearchParams({
+                      title: service.name,
+                      price: formatCurrency(service.base_price),
+                      type: 'service',
+                      image: service.cover_image_url || '',
+                    })
+                    
+                    // Add "docs" as specs for services
+                    if (service.required_documents) {
+                      service.required_documents.slice(0, 3).forEach((doc: string, i: number) => {
+                        params.set(`s${i+1}`, doc)
+                      })
+                    }
+                    
+                    window.open(`/api/og?${params.toString()}`, '_blank')
+                  }}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+
+                <ShareButton 
+                  url={`${baseUrl}/catalog/service/${service.id}`} 
+                  title={service.name}
+                  variant="ghost"
+                  size="icon"
+                />
+                
                 <Button 
                   size="icon" 
                   variant="ghost" 

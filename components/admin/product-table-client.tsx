@@ -5,7 +5,7 @@ import { formatCurrency } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Package, Eye, EyeOff, Trash2, Loader2, Share2 } from "lucide-react"
+import { Package, Eye, EyeOff, Trash2, Loader2, Share2, Download } from "lucide-react"
 import { toggleProductStatus, deleteProduct } from "@/lib/actions/catalog"
 import { useToast } from "@/components/ui/use-toast"
 import { ShareButton } from "@/components/share-button"
@@ -105,7 +105,7 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                   {product.is_available ? "Published" : "Hidden"}
                 </Badge>
               </TableCell>
-              <TableCell className="text-right space-x-2">
+              <TableCell className="text-right space-x-1">
                 <Button 
                   size="icon" 
                   variant="ghost" 
@@ -115,12 +115,41 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                 >
                   {loadingId === product.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (product.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
                 </Button>
+                
+                {/* Download Branded Card */}
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  title="Download Branded Card"
+                  onClick={() => {
+                    const params = new URLSearchParams({
+                      title: product.name,
+                      price: formatCurrency(product.price),
+                      type: 'product',
+                      image: product.images?.[0] || '',
+                    })
+                    
+                    // Add specs if available
+                    if (product.specifications) {
+                      Object.entries(product.specifications).slice(0, 3).forEach(([key, val], i) => {
+                        params.set(`s${i+1}`, `${key}: ${val}`)
+                      })
+                    }
+                    
+                    window.open(`/api/og?${params.toString()}`, '_blank')
+                  }}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+
                 <ShareButton 
                   url={`${baseUrl}/catalog/product/${product.id}`} 
                   title={product.name}
                   variant="ghost"
                   size="icon"
                 />
+                
                 <Button 
                   size="icon" 
                   variant="ghost" 
