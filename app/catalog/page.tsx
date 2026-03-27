@@ -28,27 +28,29 @@ export default async function CatalogPage() {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-12">
+    <div className="space-y-12 animate-fade-in max-w-7xl mx-auto pb-20 px-4">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors">Browse Catalog</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Discover expert-handled products and digital services.</p>
+        <h1 className="text-3xl font-black text-gray-900 dark:text-white transition-colors tracking-tight">Browse Catalog</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-medium">Discover expert-handled products and digital services.</p>
       </div>
 
       {/* Products */}
       <section>
-        <div className="flex items-center gap-2 mb-4 border-b border-gray-200 dark:border-gray-800 pb-2">
-          <ShoppingBag className="h-5 w-5 text-amber-500" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Products</h2>
-          <span className="text-sm text-gray-500 dark:text-gray-400">({products?.length ?? 0})</span>
+        <div className="flex items-center gap-3 mb-6 border-b border-gray-200 dark:border-gray-800 pb-3">
+          <ShoppingBag className="h-6 w-6 text-amber-500" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Premium Products</h2>
+          <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-500 border-none font-bold">
+            {products?.length ?? 0}
+          </Badge>
         </div>
 
         {!products?.length ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-800 backdrop-blur-sm">
-            <ShoppingBag className="h-12 w-12 text-gray-300 dark:text-gray-700 mb-3" />
-            <p className="text-sm text-gray-500">No products available at the moment.</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-white/50 dark:bg-black/20 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 backdrop-blur-sm">
+            <ShoppingBag className="h-16 w-16 text-gray-300 dark:text-gray-700 mb-4" />
+            <p className="text-lg font-medium text-gray-500">No products available at the moment.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
             {products.map((product: any) => {
               const highlights = product.specifications && typeof product.specifications === 'object'
                 ? Object.entries(product.specifications).slice(0, 3).map(([k, v]) => `${k}: ${v}`)
@@ -146,19 +148,21 @@ export default async function CatalogPage() {
 
       {/* Services */}
       <section>
-        <div className="flex items-center gap-2 mb-4 border-b border-gray-200 dark:border-gray-800 pb-2">
-          <Briefcase className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Services</h2>
-          <span className="text-sm text-gray-500 dark:text-gray-400">({services?.length ?? 0})</span>
+        <div className="flex items-center gap-3 mb-6 border-b border-gray-200 dark:border-gray-800 pb-3">
+          <Briefcase className="h-6 w-6 text-indigo-500 dark:text-indigo-400" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Professional Services</h2>
+          <Badge variant="secondary" className="bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400 border-none font-bold">
+            {services?.length ?? 0}
+          </Badge>
         </div>
 
         {!services?.length ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-800 backdrop-blur-sm">
-            <Briefcase className="h-12 w-12 text-gray-300 dark:text-gray-700 mb-3" />
-            <p className="text-sm text-gray-500">No services available at the moment.</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-white/50 dark:bg-black/20 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 backdrop-blur-sm">
+            <Briefcase className="h-16 w-16 text-gray-300 dark:text-gray-700 mb-4" />
+            <p className="text-lg font-medium text-gray-500">No services available at the moment.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {services.map((service: any) => {
               const highlights = service.required_documents && Array.isArray(service.required_documents)
                 ? service.required_documents.slice(0, 3)

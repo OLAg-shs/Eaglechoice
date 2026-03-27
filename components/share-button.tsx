@@ -63,11 +63,11 @@ export function ShareButton({
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(`${getShareText()}${getShareUrl()}`)
+      await navigator.clipboard.writeText(getShareUrl())
       setCopied(true)
       toast({
-        title: "Copied with Sales Copy",
-        description: "Branded link and attractive text copied to clipboard.",
+        title: "Link Copied",
+        description: "Clean product link copied to clipboard.",
       })
       setTimeout(() => setCopied(false), 2500)
     } catch (err) {
@@ -75,6 +75,22 @@ export function ShareButton({
         variant: "destructive",
         title: "Copy Failed",
         description: "Please copy the URL manually.",
+      })
+    }
+  }
+
+  const copySalesTextToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(`${getShareText()}${getShareUrl()}`)
+      toast({
+        title: "Sales Copy Copied",
+        description: "Branded text and link ready to paste!",
+      })
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Copy Failed",
+        description: "Unable to copy sales text.",
       })
     }
   }
@@ -190,7 +206,15 @@ export function ShareButton({
           {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-amber-500" />}
           <div className="flex flex-col">
             <span className="font-semibold text-sm">{copied ? "Copied!" : "Copy Link"}</span>
-            <span className="text-[10px] text-gray-500">Automated branding info</span>
+            <span className="text-[10px] text-gray-500">Clean product link</span>
+          </div>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem onClick={copySalesTextToClipboard} className="cursor-pointer gap-3 py-2.5 focus:bg-amber-500/10 focus:text-amber-600 dark:focus:text-amber-400">
+          <ExternalLink className="h-4 w-4 text-amber-500" />
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm">Copy Sales Text</span>
+            <span className="text-[10px] text-gray-500">Branded ad + link</span>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
