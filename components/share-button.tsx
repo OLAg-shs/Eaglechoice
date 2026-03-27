@@ -1,9 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { Share2, Check, Copy } from "lucide-react"
+import { Share2, Check, Copy, MessageCircle, Twitter, Facebook } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useToast } from "@/components/ui/use-toast"
 
 interface ShareButtonProps {
   url: string
@@ -23,55 +32,115 @@ export function ShareButton({
   showText = true 
 }: ShareButtonProps) {
   const [copied, setCopied] = useState(false)
+  const { toast } = useToast()
 
-  async function handleShare() {
-    // Try native Web Share API first (mobile)
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({
-          title: `${title} — Eagle Choice`,
-          url,
-        })
-        return
-      } catch (_) {
-        // Fall through to clipboard copy
-      }
-    }
+  // Automatic Cache Buster: Add a timestamp to ensure fresh social crawls
+  const getShareUrl = () => {
+    const timestamp = Math.floor(Date.now() / 1000)
+    const shareUrl = new URL(url)
+    shareUrl.searchParams.set("v", timestamp.toString())
+    return shareUrl.toString()
+  }
 
-    // Fallback: copy to clipboard
+  const shareTitle = `${title} — Eagle Choice`
+  const shareText = `Check out ${title} on Eagle Choice! 🦅\n\n`
+
+  const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(url)
+      await navigator.clipboard.writeText(getShareUrl())
       setCopied(true)
+      toast({
+        title: "Link Copied",
+        description: "Public link with branding info copied to clipboard.",
+      })
       setTimeout(() => setCopied(false), 2500)
     } catch (err) {
-      console.error("Failed to copy!", err)
+      toast({
+        variant: "destructive",
+        title: "Copy Failed",
+        description: "Please copy the URL manually.",
+      })
     }
   }
 
+  const shareWhatsApp = () => {
+    const finalUrl = getShareUrl()
+    const encodedText = encodeURIComponent(shareText + finalUrl)
+    window.open(`https://wa.me/?text=${encodedText}`, "_blank")
+  }
+
+  const shareTwitter = () => {
+    const finalUrl = getShareUrl()
+    const encodedText = encodeURIComponent(shareText)
+    const encodedUrl = encodeURIComponent(finalUrl)
+    window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, "_blank")
+  }
+
+  const shareFacebook = () => {
+    const finalUrl = getShareUrl()
+    const encodedUrl = encodeURIComponent(finalUrl)
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`, "_blank")
+  }
+
   return (
-    <Button
-      variant={variant}
-      size={size}
-      onClick={handleShare}
-      className={cn(
-        variant === "outline" && "border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20",
-        size !== "icon" && "gap-2 text-xs font-semibold",
-        "transition-all",
-        className
-      )}
-      title={copied ? "Copied!" : "Share Link"}
-    >
-      {copied ? (
-        <>
-          <Check className={cn("h-3.5 w-3.5 text-green-500", size === "icon" && "h-4 w-4")} />
-          {size !== "icon" && showText && "Link Copied!"}
-        </>
-      ) : (
-        <>
-          <Share2 className={cn("h-3.5 w-3.5", size === "icon" && "h-4 w-4")} />
-          {size !== "icon" && showText && "Share"}
-        </>
-      )}
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant={variant}
+          size={size}
+          className={cn(
+            variant === "outline" && "border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20",
+            size !== "icon" && "gap-2 text-xs font-semibold",
+            "transition-all",
+            className
+          )}
+        >
+          {copied ? (
+            <Check className={cn("h-3.5 w-3.5 text-green-500", size === "icon" && "h-4 w-4")} />
+          ) : (
+            <Share2 className={cn("h-3.5 w-3.5", size === "icon" && "h-4 w-4")} />
+          )}
+          {size !== "icon" && showText && (copied ? "Copied!" : "Share")}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 bg-white/95 dark:bg-[#0a0a0a]/95 backdrop-blur-sm border-gray-200 dark:border-gray-800">
+        <DropdownMenuLabel className="text-xs font-bold uppercase tracking-wider text-gray-500">Share Product</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuItem onClick={shareWhatsApp} className="cursor-pointer gap-3 py-2.5 focus:bg-green-500/10 focus:text-green-600 dark:focus:text-green-400">
+          <MessageCircle className="h-4 w-4 text-green-500" />
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm">WhatsApp</span>
+            <span className="text-[10px] text-gray-500">Best for private chats</span>
+          </div>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem onClick={shareFacebook} className="cursor-pointer gap-3 py-2.5 focus:bg-blue-600/10 focus:text-blue-600 dark:focus:text-blue-400">
+          <Facebook className="h-4 w-4 text-blue-600" />
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm">Facebook</span>
+            <span className="text-[10px] text-gray-500">Post to your feed</span>
+          </div>
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem onClick={shareTwitter} className="cursor-pointer gap-3 py-2.5 focus:bg-sky-500/10 focus:text-sky-500 dark:focus:text-sky-400">
+          <Twitter className="h-4 w-4 text-sky-500" />
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm">Twitter (X)</span>
+            <span className="text-[10px] text-gray-500">Share with followers</span>
+          </div>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuItem onClick={copyToClipboard} className="cursor-pointer gap-3 py-2.5 focus:bg-amber-500/10 focus:text-amber-600 dark:focus:text-amber-400">
+          {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4 text-amber-500" />}
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm">{copied ? "Copied!" : "Copy Link"}</span>
+            <span className="text-[10px] text-gray-500">Automated branding info</span>
+          </div>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
