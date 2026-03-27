@@ -66,6 +66,11 @@ export default async function ProductDetailPage({
 }: {
   params: { id: string }
 }) {
+  const headersList = await headers()
+  const domain = headersList.get("host") || "eagle-choice.vercel.app"
+  const protocol = domain.includes("localhost") ? "http" : "https"
+  const currentUrl = `${protocol}://${domain}`
+
   const supabase = await createClient()
   const adminSupabase = await createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -78,12 +83,12 @@ export default async function ProductDetailPage({
 
   if (!product) notFound()
 
-  const shareUrl = `${APP_URL}/user/catalog/product/${product.id}`
+  const shareUrl = `${currentUrl}/catalog/product/${product.id}`
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <Link href="/user/catalog" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+        <Link href="/catalog" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />Back to Catalog
         </Link>
         <ShareButton url={shareUrl} title={product.name} />

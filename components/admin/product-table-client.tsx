@@ -116,7 +116,7 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                   {loadingId === product.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (product.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
                 </Button>
                 <ShareButton 
-                  url={`${baseUrl}/user/catalog/product/${product.id}`} 
+                  url={`${baseUrl}/catalog/product/${product.id}`} 
                   title={product.name}
                   variant="ghost"
                   size="icon"

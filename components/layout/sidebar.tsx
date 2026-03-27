@@ -45,7 +45,7 @@ function getNavItems(role: string): NavItem[] {
   // user
   return [
     { href: "/user", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/user/catalog", label: "Browse Catalog", icon: ShoppingBag },
+    { href: "/catalog", label: "Browse Catalog", icon: ShoppingBag },
     { href: "/user/orders", label: "My Orders", icon: ClipboardList },
     { href: "/user/payments", label: "Payments", icon: CreditCard },
     { href: "/user/messages", label: "Messages", icon: MessageSquare },

@@ -38,7 +38,7 @@ export async function updateSession(request: NextRequest) {
   // Public routes that don't need auth
   const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/auth/callback"]
   const isPublicRoute = publicRoutes.some((route) => pathname === route)
-  const isCatalogRoute = pathname.startsWith("/user/catalog")
+  const isCatalogRoute = pathname.startsWith("/catalog")
   const isOgRoute = pathname.startsWith("/api/og")
   const isApiWebhook = pathname.startsWith("/api/webhooks")
 

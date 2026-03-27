@@ -49,7 +49,7 @@ export default async function CatalogPage() {
         ) : (
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {products.map((product: any) => (
-              <Link key={product.id} href={`/user/catalog/product/${product.id}`} className="group">
+              <Link key={product.id} href={`/catalog/product/${product.id}`} className="group">
                 <Card className="hover-lift overflow-hidden bg-white/50 dark:bg-black/20 backdrop-blur-md border-gray-200 dark:border-gray-800 h-full flex flex-col">
                   <div className="aspect-square bg-white dark:bg-gray-900 flex items-center justify-center transition-colors border-b border-gray-100 dark:border-gray-800 overflow-hidden">
                     {product.images?.[0] ? (
@@ -114,7 +114,7 @@ export default async function CatalogPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {services.map((service: any) => (
-              <Link key={service.id} href={`/user/catalog/service/${service.id}`} className="group">
+              <Link key={service.id} href={`/catalog/service/${service.id}`} className="group">
                 <Card className="hover-lift cursor-pointer bg-white/50 dark:bg-black/20 backdrop-blur-md border-gray-200 dark:border-gray-800 overflow-hidden h-full flex flex-col">
                   {service.cover_image_url && (
                     <div className="h-32 w-full overflow-hidden border-b border-gray-100 dark:border-gray-800">

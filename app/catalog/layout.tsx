@@ -16,7 +16,7 @@ export default async function CatalogLayout({
       {/* Public Header */}
       <header className="sticky top-0 z-50 w-full border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-black/80 backdrop-blur-md">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/user/catalog" className="flex items-center gap-2 group">
+          <Link href="/catalog" className="flex items-center gap-2 group">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 dark:bg-amber-500 shadow-md group-hover:scale-105 transition-transform">
               <Shield className="h-4 w-4 text-white dark:text-neutral-950" />
             </div>

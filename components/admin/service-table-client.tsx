@@ -105,7 +105,7 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
               </TableCell>
               <TableCell className="text-right space-x-2">
                 <ShareButton 
-                  url={`${baseUrl}/user/catalog/service/${service.id}`} 
+                  url={`${baseUrl}/catalog/service/${service.id}`} 
                   title={service.name}
                   variant="ghost"
                   size="icon"
