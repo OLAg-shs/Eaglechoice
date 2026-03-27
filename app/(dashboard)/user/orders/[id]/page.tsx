@@ -1,0 +1,146 @@
+import { createClient } from "@/lib/supabase/server"
+import { notFound, redirect } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { formatCurrency, formatDate } from "@/lib/utils"
+import { ShoppingBag, Briefcase, Clock, CheckCircle2, XCircle, ChevronLeft } from "lucide-react"
+import Link from "next/link"
+import { PayButton } from "@/components/payments/pay-button"
+
+export default async function OrderDetailPage({ params }: { params: { id: string } }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect("/login")
+
+  const { data: order, error } = await supabase
+    .from("orders")
+    .select(`
+      *,
+      products(name, images, brand),
+      services(name, category),
+      profiles!orders_client_id_fkey(full_name, phone, is_verified)
+    `)
+    .eq("id", params.id)
+    .single()
+
+  if (error || !order) notFound()
+  if (order.user_id !== user.id) redirect("/user/orders")
+
+  const statusColors: Record<string, string> = {
+    pending: "bg-yellow-100 text-yellow-700",
+    in_progress: "bg-blue-100 text-blue-700",
+    payment_pending: "bg-orange-100 text-orange-700",
+    paid: "bg-green-100 text-green-700",
+    completed: "bg-emerald-100 text-emerald-700",
+    cancelled: "bg-red-100 text-red-700",
+  }
+
+  const agent = order.profiles as any
+
+  return (
+    <div className="max-w-3xl mx-auto space-y-6">
+      <Link href="/user/orders" className="flex items-center text-sm text-gray-500 hover:text-gray-900 transition-colors">
+        <ChevronLeft className="h-4 w-4 mr-1" /> Back to My Orders
+      </Link>
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Order {order.order_number}</h1>
+          <p className="text-sm text-gray-500">Placed on {formatDate(order.created_at)}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Badge className={statusColors[order.status] || "bg-gray-100 text-gray-700"}>
+            {order.status.replace("_", " ").toUpperCase()}
+          </Badge>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2 space-y-6">
+          <Card>
+            <CardHeader><CardTitle className="text-base">Order Items</CardTitle></CardHeader>
+            <CardContent>
+              <div className="flex gap-4">
+                <div className="h-20 w-20 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                  {order.order_type === "product" ? <ShoppingBag className="h-10 w-10 text-gray-300" /> : <Briefcase className="h-10 w-10 text-gray-300" />}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{order.products?.name || order.services?.name}</h3>
+                  <p className="text-sm text-gray-500">{order.products?.brand || order.services?.category}</p>
+                  <div className="mt-2 flex justify-between items-center text-sm">
+                    <span>Qty: {order.quantity}</span>
+                    <span className="font-bold text-blue-600">{formatCurrency(order.total_amount)}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {Object.keys(order.form_data || {}).length > 0 && (
+            <Card>
+              <CardHeader><CardTitle className="text-base">Form Details</CardTitle></CardHeader>
+              <CardContent className="grid gap-4 text-sm">
+                {Object.entries(order.form_data).map(([key, value]) => (
+                  <div key={key}>
+                    <p className="text-gray-500 capitalize">{key.replace(/_/g, " ")}</p>
+                    <p className="font-medium text-gray-900">{value as string}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {order.notes && (
+            <Card>
+              <CardHeader><CardTitle className="text-base text-gray-600">Notes</CardTitle></CardHeader>
+              <CardContent><p className="text-sm text-gray-600 italic">"{order.notes}"</p></CardContent>
+            </Card>
+          )}
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader><CardTitle className="text-base">Payment Summary</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between text-sm">
+                 <span className="text-gray-500">Subtotal</span>
+                 <span>{formatCurrency(order.total_amount)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg pt-2 border-t text-blue-700">
+                 <span>Total</span>
+                 <span>{formatCurrency(order.total_amount)}</span>
+              </div>
+              
+              {(order.status === "pending" || order.status === "payment_pending") && (
+                <div className="pt-4">
+                   <PayButton orderId={order.id} amount={Number(order.total_amount)} />
+                   <p className="mt-3 text-[10px] text-gray-400 text-center">Secure checkout by Paystack. All major cards & mobile money accepted.</p>
+                </div>
+              )}
+              {order.status === "paid" && (
+                <div className="flex items-center justify-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg font-bold text-sm">
+                   <CheckCircle2 className="h-4 w-4" /> Order is Paid
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">Assigned Agent</CardTitle></CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-3">
+                 <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold">
+                    {agent.full_name?.split(" ")[0][0]}
+                 </div>
+                 <div>
+                    <p className="text-sm font-semibold">{agent.full_name}</p>
+                    <p className="text-xs text-gray-500">{agent.phone || "No phone listed"}</p>
+                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
+}
