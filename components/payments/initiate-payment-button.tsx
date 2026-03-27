@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Loader2, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { initializePayment } from "@/lib/actions/payments"
+import { createPaymentIntent } from "@/lib/actions/payments"
 
 export function InitiatePaymentButton({
   orderId,
@@ -21,7 +21,7 @@ export function InitiatePaymentButton({
     setLoading(true)
     setError("")
 
-    const result = await initializePayment(orderId)
+    const result = await createPaymentIntent(orderId)
 
     if (result?.error) {
       setError(result.error)
