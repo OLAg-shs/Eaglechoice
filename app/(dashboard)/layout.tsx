@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Topbar } from "@/components/layout/topbar"
+import { Footer } from "@/components/layout/footer"
 
 export default async function DashboardLayout({
   children,
@@ -26,8 +27,11 @@ export default async function DashboardLayout({
       <Sidebar role={profile.role} profile={profile} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar profile={profile} />
-        <main className="flex-1 overflow-auto p-4 md:p-6">
-          {children}
+        <main className="flex-1 overflow-auto p-4 md:p-6 flex flex-col">
+          <div className="flex-1">
+            {children}
+          </div>
+          <Footer className="mt-8 rounded-xl border border-gray-100 dark:border-gray-800" />
         </main>
       </div>
     </div>

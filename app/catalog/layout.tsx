@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import Link from "next/link"
 import { Shield, LayoutDashboard, LogIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Footer } from "@/components/layout/footer"
 
 export default async function CatalogLayout({
   children,
@@ -48,12 +49,7 @@ export default async function CatalogLayout({
         {children}
       </main>
 
-      {/* Simple Footer */}
-      <footer className="border-t border-gray-100 dark:border-gray-800 py-8 bg-white dark:bg-black/20">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-gray-500">© {new Date().getFullYear()} Eagle Choice. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
