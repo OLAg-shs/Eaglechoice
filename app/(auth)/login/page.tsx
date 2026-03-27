@@ -101,6 +101,10 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
+
+      <p className="text-center text-xs text-gray-400 dark:text-gray-600 pt-2 transition-colors">
+        © {new Date().getFullYear()} Eagle Choice. All rights reserved.
+      </p>
     </div>
   )
 }

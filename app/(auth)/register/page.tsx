@@ -67,6 +67,10 @@ export default function RegisterPage() {
         Already have an account?{" "}
         <Link href="/login" className="font-medium text-blue-600 dark:text-amber-500 hover:text-blue-700 dark:hover:text-amber-400 transition-colors">Sign in</Link>
       </p>
+
+      <p className="text-center text-xs text-gray-400 dark:text-gray-600 pt-2 transition-colors">
+        © {new Date().getFullYear()} Eagle Choice. All rights reserved.
+      </p>
     </div>
   )
 }
