@@ -16,6 +16,9 @@ export async function GET(req: NextRequest) {
     const image = searchParams.get("image") || ""
     const badge = searchParams.get("badge") || ""
 
+    const accentColor = type === "service" ? "rgba(168, 85, 247, 1)" : "rgba(245, 158, 11, 1)"
+    const accentBg = type === "service" ? "rgba(168, 85, 247, 0.1)" : "rgba(245, 158, 11, 0.1)"
+
     // Fetch image and convert to base64 for robustness in Edge Runtime
     let imageData: string | null = null
     if (image && image.startsWith("http")) {
