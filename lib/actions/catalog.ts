@@ -8,12 +8,13 @@ export async function createProduct(formData: FormData) {
   
   const name = formData.get("name") as string
   const description = formData.get("description") as string
-  const stock = Number(formData.get("stock")) || 0
-  const base_price = Number(formData.get("base_price")) || 0
+  const stock_quantity = Number(formData.get("stock")) || 0
+  const price = Number(formData.get("base_price")) || 0
+  const brand = formData.get("brand") as string || null
   const file = formData.get("image") as File
   const agent_id = formData.get("agent_id") as string
   
-  let image_url = null
+  let imagePublicUrl: string | null = null
   
   // Handle optional image upload to the 'files' bucket
   if (file && file.size > 0) {
@@ -31,20 +32,21 @@ export async function createProduct(formData: FormData) {
       .from('files')
       .getPublicUrl(filePath)
       
-    image_url = publicUrl
+    imagePublicUrl = publicUrl
   }
   
   const { error } = await supabase
     .from('products')
     .insert({
       name,
-      category: 'product',
-      description,
-      stock,
-      base_price,
-      image_url,
-      agent_id: agent_id ? agent_id : null,
-      is_active: true
+      category: 'laptop',        // products table CHECK: 'laptop' | 'accessory'
+      description: description || null,
+      brand,
+      stock_quantity,             // correct column name
+      price,                      // correct column name
+      images: imagePublicUrl ? [imagePublicUrl] : [],  // images is TEXT[]
+      agent_id: agent_id || null,
+      is_available: true,
     })
     
   if (error) throw new Error(`Database error: ${error.message}`)
@@ -88,12 +90,12 @@ export async function createService(formData: FormData) {
     .from('services')
     .insert({
       name,
-      category,
-      description,
+      category: category || 'ghana_card',  // must match CHECK constraint
+      description: description || null,
       base_price,
-      image_url,
-      agent_id: agent_id ? agent_id : null,
-      is_active: true
+      cover_image_url: image_url,           // correct column name for services
+      agent_id: agent_id || null,
+      is_available: true,
     })
     
   if (error) throw new Error(`Database error: ${error.message}`)
