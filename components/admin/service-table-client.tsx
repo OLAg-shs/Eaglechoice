@@ -5,20 +5,21 @@ import { formatCurrency } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Briefcase, Eye, EyeOff, Trash2 } from "lucide-react"
-import { toggleServiceStatus } from "@/lib/actions/catalog"
+import { Briefcase, Eye, EyeOff, Trash2, Loader2 } from "lucide-react"
+import { toggleServiceStatus, deleteService } from "@/lib/actions/catalog"
 import { useToast } from "@/components/ui/use-toast"
 
 export function ServiceTableClient({ initialServices }: { initialServices: any[] }) {
   const { toast } = useToast()
   const [services, setServices] = useState(initialServices)
   const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const handleToggleStatus = async (id: string, currentlyActive: boolean) => {
     setLoadingId(id)
     try {
       await toggleServiceStatus(id, currentlyActive)
-      setServices(services.map(s => s.id === id ? { ...s, is_active: !currentlyActive } : s))
+      setServices(services.map(s => s.id === id ? { ...s, is_available: !currentlyActive } : s))
       toast({
         title: currentlyActive ? "Service Hidden" : "Service Published",
         description: "The service visibility status has been updated.",
@@ -27,6 +28,23 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
       toast({ variant: "destructive", title: "Error", description: e.message })
     } finally {
       setLoadingId(null)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this service?")) return
+    setDeletingId(id)
+    try {
+      await deleteService(id)
+      setServices(services.filter(s => s.id !== id))
+      toast({
+        title: "Service Deleted",
+        description: "The service has been removed from the catalog.",
+      })
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error", description: e.message })
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -57,9 +75,9 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
           {services.map((service) => (
             <TableRow key={service.id} className="border-gray-100 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
               <TableCell>
-                {service.image_url ? (
+                {service.cover_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={service.image_url} alt={service.name} className="h-12 w-12 rounded-md object-cover border border-gray-200 dark:border-gray-700 shadow-sm" />
+                  <img src={service.cover_image_url} alt={service.name} className="h-12 w-12 rounded-md object-cover border border-gray-200 dark:border-gray-700 shadow-sm" />
                 ) : (
                   <div className="h-12 w-12 rounded-md bg-gray-100 dark:bg-gray-800 flex items-center justify-center border border-gray-200 dark:border-gray-700">
                     <Briefcase className="h-6 w-6 text-gray-400" />
@@ -72,22 +90,28 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
                 {formatCurrency(service.base_price)}
               </TableCell>
               <TableCell className="text-center">
-                <Badge variant="outline" className={service.is_active ? "border-green-500/50 text-green-600 dark:text-green-400" : "border-gray-400 text-gray-500 dark:text-gray-400"}>
-                  {service.is_active ? "Published" : "Hidden"}
+                <Badge variant="outline" className={service.is_available ? "border-green-500/50 text-green-600 dark:text-green-400" : "border-gray-400 text-gray-500 dark:text-gray-400"}>
+                  {service.is_available ? "Published" : "Hidden"}
                 </Badge>
               </TableCell>
               <TableCell className="text-right space-x-2">
                 <Button 
                   size="icon" 
                   variant="ghost" 
-                  className={service.is_active ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-500/10" : "text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-500/10"}
-                  onClick={() => handleToggleStatus(service.id, service.is_active)}
+                  className={service.is_available ? "text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-500/10" : "text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-500/10"}
+                  onClick={() => handleToggleStatus(service.id, service.is_available)}
                   disabled={loadingId === service.id}
                 >
-                  {service.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {service.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
-                <Button size="icon" variant="ghost" className="text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10">
-                  <Trash2 className="h-4 w-4" />
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className="text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                  onClick={() => handleDelete(service.id)}
+                  disabled={deletingId === service.id}
+                >
+                  {deletingId === service.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                 </Button>
               </TableCell>
             </TableRow>

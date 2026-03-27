@@ -29,8 +29,9 @@ export function AddProductForm({ agents }: { agents: { id: string; full_name: st
     try {
       await createProduct(formData)
       toast({
+        variant: "success",
         title: "Product Created",
-        description: "The product was successfully added to the catalog and the image was uploaded.",
+        description: "The product was successfully added to the catalog and the image was secured.",
       })
       // Reset form
       const form = document.getElementById('add-product-form') as HTMLFormElement

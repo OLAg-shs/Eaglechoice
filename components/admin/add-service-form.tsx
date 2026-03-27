@@ -29,6 +29,7 @@ export function AddServiceForm({ agents }: { agents: { id: string; full_name: st
     try {
       await createService(formData)
       toast({
+        variant: "success",
         title: "Service Created",
         description: "The service offering was beautifully added to the catalog and the thumbnail was secured.",
       })

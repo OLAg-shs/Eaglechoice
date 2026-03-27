@@ -5,14 +5,15 @@ import { formatCurrency } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Package, Eye, EyeOff, Trash2 } from "lucide-react"
-import { toggleProductStatus } from "@/lib/actions/catalog"
+import { Package, Eye, EyeOff, Trash2, Loader2 } from "lucide-react"
+import { toggleProductStatus, deleteProduct } from "@/lib/actions/catalog"
 import { useToast } from "@/components/ui/use-toast"
 
 export function ProductTableClient({ initialProducts }: { initialProducts: any[] }) {
   const { toast } = useToast()
   const [products, setProducts] = useState(initialProducts)
   const [loadingId, setLoadingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const handleToggleStatus = async (id: string, currentlyActive: boolean) => {
     setLoadingId(id)
@@ -27,6 +28,23 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
       toast({ variant: "destructive", title: "Error", description: e.message })
     } finally {
       setLoadingId(null)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this product?")) return
+    setDeletingId(id)
+    try {
+      await deleteProduct(id)
+      setProducts(products.filter(p => p.id !== id))
+      toast({
+        title: "Product Deleted",
+        description: "The product has been removed from the catalog.",
+      })
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error", description: e.message })
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -90,8 +108,14 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                 >
                   {product.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
-                <Button size="icon" variant="ghost" className="text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10">
-                  <Trash2 className="h-4 w-4" />
+                <Button 
+                  size="icon" 
+                  variant="ghost" 
+                  className="text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
+                  onClick={() => handleDelete(product.id)}
+                  disabled={deletingId === product.id}
+                >
+                  {deletingId === product.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                 </Button>
               </TableCell>
             </TableRow>

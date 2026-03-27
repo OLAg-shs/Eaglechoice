@@ -134,3 +134,29 @@ export async function toggleServiceStatus(id: string, currentlyActive: boolean) 
   revalidatePath("/user/catalog")
   return { success: true }
 }
+
+export async function deleteProduct(id: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id)
+    
+  if (error) throw new Error(error.message)
+  revalidatePath("/admin/products")
+  revalidatePath("/user/catalog")
+  return { success: true }
+}
+
+export async function deleteService(id: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('services')
+    .delete()
+    .eq('id', id)
+    
+  if (error) throw new Error(error.message)
+  revalidatePath("/admin/services")
+  revalidatePath("/user/catalog")
+  return { success: true }
+}

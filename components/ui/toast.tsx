@@ -18,9 +18,9 @@ interface ToastItemProps extends ToastProps {
 }
 
 const variantStyles: Record<ToastVariant, string> = {
-  default: "border-gray-200 bg-white text-gray-950",
-  destructive: "border-red-200 bg-red-50 text-red-900",
-  success: "border-green-200 bg-green-50 text-green-900",
+  default: "border-gray-200 dark:border-gray-800 bg-white dark:bg-[#111111] text-gray-950 dark:text-gray-100",
+  destructive: "border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950 text-red-900 dark:text-red-200",
+  success: "border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 text-amber-900 dark:text-amber-400",
 }
 
 function ToastItem({ id, title, description, variant = "default", onDismiss }: ToastItemProps) {
