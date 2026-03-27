@@ -1,6 +1,7 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { revalidatePath } from "next/cache"
 
 export async function createProduct(formData: FormData) {
@@ -16,19 +17,20 @@ export async function createProduct(formData: FormData) {
   
   let imagePublicUrl: string | null = null
   
-  // Handle optional image upload to the 'files' bucket
+  // Handle optional image upload — use admin client to bypass storage RLS
   if (file && file.size > 0) {
+    const adminSupabase = createAdminClient()
     const fileExt = file.name.split('.').pop()
     const fileName = `${Math.random().toString(36).substring(2, 15)}-${Date.now()}.${fileExt}`
     const filePath = `products/${fileName}`
     
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await adminSupabase.storage
       .from('files')
       .upload(filePath, file, { cacheControl: '3600', upsert: false })
       
     if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`)
     
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = adminSupabase.storage
       .from('files')
       .getPublicUrl(filePath)
       
@@ -68,18 +70,20 @@ export async function createService(formData: FormData) {
   
   let image_url = null
   
+  // Handle optional image upload — use admin client to bypass storage RLS
   if (file && file.size > 0) {
+    const adminSupabase = createAdminClient()
     const fileExt = file.name.split('.').pop()
     const fileName = `${Math.random().toString(36).substring(2, 15)}-${Date.now()}.${fileExt}`
     const filePath = `services/${fileName}`
     
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await adminSupabase.storage
       .from('files')
-      .upload(filePath, file)
+      .upload(filePath, file, { cacheControl: '3600', upsert: false })
       
     if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`)
     
-    const { data: { publicUrl } } = supabase.storage
+    const { data: { publicUrl } } = adminSupabase.storage
       .from('files')
       .getPublicUrl(filePath)
       

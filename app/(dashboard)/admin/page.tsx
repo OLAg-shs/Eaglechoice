@@ -36,8 +36,7 @@ export default async function AdminDashboard() {
       service_id,
       client_id,
       products(name),
-      services(name),
-      agent:profiles!client_id(full_name, avatar_url)
+      services(name)
     `).in("status", ["paid", "completed", "processing"]),
   ])
 
@@ -56,10 +55,6 @@ export default async function AdminDashboard() {
     if (order.service_id && order.services) {
       if (!serviceCounts[order.service_id]) serviceCounts[order.service_id] = { name: (order.services as any).name, count: 0 }
       serviceCounts[order.service_id].count++
-    }
-    if (order.client_id && order.agent) {
-      if (!agentCounts[order.client_id]) agentCounts[order.client_id] = { name: (order.agent as any).full_name, avatar: (order.agent as any).avatar_url, count: 0 }
-      agentCounts[order.client_id].count++
     }
   })
 
