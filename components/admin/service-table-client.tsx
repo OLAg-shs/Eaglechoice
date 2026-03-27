@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { formatCurrency } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -10,9 +10,15 @@ import { toggleServiceStatus, deleteService } from "@/lib/actions/catalog"
 import { useToast } from "@/components/ui/use-toast"
 import { ShareButton } from "@/components/share-button"
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://eaglechoice.vercel.app"
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://eagle-choice.vercel.app"
 
 export function ServiceTableClient({ initialServices }: { initialServices: any[] }) {
+  const [baseUrl, setBaseUrl] = useState("")
+  
+  useEffect(() => {
+    setBaseUrl(window.location.origin)
+  }, [])
+
   const { toast } = useToast()
   const [services, setServices] = useState(initialServices)
   const [loadingId, setLoadingId] = useState<string | null>(null)
@@ -99,7 +105,7 @@ export function ServiceTableClient({ initialServices }: { initialServices: any[]
               </TableCell>
               <TableCell className="text-right space-x-2">
                 <ShareButton 
-                  url={`${APP_URL}/user/catalog/service/${service.id}`} 
+                  url={`${baseUrl}/user/catalog/service/${service.id}`} 
                   title={service.name}
                   variant="ghost"
                   size="icon"

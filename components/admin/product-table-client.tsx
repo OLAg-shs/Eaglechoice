@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { formatCurrency } from "@/lib/utils"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -10,9 +10,13 @@ import { toggleProductStatus, deleteProduct } from "@/lib/actions/catalog"
 import { useToast } from "@/components/ui/use-toast"
 import { ShareButton } from "@/components/share-button"
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://eaglechoice.vercel.app"
-
 export function ProductTableClient({ initialProducts }: { initialProducts: any[] }) {
+  const [baseUrl, setBaseUrl] = useState("")
+  
+  useEffect(() => {
+    setBaseUrl(window.location.origin)
+  }, [])
+
   const { toast } = useToast()
   const [products, setProducts] = useState(initialProducts)
   const [loadingId, setLoadingId] = useState<string | null>(null)
@@ -56,7 +60,7 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
       <div className="flex flex-col items-center justify-center py-16 text-center bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-800 backdrop-blur-sm">
         <Package className="h-16 w-16 text-gray-300 dark:text-gray-700 mb-4" />
         <h3 className="text-lg font-medium text-gray-900 dark:text-white">No products yet</h3>
-        <p className="mt-1 text-sm text-gray-500">Your inventory is currently empty.</p>
+        <p className="mt-1 text-sm text-500">Your inventory is currently empty.</p>
       </div>
     )
   }
@@ -112,7 +116,7 @@ export function ProductTableClient({ initialProducts }: { initialProducts: any[]
                   {loadingId === product.id ? <Loader2 className="h-4 w-4 animate-spin" /> : (product.is_available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />)}
                 </Button>
                 <ShareButton 
-                  url={`${APP_URL}/user/catalog/product/${product.id}`} 
+                  url={`${baseUrl}/user/catalog/product/${product.id}`} 
                   title={product.name}
                   variant="ghost"
                   size="icon"

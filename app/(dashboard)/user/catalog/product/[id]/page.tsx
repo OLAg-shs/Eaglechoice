@@ -8,7 +8,7 @@ import { PlaceOrderForm } from "@/components/orders/place-order-form"
 import type { Metadata } from "next"
 import { ShareButton } from "@/components/share-button"
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://eaglechoice.vercel.app"
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://eagle-choice.vercel.app"
 
 export async function generateMetadata({
   params,
