@@ -22,8 +22,9 @@ export async function GET(req: NextRequest) {
       searchParams.get("s3")
     ].filter(Boolean) as string[]
 
-    const accentColor = type === "service" ? "#a855f7" : "#f59e0b"
-    const accentBg = type === "service" ? "rgba(168, 85, 247, 0.1)" : "rgba(245, 158, 11, 0.1)"
+    // Robust colors inspired by the site's UI
+    const accentColor = "#f59e0b" // Orange/Amber
+    const priceColor = "#f59e0b"
 
     // Fetch image and convert to base64 for robustness in Edge Runtime
     let imageData: string | null = null
@@ -59,186 +60,149 @@ export async function GET(req: NextRequest) {
             height: "100%",
             width: "100%",
             display: "flex",
-            backgroundColor: "#050505",
-            color: "white",
+            flexDirection: "column",
+            backgroundColor: "#fcfcfc", // Very clean off-white
             fontFamily: "sans-serif",
+            padding: "30px",
             position: "relative",
-            overflow: "hidden",
           }}
         >
-          {/* CONTENT AREA (60%) */}
+          {/* Main Card Container */}
           <div
             style={{
-              width: "720px",
-              height: "100%",
               display: "flex",
               flexDirection: "column",
-              padding: "70px 60px 60px 80px",
-              justifyContent: "space-between",
-              zIndex: 10,
-              backgroundColor: "#050505",
-              position: "relative",
+              flex: 1,
+              backgroundColor: "white",
+              borderRadius: "24px",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.05)",
+              border: "1px solid #eeeeee",
+              overflow: "hidden",
             }}
           >
-            {/* Logo Section */}
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-              <div
-                style={{
-                  width: "60px",
-                  height: "60px",
-                  borderRadius: "16px",
-                  background: `linear-gradient(135deg, ${accentColor} 0%, #000 100%)`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "36px",
-                  fontWeight: "900",
-                  color: "white",
-                }}
-              >
-                E
-              </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: "32px", fontWeight: "900", letterSpacing: "-1px" }}>EAGLE CHOICE</span>
-                <span style={{ fontSize: "14px", fontWeight: "bold", color: "#666", letterSpacing: "3px" }}>PREMIUM CATALOG</span>
-              </div>
+            {/* Header: Site Name */}
+            <div style={{
+              padding: "20px 40px",
+              borderBottom: "1px solid #f5f5f5",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px"
+            }}>
+              <div style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "8px",
+                backgroundColor: accentColor,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "20px",
+                fontWeight: "900",
+                color: "white"
+              }}>E</div>
+              <span style={{ fontSize: "24px", fontWeight: "900", color: "#111", letterSpacing: "-1px" }}>Eagle Choice</span>
             </div>
 
-            {/* Product Title & Brand */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <div style={{ width: "12px", height: "12px", borderRadius: "3px", backgroundColor: accentColor }} />
-                <span style={{ fontSize: "16px", fontWeight: "900", color: accentColor, letterSpacing: "2.5px" }}>{type.toUpperCase()}</span>
-              </div>
-              <div
-                style={{
-                  fontSize: title.length > 18 ? "75px" : "90px",
-                  fontWeight: "900",
-                  lineHeight: "0.95",
-                  letterSpacing: "-3px",
-                  textShadow: "0 10px 30px rgba(0,0,0,0.5)",
-                }}
-              >
-                {title}
-              </div>
-              
-              {/* Highlights Rendering */}
-              {specs.length > 0 ? (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "15px" }}>
-                  {specs.map((spec, i) => (
-                    <div 
-                      key={i}
-                      style={{ 
-                        padding: "8px 16px", 
-                        backgroundColor: "rgba(255,255,255,0.06)",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: "10px",
-                        fontSize: "20px",
-                        fontWeight: "800",
-                        color: "#ccc"
-                      }}
-                    >
-                      {spec}
-                    </div>
-                  ))}
-                </div>
-              ) : badge ? (
-                <div style={{ fontSize: "24px", fontWeight: "600", color: "#888", marginTop: "10px" }}>{badge}</div>
-              ) : null}
-            </div>
-
-            {/* Price section */}
-            <div style={{ display: "flex", alignItems: "baseline", gap: "25px", marginTop: "20px" }}>
-              <div style={{ fontSize: "95px", fontWeight: "900", lineHeight: "1", letterSpacing: "-2px" }}>
-                {price.replace('GH₵', 'GH')}
-              </div>
-              <div 
-                style={{ 
-                  padding: "10px 20px", 
-                  backgroundColor: accentBg, 
-                  borderRadius: "12px",
-                  border: `1px solid ${accentColor}44`,
-                  fontSize: "14px",
-                  fontWeight: "900",
-                  color: accentColor,
-                  letterSpacing: "2px"
-                }}
-              >
-                VERIFIED AUTHENTIC
-              </div>
-            </div>
-          </div>
-
-          {/* IMAGE AREA (40%) - ABSOLUTE CONTAINMENT TO PREVENT CROP */}
-          <div
-            style={{
-              width: "480px",
-              height: "100%",
+            {/* Image Area (Large) */}
+            <div style={{
+              flex: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: "#111",
+              backgroundColor: "white",
+              padding: "40px",
               position: "relative",
-              overflow: "hidden"
-            }}
-          >
-            {imageData ? (
-              <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", justifyItems: "center", position: "relative" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+            }}>
+              {imageData ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={imageData}
                   alt=""
                   style={{ 
-                    maxWidth: "90%", // PREVENT OVERFLOW
-                    maxHeight: "85%", // PREVENT OVERFLOW
+                    maxWidth: "100%", 
+                    maxHeight: "100%", 
                     objectFit: "contain",
-                    margin: "auto",
-                    zIndex: 2,
-                    boxShadow: "0 20px 50px rgba(0,0,0,0.5)"
                   }}
                 />
-                
-                {/* Background Shadow/Glow behind image */}
-                <div style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: `radial-gradient(circle at center, ${accentColor}15 0%, transparent 80%)`,
-                  zIndex: 0
-                }} />
+              ) : (
+                <div style={{ fontSize: "100px", fontWeight: "900", color: "#f0f0f0" }}>
+                  {type.slice(0, 3).toUpperCase()}
+                </div>
+              )}
+            </div>
 
-                {/* THE FADE: Transition overlay from Content Area to Image Area */}
+            {/* Content Footer (Title & Price) */}
+            <div style={{
+              padding: "40px 50px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              background: "linear-gradient(to top, #ffffff, #fafafa)",
+              borderTop: "1px solid #f5f5f5"
+            }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "60%" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                   <div style={{ width: "8px", height: "8px", borderRadius: "2px", backgroundColor: accentColor }} />
+                   <span style={{ fontSize: "14px", fontWeight: "800", color: "#888", letterSpacing: "2px" }}>{type.toUpperCase()}</span>
+                </div>
+                <div style={{ 
+                  fontSize: title.length > 20 ? "48px" : "64px", 
+                  fontWeight: "900", 
+                  color: "#111", 
+                  lineHeight: "1",
+                  letterSpacing: "-2px"
+                }}>
+                  {title}
+                </div>
+                {specs.length > 0 && (
+                  <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                    {specs.map((spec, i) => (
+                      <div key={i} style={{ 
+                        fontSize: "18px", 
+                        color: "#666", 
+                        fontWeight: "600",
+                        padding: "4px 12px",
+                        backgroundColor: "#f5f5f5",
+                        borderRadius: "8px"
+                      }}>{spec}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+                <div style={{ 
+                  fontSize: "56px", 
+                  fontWeight: "900", 
+                  color: priceColor,
+                  lineHeight: "1",
+                  letterSpacing: "-1px"
+                }}>
+                  {price.replace('GH₵', 'GH')}
+                </div>
                 <div style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  width: "150px", // Gradient start area
-                  background: "linear-gradient(to right, #050505 0%, #050505 10%, transparent 100%)",
-                  zIndex: 10
-                }} />
+                  padding: "6px 14px",
+                  backgroundColor: "#ecfdf5",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  fontWeight: "900",
+                  color: "#10b981", // Green for stock
+                  letterSpacing: "1px"
+                }}>VERIFIED LISTING</div>
               </div>
-            ) : (
-              <div style={{ fontSize: "120px", fontWeight: "900", color: "#1a1a1a" }}>
-                {type === "service" ? "SVC" : "PRD"}
-              </div>
-            )}
-            
-            {/* Watermark */}
-            <div 
-              style={{ 
-                position: "absolute",
-                bottom: "30px",
-                right: "30px",
-                fontSize: "14px",
-                fontWeight: "900",
-                color: "rgba(255,255,255,0.15)",
-                letterSpacing: "2px",
-                zIndex: 20
-              }}
-            >
-              eaglechoice.vercel.app
             </div>
           </div>
+          
+          {/* Footer Watermark */}
+          <div style={{
+            position: "absolute",
+            bottom: "45px",
+            right: "80px",
+            fontSize: "12px",
+            color: "rgba(0,0,0,0.2)",
+            fontWeight: "bold",
+            letterSpacing: "1px"
+          }}>eaglechoice.vercel.app</div>
         </div>
       ),
       {
