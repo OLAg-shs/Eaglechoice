@@ -19,7 +19,7 @@ export async function generateMetadata({
   params: { id: string }
 }): Promise<Metadata> {
   const headersList = await headers()
-  const domain = headersList.get("host") || "eagle-choice.vercel.app"
+  const domain = headersList.get("host") || "eaglechoice.vercel.app"
   const protocol = domain.includes("localhost") ? "http" : "https"
   const currentUrl = `${protocol}://${domain}`
 
@@ -67,7 +67,7 @@ export default async function ProductDetailPage({
   params: { id: string }
 }) {
   const headersList = await headers()
-  const domain = headersList.get("host") || "eagle-choice.vercel.app"
+  const domain = headersList.get("host") || "eaglechoice.vercel.app"
   const protocol = domain.includes("localhost") ? "http" : "https"
   const currentUrl = `${protocol}://${domain}`
 
