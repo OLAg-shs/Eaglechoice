@@ -4,6 +4,7 @@ import { Briefcase, ArrowLeft } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import { PlaceOrderForm } from "@/components/orders/place-order-form"
 import type { Metadata } from "next"
 import { ShareButton } from "@/components/share-button"
@@ -56,7 +57,7 @@ export default async function ServiceDetailPage({
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/login")
+  // DELETED: if (!user) redirect("/login")
 
   const [{ data: service }, { data: clients }] = await Promise.all([
     supabase.from("services").select("*").eq("id", params.id).eq("is_available", true).single(),
@@ -121,13 +122,22 @@ export default async function ServiceDetailPage({
           <CardTitle className="dark:text-white">Apply for Service</CardTitle>
         </CardHeader>
         <CardContent>
-          <PlaceOrderForm
-            type="service"
-            itemId={service.id}
-            itemPrice={service.base_price}
-            clients={clients || []}
-            category={service.category}
-          />
+          {user ? (
+            <PlaceOrderForm
+              type="service"
+              itemId={service.id}
+              itemPrice={service.base_price}
+              clients={clients || []}
+              category={service.category}
+            />
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-gray-500 mb-4">Interested in this service? Please log in to your account to apply.</p>
+              <Button asChild className="gradient-primary">
+                <Link href="/login">Log in to Apply</Link>
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

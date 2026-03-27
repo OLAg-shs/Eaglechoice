@@ -4,6 +4,7 @@ import { ShoppingBag, ArrowLeft, BadgeCheck } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import { PlaceOrderForm } from "@/components/orders/place-order-form"
 import type { Metadata } from "next"
 import { ShareButton } from "@/components/share-button"
@@ -60,7 +61,7 @@ export default async function ProductDetailPage({
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect("/login")
+  // DELETED: if (!user) redirect("/login")
 
   const [{ data: product }, { data: clients }] = await Promise.all([
     supabase.from("products").select("*, profiles!client_id(id, full_name, is_verified)").eq("id", params.id).eq("is_available", true).single(),
@@ -129,13 +130,22 @@ export default async function ProductDetailPage({
           <CardTitle className="dark:text-white">Place Order</CardTitle>
         </CardHeader>
         <CardContent>
-          <PlaceOrderForm
-            type="product"
-            itemId={product.id}
-            itemPrice={product.price}
-            clients={clients || []}
-            preAssignedClientId={product.client_id}
-          />
+          {user ? (
+            <PlaceOrderForm
+              type="product"
+              itemId={product.id}
+              itemPrice={product.price}
+              clients={clients || []}
+              preAssignedClientId={product.client_id}
+            />
+          ) : (
+            <div className="text-center py-6">
+              <p className="text-gray-500 mb-4">Want to place an order? Please log in to your account.</p>
+              <Button asChild className="gradient-primary">
+                <Link href="/login">Log in to Order</Link>
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
