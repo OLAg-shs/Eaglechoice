@@ -119,7 +119,7 @@ export async function GET(req: NextRequest) {
             {/* Badge (assigned agent or brand) */}
             {badge && (
               <div style={{ color: "#9ca3af", fontSize: "16px", display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ color: "#22c55e", fontSize: "14px" }}>✓</span>
+                <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#22c55e" }} />
                 {badge}
               </div>
             )}
@@ -195,10 +195,12 @@ export async function GET(req: NextRequest) {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "60px",
+                fontSize: "40px",
+                color: accentColor,
+                fontWeight: "bold",
               }}
             >
-              {type === "service" ? "📋" : "📦"}
+              {type === "service" ? "SVC" : "PRD"}
             </div>
           </div>
         )}
