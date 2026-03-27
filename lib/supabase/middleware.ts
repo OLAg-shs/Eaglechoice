@@ -39,8 +39,13 @@ export async function updateSession(request: NextRequest) {
   const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/auth/callback"]
   const isPublicRoute = publicRoutes.some((route) => pathname === route)
   const isCatalogRoute = pathname.startsWith("/catalog")
+  const isOldCatalogRoute = pathname.startsWith("/user/catalog")
   const isOgRoute = pathname.startsWith("/api/og")
   const isApiWebhook = pathname.startsWith("/api/webhooks")
+
+  if (isOldCatalogRoute) {
+    return NextResponse.redirect(new URL("/catalog", request.url))
+  }
 
   // Allow webhooks, catalog viewing, and OG images through without auth
   if (isApiWebhook || isCatalogRoute || isOgRoute) {

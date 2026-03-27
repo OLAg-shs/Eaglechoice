@@ -118,7 +118,7 @@ export async function toggleProductStatus(id: string, currentlyActive: boolean) 
     
   if (error) throw new Error(error.message)
   revalidatePath("/admin/products")
-  revalidatePath("/user/catalog")
+  revalidatePath("/catalog")
   return { success: true }
 }
 
@@ -131,7 +131,7 @@ export async function toggleServiceStatus(id: string, currentlyActive: boolean) 
     
   if (error) throw new Error(error.message)
   revalidatePath("/admin/services")
-  revalidatePath("/user/catalog")
+  revalidatePath("/catalog")
   return { success: true }
 }
 
@@ -144,7 +144,7 @@ export async function deleteProduct(id: string) {
     
   if (error) throw new Error(error.message)
   revalidatePath("/admin/products")
-  revalidatePath("/user/catalog")
+  revalidatePath("/catalog")
   return { success: true }
 }
 
@@ -157,6 +157,6 @@ export async function deleteService(id: string) {
     
   if (error) throw new Error(error.message)
   revalidatePath("/admin/services")
-  revalidatePath("/user/catalog")
+  revalidatePath("/catalog")
   return { success: true }
 }
