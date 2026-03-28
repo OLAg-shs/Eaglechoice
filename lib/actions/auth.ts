@@ -199,3 +199,38 @@ export async function updateSettings(key: string, value: string): Promise<{ erro
   return { success: true }
 }
 
+export async function updateAdminProfile(formData: FormData): Promise<{ error?: string; success?: boolean; message?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+  if (profile?.role !== "admin") return { error: "Unauthorized" }
+
+  const full_name = formData.get("full_name") as string
+  const email = formData.get("email") as string
+
+  if (!full_name || !email) return { error: "Name and email are required" }
+
+  // Update profile name
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({ full_name })
+    .eq("id", user.id)
+
+  if (profileError) return { error: profileError.message }
+
+  // Update email if it changed
+  if (email !== user.email) {
+    const { error: authError } = await supabase.auth.updateUser({ email })
+    if (authError) return { error: authError.message }
+    
+    revalidatePath("/admin/settings")
+    return { success: true, message: "Name updated! A confirmation link has been sent to confirm your new email. It will change once you click it." }
+  }
+
+  revalidatePath("/admin/settings")
+  return { success: true, message: "Profile updated successfully!" }
+}
+

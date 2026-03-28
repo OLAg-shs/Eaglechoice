@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Shield, Settings, Info } from "lucide-react"
 import { AdminSettingsForm } from "@/components/admin/settings-form"
+import { AdminProfileForm } from "@/components/admin/admin-profile-form"
 
 export default async function AdminSettingsPage() {
   const supabase = await createClient()
@@ -36,17 +37,8 @@ export default async function AdminSettingsPage() {
 
       <Card>
         <CardHeader><CardTitle className="text-base flex items-center gap-2"><Shield className="h-5 w-5 text-blue-600" />Admin Account</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs text-gray-500">Name</p>
-              <p className="font-medium">{profile.full_name}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">Email</p>
-              <p className="font-medium">{profile.email}</p>
-            </div>
-          </div>
+        <CardContent>
+          <AdminProfileForm initialName={profile.full_name || ""} initialEmail={profile.email || ""} />
         </CardContent>
       </Card>
 
@@ -59,14 +51,6 @@ export default async function AdminSettingsPage() {
             <li>System automatically calculates 5% and credits it to the Agent's Ledger.</li>
             <li>Agents can view their earnings and request redemption in their dashboard.</li>
           </ul>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader><CardTitle className="text-base">Developer Notes</CardTitle></CardHeader>
-        <CardContent className="space-y-2 text-sm text-gray-600">
-          <p>• <strong>Paystack Webhook:</strong> Ensure <code>{process.env.NEXT_PUBLIC_APP_URL}/api/paystack/webhook</code> is set in your Paystack dashboard.</p>
-          <p>• <strong>Service Role:</strong> The backend uses a service role key for commission settlement to bypass RLS.</p>
         </CardContent>
       </Card>
     </div>
