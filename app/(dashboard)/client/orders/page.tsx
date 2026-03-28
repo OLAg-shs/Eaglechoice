@@ -7,8 +7,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { OrderStatusUpdater } from "@/components/orders/order-status-updater"
 import { TrackingUpdater } from "@/components/orders/tracking-updater"
-import { updateOrderStatus } from "@/lib/actions/orders"
-import { confirmPaymentProof } from "@/lib/actions/orders"
+import { ConfirmOrderButton, VerifyPaymentButton } from "@/components/orders/agent-action-buttons"
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -80,15 +79,16 @@ export default async function ClientOrdersPage() {
                   </div>
                 </div>
                 <div className="mt-4 space-y-2">
-                  <OrderStatusUpdater orderId={order.id} currentStatus={order.status} role="client" />
-                  <TrackingUpdater orderId={order.id} currentTracking={order.form_data?.tracking} />
+                  {/* Logistics & Status Updaters — shown only AFTER payment */}
+                  {["paid", "processing", "completed", "in_progress"].includes(order.status) && (
+                    <>
+                      <OrderStatusUpdater orderId={order.id} currentStatus={order.status} role="client" />
+                      <TrackingUpdater orderId={order.id} currentTracking={order.form_data?.tracking} />
+                    </>
+                  )}
                   {/* Confirm Order — shown when status is pending */}
                   {order.status === "pending" && (
-                    <form action={async () => { "use server"; await updateOrderStatus(order.id, "agent_confirmed") }}>
-                      <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white gap-2">
-                        <CheckCheck className="h-4 w-4" /> Confirm Order
-                      </Button>
-                    </form>
+                    <ConfirmOrderButton orderId={order.id} />
                   )}
                   {/* Verify Receipt — shown when customer uploaded proof */}
                   {order.form_data?.payment_proof_url && order.status === "paid" && (
@@ -97,11 +97,7 @@ export default async function ClientOrdersPage() {
                         className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 underline font-medium">
                         <FileCheck2 className="h-4 w-4" /> View Customer Receipt Proof
                       </a>
-                      <form action={async () => { "use server"; await confirmPaymentProof(order.id) }}>
-                        <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white gap-2">
-                          <FileCheck2 className="h-4 w-4" /> Verify &amp; Confirm Payment
-                        </Button>
-                      </form>
+                      <VerifyPaymentButton orderId={order.id} />
                     </div>
                   )}
                 </div>
