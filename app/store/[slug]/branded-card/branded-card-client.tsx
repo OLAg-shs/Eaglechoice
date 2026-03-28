@@ -25,18 +25,28 @@ export default function BrandedCardClient({ store, productCount, agentCount }: B
   async function handleDownload() {
     setDownloading(true)
     try {
-      // Dynamic import to avoid SSR issues
-      const html2canvas = (await import("html2canvas")).default
-      const canvas = await html2canvas(cardRef.current!, { scale: 3, backgroundColor: null, useCORS: true })
-      const link = document.createElement("a")
-      link.download = `${store.slug}-store-card.png`
-      link.href = canvas.toDataURL("image/png")
-      link.click()
-    } catch (e) {
-      // Fallback: open print dialog
-      window.print()
+      const cardEl = cardRef.current
+      if (!cardEl) return
+
+      const styles = Array.from(document.styleSheets)
+        .map(s => { try { return Array.from(s.cssRules).map(r => r.cssText).join("\n") } catch { return "" } })
+        .join("\n")
+
+      const printWindow = window.open("", "_blank", "width=720,height=450")
+      if (!printWindow) { setDownloading(false); return }
+
+      printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/>
+        <title>${store.name} Store Card</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+        <style>${styles} body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Inter',sans-serif;}
+        @media print{@page{margin:0;size:700px 420px;}}</style></head>
+        <body><div style="width:680px;">${cardEl.outerHTML}</div>
+        <script>window.onload=function(){setTimeout(function(){window.print();window.close();},600);}<\/script>
+        </body></html>`)
+      printWindow.document.close()
+    } finally {
+      setDownloading(false)
     }
-    setDownloading(false)
   }
 
   return (

@@ -127,8 +127,14 @@ export default async function StorePublicPage({ params }: { params: Promise<{ sl
                       <span className="text-[10px] text-gray-400 truncate">{store.name}</span>
                     </div>
 
-                    <AddToCartButton product={product} agentId={product.client_id} className="w-full mt-2 h-8 text-xs text-white border-none font-semibold"
-                      style={{ background: brandColor }} />
+                    <AddToCartButton
+                      productId={product.id}
+                      productName={product.name}
+                      productPrice={product.price}
+                      productImage={product.images?.[0]}
+                      className="w-full mt-2"
+                      size="sm"
+                    />
                   </div>
                 </div>
               ))}
