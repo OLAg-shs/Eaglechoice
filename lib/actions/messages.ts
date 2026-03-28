@@ -221,6 +221,7 @@ export async function getOrCreateConversation(
     .insert({
       participant_1: user.id,
       participant_2: participantId,
+      conversation_type: type,
       order_id: orderId || null,
       last_message_at: new Date().toISOString(),
     })

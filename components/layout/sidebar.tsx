@@ -133,7 +133,7 @@ export function Sidebar({ role, profile }: { role: string; profile: any }) {
           {!collapsed && (
             <div className="flex-1 overflow-hidden">
               <p className="truncate text-sm font-medium text-gray-900">{profile.full_name}</p>
-              <p className="truncate text-xs text-gray-500 capitalize">{role}</p>
+              <p className="truncate text-xs text-gray-500 capitalize">{role === 'client' ? 'agent' : role}</p>
             </div>
           )}
           {!collapsed && (

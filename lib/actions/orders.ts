@@ -581,6 +581,7 @@ export async function enableOrderMessaging(orderId: string): Promise<{ data?: an
     const { data: newConv, error: convError } = await supabase.from("conversations").insert({
       participant_1: user.id,
       participant_2: order.client_id,
+      conversation_type: "order",
       order_id: orderId,
       last_message_at: new Date().toISOString()
     }).select().single()
