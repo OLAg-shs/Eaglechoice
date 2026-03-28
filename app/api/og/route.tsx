@@ -135,12 +135,12 @@ export async function GET(req: NextRequest) {
 
             {/* Image Area (Large directly centered on top) */}
             <div style={{
-              flex: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: "white",
-              padding: "15px",
+              padding: "10px",
+              height: "280px", // Exact layout constraint to prevent overflow clipping
               position: "relative",
             }}>
               {imageData ? (
@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
                   alt=""
                   style={{ 
                     width: "100%", 
-                    height: "380px", 
+                    height: "100%", 
                     objectFit: "contain",
                   }}
                 />
