@@ -134,6 +134,7 @@ export function ShareButton({
     }
     
     params.set("download", "1")
+    params.set("v", Math.floor(Date.now() / 1000).toString()) // Cache buster
     window.open(`/api/og?${params.toString()}`, "_blank")
     
     toast({
