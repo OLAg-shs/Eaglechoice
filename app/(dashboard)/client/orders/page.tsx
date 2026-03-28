@@ -64,7 +64,7 @@ export default async function ClientOrdersPage() {
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-gray-900">{order.order_number}</span>
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[order.status] || "bg-gray-100 text-gray-700"}`}>
-                        {order.status.replace(/_/g, " ")}
+                        {order.status === 'agent_confirmed' ? 'Accepted' : order.status.replace(/_/g, " ")}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mt-1">

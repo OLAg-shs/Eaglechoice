@@ -13,8 +13,8 @@ export default async function CatalogPage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   const [{ data: products }, { data: services }] = await Promise.all([
-    adminSupabase.from("products").select("*, agent:profiles!agent_id(full_name, is_verified, avatar_url)").eq("is_available", true).order("created_at", { ascending: false }),
-    adminSupabase.from("services").select("*, agent:profiles!agent_id(full_name, is_verified, avatar_url)").eq("is_available", true).order("created_at", { ascending: false }),
+    adminSupabase.from("products").select("*, agent:profiles!client_id(full_name, is_verified, avatar_url)").eq("is_available", true).order("created_at", { ascending: false }),
+    adminSupabase.from("services").select("*, agent:profiles!client_id(full_name, is_verified, avatar_url)").eq("is_available", true).order("created_at", { ascending: false }),
   ])
 
   const categoryLabels: Record<string, string> = {
@@ -86,6 +86,20 @@ export default async function CatalogPage() {
                         <h3 className="font-bold text-gray-900 dark:text-white line-clamp-2 text-base leading-tight mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors">
                           {product.name}
                         </h3>
+                        
+                        {product.agent && (
+                          <div className="flex items-center gap-2 mb-3 mt-1">
+                            <div className="h-5 w-5 shrink-0 rounded-full overflow-hidden bg-amber-100 flex items-center justify-center text-[10px] font-bold text-amber-700">
+                              {product.agent.avatar_url ? (
+                                <img src={product.agent.avatar_url} alt="" className="h-full w-full object-cover" />
+                              ) : product.agent.full_name.charAt(0)}
+                            </div>
+                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1 truncate">
+                              {product.agent.full_name}
+                              {product.agent.is_verified && <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-amber-500" />}
+                            </span>
+                          </div>
+                        )}
                         
                         {/* Highlights/Specs */}
                         {highlights.length > 0 && (
@@ -171,6 +185,20 @@ export default async function CatalogPage() {
                         <h3 className="font-bold text-gray-900 dark:text-white leading-tight mb-2 text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                           {service.name}
                         </h3>
+                        
+                        {service.agent && (
+                          <div className="flex items-center gap-2 mb-3 mt-1">
+                            <div className="h-5 w-5 shrink-0 rounded-full overflow-hidden bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-indigo-700">
+                              {service.agent.avatar_url ? (
+                                <img src={service.agent.avatar_url} alt="" className="h-full w-full object-cover" />
+                              ) : service.agent.full_name.charAt(0)}
+                            </div>
+                            <span className="text-xs font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1 truncate">
+                              {service.agent.full_name}
+                              {service.agent.is_verified && <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-indigo-500" />}
+                            </span>
+                          </div>
+                        )}
                         
                         {highlights.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 mb-4">
