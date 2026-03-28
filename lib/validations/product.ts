@@ -11,6 +11,7 @@ export const productSchema = z.object({
   stock_quantity: z.coerce.number().int().min(0).default(0),
   is_available: z.boolean().default(true),
   store_id: z.string().uuid().optional(),
+  agent_id: z.string().uuid().optional(),
 })
 
 export const serviceSchema = z.object({

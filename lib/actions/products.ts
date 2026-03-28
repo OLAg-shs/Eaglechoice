@@ -7,16 +7,32 @@ import { productSchema } from "@/lib/validations/product"
 export async function getProducts(): Promise<{ data: any[] | null; error: string | null }> {
   const supabase = await createClient()
 
+  // Join with stores to filter by is_verified and is_active
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select(`
+      *,
+      stores (
+        id,
+        name,
+        slug,
+        is_verified,
+        is_active,
+        brand_color
+      )
+    `)
+    .eq("stores.is_verified", true)
+    .eq("stores.is_active", true)
     .order("created_at", { ascending: false })
+
+  // Filter out any products where the join failed (i.e. store is unverified)
+  const filteredData = data?.filter(p => p.stores) || []
 
   if (error) {
     return { data: null, error: error.message }
   }
 
-  return { data, error: null }
+  return { data: filteredData, error: null }
 }
 
 export async function getProduct(id: string): Promise<{ data: any | null; error: string | null }> {
@@ -24,12 +40,27 @@ export async function getProduct(id: string): Promise<{ data: any | null; error:
 
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select(`
+      *,
+      stores (
+        id,
+        is_verified,
+        is_active,
+        owner_id
+      )
+    `)
     .eq("id", id)
     .single()
 
-  if (error) {
-    return { data: null, error: error.message }
+  if (error) return { data: null, error: error.message }
+  if (!data) return { data: null, error: "Product not found" }
+
+  const { data: { user } } = await supabase.auth.getUser()
+  const isOwner = user && data.stores?.owner_id === user.id
+
+  // If not owner, the store must be verified and active
+  if (!isOwner && (!data.stores?.is_verified || !data.stores?.is_active)) {
+    return { data: null, error: "Product currently undergoing verification." }
   }
 
   return { data, error: null }
@@ -104,7 +135,9 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
     images,
     stock_quantity: formData.get("stock") as string || formData.get("stock_quantity") as string,
     is_available: formData.get("is_available") === "true" || formData.get("is_available") === "on",
-    store_id,
+    is_negotiation_enabled: formData.get("is_negotiation_enabled") === "true",
+    store_id: (formData.get("store_id") as string) || store_id,
+    agent_id: (formData.get("agent_id") as string) || undefined,
   }
 
   const validated = productSchema.safeParse(rawData)
@@ -186,6 +219,8 @@ export async function updateProduct(id: string, formData: FormData): Promise<{ e
     images: images && images.length > 0 ? images : undefined,
     stock_quantity: formData.get("stock") as string || formData.get("stock_quantity") as string,
     is_available: formData.get("is_available") === "true" || formData.get("is_available") === "on",
+    is_negotiation_enabled: formData.get("is_negotiation_enabled") === "true",
+    agent_id: (formData.get("agent_id") as string) || undefined,
   }
 
   const validated = productSchema.safeParse(rawData)

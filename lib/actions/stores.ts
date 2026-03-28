@@ -11,74 +11,59 @@ function slugify(name: string): string {
     .slice(0, 40)
 }
 
-export async function createStore(formData: FormData): Promise<{ error?: string; slug?: string }> {
+export async function createStore(input: {
+  name: string
+  tagline?: string
+  description?: string
+  brand_color?: string
+  category_tags?: string
+  logo?: string
+}): Promise<{ error?: string; slug?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: "Not authenticated" }
 
-  const name = (formData.get("name") as string)?.trim()
-  const tagline = (formData.get("tagline") as string)?.trim()
-  const description = (formData.get("description") as string)?.trim()
-  const brand_color = (formData.get("brand_color") as string) || "#2563eb"
-  const category_tags_raw = (formData.get("category_tags") as string) || ""
+  const name = input.name?.trim()
+  const tagline = input.tagline?.trim()
+  const description = input.description?.trim()
+  const brand_color = input.brand_color || "#2563eb"
+  const category_tags_raw = input.category_tags || ""
   const category_tags = category_tags_raw.split(",").map(s => s.trim()).filter(Boolean)
 
   if (!name) return { error: "Store name is required" }
 
   let slug = slugify(name)
-
-  // Check slug uniqueness and append suffix if needed
   const adminSupabase = await createAdminClient()
   const { data: existing } = await adminSupabase.from("stores").select("slug").eq("slug", slug).single()
   if (existing) {
     slug = `${slug}-${Math.random().toString(36).substring(2, 6)}`
   }
 
-  // Handle logo upload
-  let logo_url: string | null = null
-  const logoFile = formData.get("logo") as File
-  if (logoFile && logoFile.size > 0) {
-    const ext = logoFile.name.split(".").pop()
-    const path = `stores/${slug}/logo-${Date.now()}.${ext}`
-    const { error: uploadError } = await adminSupabase.storage.from("files").upload(path, logoFile, { upsert: false })
-    if (!uploadError) {
-      const { data: { publicUrl } } = adminSupabase.storage.from("files").getPublicUrl(path)
-      logo_url = publicUrl
-    }
-  }
-
-  // Handle banner upload
-  let banner_url: string | null = null
-  const bannerFile = formData.get("banner") as File
-  if (bannerFile && bannerFile.size > 0) {
-    const ext = bannerFile.name.split(".").pop()
-    const path = `stores/${slug}/banner-${Date.now()}.${ext}`
-    const { error: uploadError } = await adminSupabase.storage.from("files").upload(path, bannerFile, { upsert: false })
-    if (!uploadError) {
-      const { data: { publicUrl } } = adminSupabase.storage.from("files").getPublicUrl(path)
-      banner_url = publicUrl
-    }
-  }
-
   const { error } = await adminSupabase.from("stores").insert({
     name,
     slug,
     owner_id: user.id,
-    logo_url,
-    banner_url,
+    logo_url: input.logo || null,
     brand_color,
     tagline: tagline || null,
     description: description || null,
     category_tags,
     commission_rate: 0.05,
     is_active: true,
-    is_official: false,
+    is_verified: false, // Must be verified by admin
+    accepted_terms: true, // They accept in the wizard
   })
 
   if (error) return { error: error.message }
 
-  // Also add owner as a store_member
-  await adminSupabase.from("store_members").insert({ store_id: (await adminSupabase.from("stores").select("id").eq("slug", slug).single()).data?.id, user_id: user.id, role: "owner" })
+  const { data: newStore } = await adminSupabase.from("stores").select("id").eq("slug", slug).single()
+  if (newStore) {
+    await adminSupabase.from("store_members").insert({ 
+      store_id: newStore.id, 
+      user_id: user.id, 
+      role: "owner" 
+    })
+  }
 
   revalidatePath("/stores")
   return { slug }
@@ -156,6 +141,8 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
   const tagline = (formData.get("tagline") as string)?.trim()
   const description = (formData.get("description") as string)?.trim()
   const brand_color = formData.get("brand_color") as string
+  const theme_id = formData.get("theme_id") as string
+  const font_preset = formData.get("font_preset") as string
   const category_tags_raw = (formData.get("category_tags") as string) || ""
   const category_tags = category_tags_raw.split(",").map(s => s.trim()).filter(Boolean)
 
@@ -171,7 +158,7 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
     }
   }
 
-  const updates: any = { name, tagline, description, brand_color, category_tags }
+  const updates: any = { name, tagline, description, brand_color, category_tags, theme_id, font_preset }
   if (logo_url) updates.logo_url = logo_url
 
   const { error } = await supabase.from("stores").update(updates).eq("id", storeId)
@@ -208,12 +195,69 @@ export async function inviteStoreAgent(storeId: string, email: string): Promise<
   return { success: true }
 }
 
-export async function getAllStores() {
+export async function getAllStores(onlyVerified = true) {
   const supabase = await createClient()
-  const { data } = await supabase
+  let query = supabase
     .from("stores")
-    .select("*, owner:profiles!stores_owner_id_fkey(full_name)")
-    .eq("is_active", true)
+    .select(`
+      *,
+      owner:profiles!stores_owner_id_fkey(full_name, email),
+      stats:store_stats(total_negotiations, successful_deals, avg_response_seconds)
+    `)
     .order("created_at", { ascending: false })
-  return data || []
+
+  if (onlyVerified) {
+    query = query.eq("is_active", true).eq("is_verified", true)
+  }
+
+  const { data } = await query
+  
+  // Flatten stats for easier UI consumption
+  const stores = data?.map(s => ({
+    ...s,
+    successful_deals: s.stats?.[0]?.successful_deals || 0,
+    avg_response_seconds: s.stats?.[0]?.avg_response_seconds || 86400 // Default to 24h if no stats
+  })) || []
+
+  return stores
+}
+
+export async function verifyStore(storeId: string, verified: boolean): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+  if (profile?.role !== "admin") return { error: "Unauthorized" }
+
+  const adminSupabase = await createAdminClient()
+  const { error } = await adminSupabase
+    .from("stores")
+    .update({ is_verified: verified })
+    .eq("id", storeId)
+
+  if (error) return { error: error.message }
+  
+  revalidatePath("/admin/stores")
+  return { success: true }
+}
+
+export async function toggleStoreActive(storeId: string, active: boolean): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+  if (profile?.role !== "admin") return { error: "Unauthorized" }
+
+  const adminSupabase = await createAdminClient()
+  const { error } = await adminSupabase
+    .from("stores")
+    .update({ is_active: active })
+    .eq("id", storeId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath("/admin/stores")
+  return { success: true }
 }

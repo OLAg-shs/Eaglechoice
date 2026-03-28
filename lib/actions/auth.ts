@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { registerSchema, loginSchema } from "@/lib/validations/auth"
 
-export async function signUp(formData: FormData): Promise<{ error?: string; success?: boolean }> {
+export async function signUp(formData: FormData): Promise<{ error?: string; success?: boolean; role?: string }> {
   const supabase = await createClient()
 
   const rawData = {
