@@ -90,150 +90,156 @@ export async function GET(req: NextRequest) {
             height: "100%",
             width: "100%",
             display: "flex",
-            backgroundColor: "#f4f4f5", // Light gray background
+            flexDirection: "column",
+            backgroundColor: "#fcfcfc", // Very clean off-white
             fontFamily: "sans-serif",
             padding: "30px",
             position: "relative",
           }}
         >
-          {/* Main Card Container shadow and border */}
+          {/* Main Card Container */}
           <div
             style={{
               display: "flex",
+              flexDirection: "column",
               flex: 1,
               backgroundColor: "white",
               borderRadius: "24px",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.06)",
-              border: "1px solid #e4e4e7",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.05)",
+              border: "1px solid #eeeeee",
               overflow: "hidden",
             }}
           >
-            {/* Left Side: Product Image Showcase */}
+            {/* Header: Site Name */}
             <div style={{
-              flex: "0 0 500px",
+              padding: "20px 40px",
+              borderBottom: "1px solid #f5f5f5",
               display: "flex",
-              flexDirection: "column",
-              backgroundColor: "white",
-              borderRight: "1px solid #f4f4f5",
               alignItems: "center",
-              justifyContent: "center",
-              padding: "40px",
+              gap: "12px"
             }}>
-               {imageData ? (
-                 // eslint-disable-next-line @next/next/no-img-element
-                 <img
-                   src={imageData}
-                   alt=""
-                   style={{ 
-                     maxWidth: "100%", 
-                     maxHeight: "450px", 
-                     objectFit: "contain",
-                   }}
-                 />
-               ) : (
-                 <div style={{ fontSize: "120px", fontWeight: "900", color: "#f4f4f5" }}>
-                   {type.slice(0, 3).toUpperCase()}
-                 </div>
-               )}
+              <div style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "8px",
+                backgroundColor: accentColor,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "20px",
+                fontWeight: "900",
+                color: "white"
+              }}>E</div>
+              <span style={{ fontSize: "24px", fontWeight: "900", color: "#111", letterSpacing: "-1px" }}>Eagle Choice</span>
             </div>
 
-            {/* Right Side: Details & Specs */}
+            {/* Image Area (Large directly centered on top) */}
             <div style={{
               flex: 1,
               display: "flex",
-              flexDirection: "column",
-              backgroundColor: "#fafafa",
-              padding: "50px 60px",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "white",
+              padding: "40px",
+              position: "relative",
             }}>
-              {/* Header Badge */}
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "30px" }}>
-                 <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: accentColor, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900 }}>E</div>
-                 <span style={{ fontSize: 26, fontWeight: 900, color: "#111", letterSpacing: "-1px" }}>Eagle Choice</span>
+              {imageData ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={imageData}
+                  alt=""
+                  style={{ 
+                    maxWidth: "100%", 
+                    maxHeight: "100%", 
+                    objectFit: "contain",
+                  }}
+                />
+              ) : (
+                <div style={{ fontSize: "100px", fontWeight: "900", color: "#f0f0f0" }}>
+                  {type.slice(0, 3).toUpperCase()}
+                </div>
+              )}
+            </div>
+
+            {/* Content Footer (Title, Specs, & Price) */}
+            <div style={{
+              padding: "40px 50px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              background: "linear-gradient(to top, #ffffff, #fafafa)",
+              borderTop: "1px solid #f5f5f5"
+            }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "65%" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                   <div style={{ width: "8px", height: "8px", borderRadius: "2px", backgroundColor: accentColor }} />
+                   <span style={{ fontSize: "14px", fontWeight: "800", color: "#888", letterSpacing: "2px" }}>{type.toUpperCase()}</span>
+                </div>
+                <div style={{ 
+                  fontSize: title.length > 30 ? "46px" : "60px", 
+                  fontWeight: "900", 
+                  color: "#111", 
+                  lineHeight: "1.1",
+                  letterSpacing: "-2px"
+                }}>
+                  {title}
+                </div>
+                {/* Horizontal Dot-Separated Specs */}
+                {specsData.length > 0 && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px", alignItems: "center" }}>
+                    {specsData.map((s, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center" }}>
+                        <span style={{ 
+                          fontSize: "16px", 
+                          color: "#666", 
+                          fontWeight: "600",
+                          backgroundColor: "#f4f4f5",
+                          padding: "4px 12px",
+                          borderRadius: "20px"
+                        }}>
+                          {s.value}
+                        </span>
+                        {i < specsData.length - 1 && (
+                          <span style={{ margin: "0 4px", color: "#d4d4d8", fontSize: "18px" }}>•</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Type Category */}
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                 <div style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: accentColor }} />
-                 <span style={{ fontSize: 13, fontWeight: 900, color: "#888", letterSpacing: "3px" }}>{type.toUpperCase()}</span>
-              </div>
-
-              {/* Title */}
-              <div style={{ 
-                fontSize: title.length > 50 ? "36px" : title.length > 30 ? "42px" : "48px", 
-                fontWeight: 900, 
-                color: "#111", 
-                lineHeight: 1.1, 
-                letterSpacing: "-1.5px", 
-                marginBottom: "30px" 
-              }}>
-                {title}
-              </div>
-
-              {/* Price & Badge */}
-              <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "40px" }}>
-                <div style={{ fontSize: "48px", fontWeight: 900, color: priceColor, letterSpacing: "-1px" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+                <div style={{ 
+                  fontSize: "56px", 
+                  fontWeight: "900", 
+                  color: priceColor,
+                  lineHeight: "1",
+                  letterSpacing: "-1px"
+                }}>
                   {price.replace('GH₵', 'GH')}
                 </div>
-                <div style={{ padding: "8px 16px", backgroundColor: "#ecfdf5", borderRadius: 8, fontSize: 13, fontWeight: 900, color: "#10b981", letterSpacing: "1px" }}>
-                   VERIFIED LISTING
-                </div>
+                <div style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#ecfdf5",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontWeight: "900",
+                  color: "#10b981", // Green for stock
+                  letterSpacing: "1px"
+                }}>VERIFIED LISTING</div>
               </div>
-
-              {/* Specifications Grid */}
-              {specsData.length > 0 && (
-                 <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-                    {specsData.map((s, i) => (
-                        <div key={i} style={{ 
-                          display: "flex", 
-                          flexDirection: "column", 
-                          backgroundColor: "white", 
-                          padding: "12px 16px", 
-                          borderRadius: "12px", 
-                          border: "1px solid #e4e4e7", 
-                          width: "250px" 
-                        }}>
-                           <span style={{ 
-                             fontSize: 12, 
-                             fontWeight: 900, 
-                             color: "#a1a1aa", 
-                             textTransform: "uppercase", 
-                             letterSpacing: "1px",
-                             marginBottom: "4px" 
-                           }}>
-                             {s.key.replace('_', ' ')}
-                           </span>
-                           <span style={{ 
-                             fontSize: 18, 
-                             fontWeight: 800, 
-                             color: "#27272a",
-                             lineHeight: 1.2,
-                             // Truncate text if it's too long
-                             overflow: "hidden",
-                             textOverflow: "ellipsis",
-                             whiteSpace: "nowrap"
-                           }}>
-                             {s.value}
-                           </span>
-                        </div>
-                    ))}
-                 </div>
-              )}
             </div>
           </div>
           
           {/* Footer Web Watermark */}
           <div style={{
             position: "absolute",
-            bottom: "50px",
-            right: "50px",
-            padding: "10px 20px",
-            backgroundColor: "rgba(255,255,255,0.8)",
-            borderRadius: "20px",
+            bottom: "45px",
+            right: "80px",
             fontSize: "14px",
-            color: "#aaa",
+            color: "rgba(0,0,0,0.2)",
             fontWeight: "bold",
-            letterSpacing: "1px",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.05)"
+            letterSpacing: "1px"
           }}>eaglechoice.vercel.app</div>
         </div>
       ),
@@ -253,5 +259,7 @@ export async function GET(req: NextRequest) {
     console.error(`OG Image Error: ${e.message}`)
     return new Response(`Failed to generate the image`, { status: 500 })
   }
+}
+
 }
 
