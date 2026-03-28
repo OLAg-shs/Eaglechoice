@@ -16,6 +16,11 @@ export async function createProduct(formData: FormData) {
   const agent_id = formData.get("agent_id") as string
   const specifications = formData.get("specifications") as string || "{}"
   
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user?.id).single()
+  
+  const final_client_id = profile?.role === 'client' ? user?.id : (agent_id || null)
+  
   let imagePublicUrl: string | null = null
   
   // Handle optional image upload — use admin client to bypass storage RLS
@@ -48,7 +53,7 @@ export async function createProduct(formData: FormData) {
       stock_quantity,
       price,
       images: imagePublicUrl ? [imagePublicUrl] : [],
-      agent_id: agent_id || null,
+      client_id: final_client_id,
       specifications: JSON.parse(specifications),
       is_available: true,
     })
@@ -180,6 +185,11 @@ export async function updateProduct(formData: FormData) {
   const is_available = formData.get("is_available") === "true"
   const current_image = formData.get("current_image") as string
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user?.id).single()
+  
+  const final_client_id = profile?.role === 'client' ? user?.id : (agent_id || null)
+
   let imagePublicUrl: string | null = current_image || null
 
   // Handle optional new image upload
@@ -213,7 +223,7 @@ export async function updateProduct(formData: FormData) {
       stock_quantity,
       price,
       images: imagePublicUrl ? [imagePublicUrl] : [],
-      client_id: agent_id || null,
+      client_id: final_client_id,
       specifications: parsedSpecs,
       is_available,
     })

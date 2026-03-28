@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
 import { AdminProductActions } from "@/components/admin/product-actions"
+import { ShareButton } from "@/components/share-button"
 
 export default async function ClientProductsPage() {
   const supabase = await createClient()
@@ -19,7 +20,6 @@ export default async function ClientProductsPage() {
   const { data: products } = await supabase
     .from("products")
     .select("*")
-    .eq("client_id", user.id)
     .order("created_at", { ascending: false })
 
   return (
@@ -70,10 +70,18 @@ export default async function ClientProductsPage() {
                 <p className="mt-2 text-lg font-bold text-blue-600">{formatCurrency(product.price)}</p>
                 <p className="text-xs text-gray-500">Stock: {product.stock_quantity} units</p>
                 <div className="mt-3 flex gap-2">
-                  <Link href={`/client/products/${product.id}/edit`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">Edit</Button>
-                  </Link>
-                  <AdminProductActions productId={product.id} />
+                  {product.client_id === user.id ? (
+                    <>
+                      <Link href={`/client/products/${product.id}/edit`} className="flex-1">
+                        <Button variant="outline" size="sm" className="w-full">Edit</Button>
+                      </Link>
+                      <AdminProductActions productId={product.id} />
+                    </>
+                  ) : (
+                    <div className="flex-1">
+                      <ShareButton id={product.id} type="product" title={product.name} url={`https://eagle-choice.vercel.app/catalog/product/${product.id}`} />
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

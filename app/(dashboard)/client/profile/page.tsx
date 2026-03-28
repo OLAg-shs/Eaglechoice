@@ -17,7 +17,6 @@ async function saveAgentSettings(formData: FormData) {
   await supabase.from("profiles").update({
     phone: formData.get("phone") as string,
     paystack_subaccount_code: formData.get("paystack_subaccount_code") as string || null,
-    commission_rate: Number(formData.get("commission_rate")) || 15,
   }).eq("id", user.id)
 
   revalidatePath("/client/profile")
@@ -85,11 +84,13 @@ export default async function ClientProfilePage() {
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="commission_rate" className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                <BadgeDollarSign className="h-3 w-3" /> Your Commission Rate (%)
+              <Label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                <BadgeDollarSign className="h-3 w-3" /> Your Commission Rate
               </Label>
-              <Input id="commission_rate" name="commission_rate" type="number" min="1" max="50" defaultValue={profile.commission_rate || 15} className="h-9" />
-              <p className="text-xs text-gray-400">The % of each order amount you receive. Admin gets the rest.</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-200">
+                {profile.commission_rate || 15}% per order
+              </p>
+              <p className="text-xs text-gray-400">Fixed rate set by admin.</p>
             </div>
 
             <div className="md:col-span-2 flex justify-end pt-2">
