@@ -105,6 +105,9 @@ export async function createOrder(formData: FormData): Promise<{ data: any | nul
     }
   }
 
+  const expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  const injectedFormData = { ...(formDataParsed || {}), expires_at }
+
   const rawData = {
     order_type: formData.get("order_type") as string,
     product_id: (formData.get("product_id") as string) || undefined,
@@ -112,7 +115,7 @@ export async function createOrder(formData: FormData): Promise<{ data: any | nul
     client_id: formData.get("client_id") as string,
     quantity: formData.get("quantity") as string || "1",
     notes: (formData.get("notes") as string) || undefined,
-    form_data: formDataParsed,
+    form_data: injectedFormData,
   }
 
   const validated = orderSchema.safeParse(rawData)
@@ -495,3 +498,74 @@ export async function confirmPaymentProof(orderId: string): Promise<{ error?: st
   return { success: true }
 }
 
+export async function rejectOrder(orderId: string, reason: string): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const { data: order } = await supabase.from("orders").select("user_id, status, form_data").eq("id", orderId).single()
+  if (!order) return { error: "Order not found" }
+  if (order.status !== "pending" && order.status !== "agent_confirmed") {
+    return { error: "This order has progressed too far to be rejected directly." }
+  }
+
+  const currentFormData = order.form_data || {}
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({ 
+      status: "cancelled",
+      form_data: { ...currentFormData, rejection_reason: reason }
+    })
+    .eq("id", orderId)
+
+  if (updateError) return { error: updateError.message }
+
+  await supabase.from("notifications").insert({
+    user_id: order.user_id,
+    type: NOTIFICATION_TYPES.ORDER_STATUS,
+    title: "Order Rejected",
+    content: "The agent has politely rejected your order request.",
+    link: `/user/orders/${orderId}`,
+    metadata: { order_id: orderId, new_status: "cancelled" },
+  })
+
+  revalidatePath("/client/orders")
+  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath("/admin/orders")
+  return { success: true }
+}
+
+export async function extendOrderDeadline(orderId: string): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const { data: order } = await supabase.from("orders").select("user_id, form_data").eq("id", orderId).single()
+  if (!order) return { error: "Order not found" }
+
+  const currentFormData = order.form_data || {}
+  const currentExpiresAt = currentFormData.expires_at ? new Date(currentFormData.expires_at) : new Date()
+  
+  // Add 7 days
+  const newExpiresAt = new Date(currentExpiresAt.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()
+
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({ form_data: { ...currentFormData, expires_at: newExpiresAt } })
+    .eq("id", orderId)
+
+  if (updateError) return { error: updateError.message }
+
+  await supabase.from("notifications").insert({
+    user_id: order.user_id,
+    type: NOTIFICATION_TYPES.ORDER_STATUS,
+    title: "Deadline Extended ⏳",
+    content: "The agent has extended the negotiation and payment deadline for your order by 7 days.",
+    link: `/user/orders/${orderId}`,
+    metadata: { order_id: orderId },
+  })
+
+  revalidatePath("/client/orders")
+  revalidatePath(`/user/orders/${orderId}`)
+  return { success: true }
+}

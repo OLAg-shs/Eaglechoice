@@ -7,6 +7,7 @@ import { ShoppingBag, Briefcase, Clock, CheckCircle2, XCircle, ChevronLeft, Truc
 import Link from "next/link"
 import { PayButton } from "@/components/payments/pay-button"
 import { ReceiptUploader } from "@/components/payments/receipt-uploader"
+import { CountdownTimer } from "@/components/orders/countdown-timer"
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -50,10 +51,15 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           <h1 className="text-2xl font-bold text-gray-900">Order {order.order_number}</h1>
           <p className="text-sm text-gray-500">Placed on {formatDate(order.created_at)}</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Badge className={statusColors[order.status] || "bg-gray-100 text-gray-700"}>
-            {order.status.replace("_", " ").toUpperCase()}
-          </Badge>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-3">
+            <Badge className={statusColors[order.status] || "bg-gray-100 text-gray-700"}>
+              {order.status.replace("_", " ").toUpperCase()}
+            </Badge>
+          </div>
+          {["pending", "agent_confirmed", "payment_pending"].includes(order.status) && order.form_data?.expires_at && (
+            <CountdownTimer expiresAt={order.form_data.expires_at} />
+          )}
         </div>
       </div>
 
@@ -181,7 +187,14 @@ export default async function OrderDetailPage({ params }: { params: { id: string
               )}
               {order.status === "pending" && (
                 <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-100 dark:border-yellow-800">
-                  <p className="text-xs text-yellow-700 dark:text-yellow-400 font-medium text-center">⏳ Waiting for your agent to confirm this order before payment.</p>
+                  <p className="text-xs text-yellow-700 dark:text-yellow-400 font-medium text-center">⏳ Order placed! Your agent will review and accept this order shortly.</p>
+                </div>
+              )}
+              {order.status === "cancelled" && order.form_data?.rejection_reason && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800 space-y-2 text-center mt-4">
+                  <XCircle className="h-6 w-6 text-red-600 mx-auto" />
+                  <p className="text-sm text-red-800 dark:text-red-400 font-bold">Order Cancelled by Agent</p>
+                  <p className="text-xs text-red-700 dark:text-red-300 italic max-w-[250px] mx-auto">"{order.form_data.rejection_reason}"</p>
                 </div>
               )}
             </CardContent>

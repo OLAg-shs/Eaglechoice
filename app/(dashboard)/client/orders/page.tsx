@@ -7,7 +7,9 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { OrderStatusUpdater } from "@/components/orders/order-status-updater"
 import { TrackingUpdater } from "@/components/orders/tracking-updater"
-import { ConfirmOrderButton, VerifyPaymentButton } from "@/components/orders/agent-action-buttons"
+import { AcceptOrderButton, VerifyPaymentButton, ExtendDeadlineButton } from "@/components/orders/agent-action-buttons"
+import { RejectOrderDialog } from "@/components/orders/reject-order-dialog"
+import { CountdownTimer } from "@/components/orders/countdown-timer"
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -86,9 +88,25 @@ export default async function ClientOrdersPage() {
                       <TrackingUpdater orderId={order.id} currentTracking={order.form_data?.tracking} />
                     </>
                   )}
-                  {/* Confirm Order — shown when status is pending */}
+                  {/* Countdown Timer (Negotiation/Payment Phase) */}
+                  {["pending", "agent_confirmed", "payment_pending"].includes(order.status) && order.form_data?.expires_at && (
+                    <div className="mb-4">
+                      <p className="text-xs text-gray-500 mb-1">Time remaining for customer payment action:</p>
+                      <CountdownTimer expiresAt={order.form_data.expires_at} />
+                    </div>
+                  )}
+
+                  {/* Accept Order — shown when status is pending */}
                   {order.status === "pending" && (
-                    <ConfirmOrderButton orderId={order.id} />
+                    <AcceptOrderButton orderId={order.id} />
+                  )}
+
+                  {/* Extend/Reject — shown when status is agent_confirmed */}
+                  {order.status === "agent_confirmed" && (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                       <ExtendDeadlineButton orderId={order.id} />
+                       <RejectOrderDialog orderId={order.id} />
+                    </div>
                   )}
                   {/* Verify Receipt — shown when customer uploaded proof */}
                   {order.form_data?.payment_proof_url && order.status === "paid" && (
