@@ -46,5 +46,3 @@ export default {
     ]
   },
 }
-
-export default nextConfig
