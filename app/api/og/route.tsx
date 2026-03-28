@@ -93,7 +93,7 @@ export async function GET(req: NextRequest) {
             flexDirection: "column",
             backgroundColor: "#fcfcfc", // Very clean off-white
             fontFamily: "sans-serif",
-            padding: "30px",
+            padding: "20px", // Reduced from 30px to gain space
             position: "relative",
           }}
         >
@@ -112,25 +112,25 @@ export async function GET(req: NextRequest) {
           >
             {/* Header: Site Name */}
             <div style={{
-              padding: "20px 40px",
+              padding: "16px 40px", // Reduced top/bottom padding
               borderBottom: "1px solid #f5f5f5",
               display: "flex",
               alignItems: "center",
               gap: "12px"
             }}>
               <div style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "8px",
+                width: "28px",
+                height: "28px",
+                borderRadius: "6px",
                 backgroundColor: accentColor,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "20px",
+                fontSize: "18px",
                 fontWeight: "900",
                 color: "white"
               }}>E</div>
-              <span style={{ fontSize: "24px", fontWeight: "900", color: "#111", letterSpacing: "-1px" }}>Eagle Choice</span>
+              <span style={{ fontSize: "22px", fontWeight: "900", color: "#111", letterSpacing: "-1px" }}>Eagle Choice</span>
             </div>
 
             {/* Image Area (Large directly centered on top) */}
@@ -139,8 +139,8 @@ export async function GET(req: NextRequest) {
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: "white",
-              padding: "10px",
-              height: "280px", // Exact layout constraint to prevent overflow clipping
+              padding: "10px", // Minimal padding
+              height: "250px", // Adjusted constraint to balance image and footer limits 
               position: "relative",
             }}>
               {imageData ? (
@@ -163,20 +163,21 @@ export async function GET(req: NextRequest) {
 
             {/* Content Footer (Title, Specs, & Price) */}
             <div style={{
-              padding: "40px 50px",
+              padding: "25px 40px 30px 40px", // Significantly reduced top/bottom padding to fix slicing
               display: "flex",
               justifyContent: "space-between",
               alignItems: "flex-end",
               background: "linear-gradient(to top, #ffffff, #fafafa)",
-              borderTop: "1px solid #f5f5f5"
+              borderTop: "1px solid #f5f5f5",
+              flex: 1, // Let footer expand to take remaining space securely
             }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "65%" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxWidth: "65%" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                    <div style={{ width: "8px", height: "8px", borderRadius: "2px", backgroundColor: accentColor }} />
                    <span style={{ fontSize: "14px", fontWeight: "800", color: "#888", letterSpacing: "2px" }}>{type.toUpperCase()}</span>
                 </div>
                 <div style={{ 
-                  fontSize: title.length > 30 ? "46px" : "60px", 
+                  fontSize: title.length > 30 ? "42px" : "56px", 
                   fontWeight: "900", 
                   color: "#111", 
                   lineHeight: "1.1",
@@ -186,16 +187,16 @@ export async function GET(req: NextRequest) {
                 </div>
                 {/* Horizontal Dot-Separated Specs */}
                 {specsData.length > 0 && (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px", alignItems: "center" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px", alignItems: "center" }}>
                     {specsData.map((s, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center" }}>
                         <span style={{ 
-                          fontSize: "16px", 
+                          fontSize: "14px", 
                           color: "#666", 
                           fontWeight: "600",
                           backgroundColor: "#f4f4f5",
-                          padding: "4px 12px",
-                          borderRadius: "20px"
+                          padding: "4px 10px",
+                          borderRadius: "16px"
                         }}>
                           {s.value}
                         </span>
@@ -210,7 +211,7 @@ export async function GET(req: NextRequest) {
 
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
                 <div style={{ 
-                  fontSize: "56px", 
+                  fontSize: "48px", 
                   fontWeight: "900", 
                   color: priceColor,
                   lineHeight: "1",
@@ -219,10 +220,10 @@ export async function GET(req: NextRequest) {
                   {price.replace('GH₵', 'GH')}
                 </div>
                 <div style={{
-                  padding: "8px 16px",
+                  padding: "6px 14px",
                   backgroundColor: "#ecfdf5",
                   borderRadius: "8px",
-                  fontSize: "14px",
+                  fontSize: "13px",
                   fontWeight: "900",
                   color: "#10b981", // Green for stock
                   letterSpacing: "1px"
