@@ -114,31 +114,6 @@ export default async function CatalogPage() {
                       </CardContent>
                     </Card>
                   </Link>
-                  
-                  {/* Action Buttons overlaying the card or below */}
-                  <div className="flex gap-2 mt-3 px-1">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 h-9 text-[11px] font-bold tracking-tighter uppercase dark:border-gray-800 dark:hover:bg-gray-900 gap-2"
-                      asChild
-                    >
-                      <a href={downloadUrl.toString()} target="_blank" rel="noopener noreferrer">
-                        <Download className="h-3.5 w-3.5" />
-                        Get Card
-                      </a>
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-9 w-9 dark:border-gray-800 dark:hover:bg-gray-900"
-                      asChild
-                    >
-                      <Link href={`/catalog/product/${product.id}`}>
-                        <ExternalLink className="h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
                 </div>
               )
             })}

@@ -121,10 +121,27 @@ export default async function ProductDetailPage({
                 <Badge className="mt-1 bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-500/20 hover:bg-green-500/20">
                   {product.stock_quantity} units in stock
                 </Badge>
-              ) : (
-                <Badge variant="destructive" className="mt-1">Out of stock</Badge>
-              )}
             </div>
+          </div>
+
+          {/* Place Order Block - Front loaded for mobile conversion */}
+          <div className="mb-8 p-4 bg-gray-50/80 dark:bg-[#0a0a0a] border border-gray-100 dark:border-gray-800 rounded-xl shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]">
+            {user ? (
+              <PlaceOrderForm
+                type="product"
+                itemId={product.id}
+                itemPrice={product.price}
+                clients={clients || []}
+                preAssignedClientId={product.client_id}
+              />
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-gray-500 dark:text-gray-400 text-sm mb-4">You must be logged in to order this premium item.</p>
+                <Button asChild className="gradient-primary w-full max-w-sm">
+                  <Link href="/login">Log in to Order Now</Link>
+                </Button>
+              </div>
+            )}
           </div>
 
           {product.profiles && (
@@ -168,30 +185,6 @@ export default async function ProductDetailPage({
                   </div>
                 ))}
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="bg-white dark:bg-[#111111] border-gray-200 dark:border-gray-800">
-        <CardHeader>
-          <CardTitle className="dark:text-white">Place Order</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {user ? (
-            <PlaceOrderForm
-              type="product"
-              itemId={product.id}
-              itemPrice={product.price}
-              clients={clients || []}
-              preAssignedClientId={product.client_id}
-            />
-          ) : (
-            <div className="text-center py-6">
-              <p className="text-gray-500 mb-4">Want to place an order? Please log in to your account.</p>
-              <Button asChild className="gradient-primary">
-                <Link href="/login">Log in to Order</Link>
-              </Button>
             </div>
           )}
         </CardContent>

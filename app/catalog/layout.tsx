@@ -3,6 +3,8 @@ import Link from "next/link"
 import { Shield, LayoutDashboard, LogIn } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Footer } from "@/components/layout/footer"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { MobileCatalogNav } from "@/components/layout/mobile-catalog-nav"
 
 export default async function CatalogLayout({
   children,
@@ -24,22 +26,28 @@ export default async function CatalogLayout({
             <span className="font-bold text-gray-900 dark:text-white text-lg tracking-tight">Eagle Choice</span>
           </Link>
 
-          <div className="flex items-center gap-4">
-            {user ? (
-              <Button asChild variant="ghost" size="sm" className="gap-2">
-                <Link href="/user">
-                  <LayoutDashboard className="h-4 w-4" />
-                  My Dashboard
-                </Link>
-              </Button>
-            ) : (
-              <Button asChild size="sm" className="gradient-primary gap-2">
-                <Link href="/login">
-                  <LogIn className="h-4 w-4" />
-                  Log In
-                </Link>
-              </Button>
-            )}
+          <div className="flex items-center gap-2 sm:gap-4">
+            <ThemeToggle />
+            <div className="hidden sm:flex items-center gap-4">
+              {user ? (
+                <Button asChild variant="ghost" size="sm" className="gap-2">
+                  <Link href="/user">
+                    <LayoutDashboard className="h-4 w-4" />
+                    My Dashboard
+                  </Link>
+                </Button>
+              ) : (
+                <Button asChild size="sm" className="gradient-primary gap-2">
+                  <Link href="/login">
+                    <LogIn className="h-4 w-4" />
+                    Log In
+                  </Link>
+                </Button>
+              )}
+            </div>
+            
+            {/* Mobile Nav Button */}
+            <MobileCatalogNav isLoggedIn={!!user} />
           </div>
         </div>
       </header>
