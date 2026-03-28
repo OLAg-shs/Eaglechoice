@@ -35,21 +35,22 @@ function getNavItems(role: string): NavItem[] {
   }
   if (role === "client") {
     return [
-      { href: "/client", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/client/orders", label: "My Orders", icon: ClipboardList },
-      { href: "/client/messages", label: "Messages", icon: MessageSquare },
-      { href: "/client/points", label: "My Points", icon: Star },
-      { href: "/client/profile", label: "Profile", icon: Settings },
+      { href: "/agent", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/agent/orders", label: "My Orders", icon: ClipboardList },
+      { href: "/agent/products", label: "Products", icon: Package },
+      { href: "/agent/messages", label: "Messages", icon: MessageSquare },
+      { href: "/agent/points", label: "My Points", icon: Star },
+      { href: "/agent/profile", label: "Profile", icon: Settings },
     ]
   }
   // user
   return [
-    { href: "/user", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/client", label: "Dashboard", icon: LayoutDashboard },
     { href: "/catalog", label: "Browse Catalog", icon: ShoppingBag },
-    { href: "/user/orders", label: "My Orders", icon: ClipboardList },
-    { href: "/user/payments", label: "Payments", icon: CreditCard },
-    { href: "/user/messages", label: "Messages", icon: MessageSquare },
-    { href: "/user/profile", label: "Profile", icon: Settings },
+    { href: "/client/orders", label: "My Orders", icon: ClipboardList },
+    { href: "/client/payments", label: "Payments", icon: CreditCard },
+    { href: "/client/messages", label: "Messages", icon: MessageSquare },
+    { href: "/client/profile", label: "Profile", icon: Settings },
   ]
 }
 

@@ -102,7 +102,7 @@ export default async function ClientDashboard() {
                     </p>
                   </div>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[order.status] || "bg-gray-100 text-gray-700"}`}>
-                    {order.status.replace("_", " ")}
+                    {order.status === 'agent_confirmed' ? 'Accepted' : order.status.replace("_", " ")}
                   </span>
                 </div>
               ))}

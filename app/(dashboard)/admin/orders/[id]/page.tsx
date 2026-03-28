@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { notFound, redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,18 +10,20 @@ import { revalidatePath } from "next/cache"
 
 async function updateOrderStatus(orderId: string, status: string) {
   "use server"
-  const supabase = await createClient()
-  await supabase.from("orders").update({ status }).eq("id", orderId)
+  const adminSupabase = await createAdminClient()
+  await adminSupabase.from("orders").update({ status }).eq("id", orderId)
   revalidatePath(`/admin/orders/${orderId}`)
   revalidatePath("/admin/orders")
 }
 
-export default async function AdminOrderDetailPage({ params }: { params: { id: string } }) {
+export default async function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
+  const adminSupabase = await createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const { data: order, error } = await supabase
+  const { data: order, error } = await adminSupabase
     .from("orders")
     .select(`
       *,
@@ -30,7 +32,7 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
       user_profile:profiles!orders_user_id_fkey(full_name, email, phone),
       client_profile:profiles!orders_client_id_fkey(full_name, email, phone, is_verified)
     `)
-    .eq("id", params.id)
+    .eq("id", id)
     .single()
 
   if (error || !order) notFound()
