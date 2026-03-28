@@ -89,26 +89,36 @@ export default async function ClientOrdersPage() {
                       <TrackingUpdater orderId={order.id} currentTracking={order.form_data?.tracking} />
                     </>
                   )}
-                  {/* Countdown Timer (Negotiation/Payment Phase) */}
-                  {["pending", "agent_confirmed", "payment_pending"].includes(order.status) && order.form_data?.expires_at && (
-                    <div className="mb-4">
-                      <p className="text-xs text-gray-500 mb-1">Time remaining for customer payment action:</p>
-                      <CountdownTimer expiresAt={order.form_data.expires_at} />
-                    </div>
-                  )}
+                  {/* Countdown Timer & Deadlines Logic */}
+                  {(() => {
+                    let expiryStr = order.form_data?.expires_at;
+                    if (!expiryStr && order.status === "agent_confirmed") {
+                       // Backward-compatibility: calculate missing deadline for older orders
+                       expiryStr = new Date(new Date(order.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+                    }
+                    
+                    const isTimerActive = ["pending", "agent_confirmed", "payment_pending"].includes(order.status) && expiryStr;
+                    const isTimeUp = expiryStr ? new Date(expiryStr).getTime() <= new Date().getTime() : false;
 
-                  {/* Accept Order — shown when status is pending */}
-                  {order.status === "pending" && (
-                    <AcceptOrderButton orderId={order.id} />
-                  )}
+                    return (
+                      <>
+                        {isTimerActive && (
+                          <div className="mb-4">
+                            <p className="text-xs text-gray-500 mb-1">Time remaining for customer payment action:</p>
+                            <CountdownTimer expiresAt={expiryStr} />
+                          </div>
+                        )}
 
-                  {/* Extend/Reject — shown when status is agent_confirmed AND time has expired */}
-                  {order.status === "agent_confirmed" && (!order.form_data?.expires_at || new Date(order.form_data.expires_at).getTime() <= new Date().getTime()) && (
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                       <ExtendDeadlineButton orderId={order.id} />
-                       <RejectOrderDialog orderId={order.id} />
-                    </div>
-                  )}
+                        {/* Extend/Reject — shown only when status is agent_confirmed AND time has expired */}
+                        {order.status === "agent_confirmed" && isTimeUp && (
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            <ExtendDeadlineButton orderId={order.id} />
+                            <RejectOrderDialog orderId={order.id} />
+                          </div>
+                        )}
+                      </>
+                    )
+                  })()}
 
                   {/* Messaging Access Visualizer */}
                   {order.status !== "pending" && order.status !== "cancelled" && (
