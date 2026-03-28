@@ -128,25 +128,26 @@ export default async function ServiceDetailPage({
           </div>
 
           {service.agent && (
-             <div className="flex items-center gap-3 p-4 bg-purple-50/50 dark:bg-purple-500/5 rounded-xl border border-purple-100 dark:border-purple-500/10 mb-6">
-               <div className="h-12 w-12 rounded-full bg-white dark:bg-black/50 shadow-sm flex items-center justify-center border border-purple-200 dark:border-purple-500/20">
+             <div className="flex flex-wrap items-center gap-3 p-4 bg-purple-50/50 dark:bg-purple-500/5 rounded-xl border border-purple-100 dark:border-purple-500/10 mb-6">
+               <div className="h-12 w-12 shrink-0 rounded-full bg-white dark:bg-black/50 shadow-sm flex items-center justify-center border border-purple-200 dark:border-purple-500/20 text-xl font-bold text-purple-500">
                  {service.agent.avatar_url ? (
                    <img src={service.agent.avatar_url} alt="Agent" className="h-full w-full rounded-full object-cover" />
                  ) : (
-                   <Briefcase className="h-6 w-6 text-purple-500" />
+                   service.agent.full_name.charAt(0).toUpperCase()
                  )}
                </div>
-               <div>
+               <div className="flex-1 min-w-[120px]">
                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Expert Handler</p>
-                 <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                   {service.agent.full_name}
-                   {service.agent.is_verified && <BadgeCheck className="w-4 h-4 text-purple-500" />}
+                 <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1 flex-wrap">
+                   <span className="truncate">{service.agent.full_name}</span>
+                   {service.agent.is_verified && <BadgeCheck className="w-4 h-4 shrink-0 text-purple-500" />}
                  </p>
                </div>
-               <div className="ml-auto">
-                 <Badge variant="outline" className="text-[10px] border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-400">Verified Expert</Badge>
+               <div className="ml-auto w-full sm:w-auto mt-2 sm:mt-0">
+                 <Badge variant="outline" className="w-full justify-center sm:w-auto text-[10px] border-purple-200 dark:border-purple-500/30 text-purple-700 dark:text-purple-400">Verified Expert</Badge>
                </div>
              </div>
+
           )}
 
           {service.processing_time_days && (

@@ -50,7 +50,7 @@ export default async function CatalogPage() {
             <p className="text-lg font-medium text-gray-500">No products available at the moment.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {products.map((product: any) => {
               const highlights = product.specifications && typeof product.specifications === 'object'
                 ? Object.entries(product.specifications).slice(0, 3).map(([k, v]) => `${k}: ${v}`)
@@ -162,7 +162,7 @@ export default async function CatalogPage() {
             <p className="text-lg font-medium text-gray-500">No services available at the moment.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {services.map((service: any) => {
               const highlights = service.required_documents && Array.isArray(service.required_documents)
                 ? service.required_documents.slice(0, 3)

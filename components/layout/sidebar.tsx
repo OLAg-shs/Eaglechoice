@@ -75,7 +75,7 @@ export function Sidebar({ role, profile }: { role: string; profile: any }) {
   return (
     <div
       className={cn(
-        "relative flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300",
+        "hidden md:flex relative flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300",
         collapsed ? "w-16" : "w-64"
       )}
     >

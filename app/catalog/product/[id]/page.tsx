@@ -127,25 +127,26 @@ export default async function ProductDetailPage({
           </div>
 
           {product.profiles && (
-             <div className="flex items-center gap-3 p-4 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-100 dark:border-amber-500/10 mb-6">
-               <div className="h-12 w-12 rounded-full bg-white dark:bg-black/50 shadow-sm flex items-center justify-center border border-amber-200 dark:border-amber-500/20">
+             <div className="flex flex-wrap items-center gap-3 p-4 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-100 dark:border-amber-500/10 mb-6">
+               <div className="h-12 w-12 shrink-0 rounded-full bg-white dark:bg-black/50 shadow-sm flex items-center justify-center border border-amber-200 dark:border-amber-500/20 text-xl font-bold text-amber-500">
                  {product.profiles.avatar_url ? (
                    <img src={product.profiles.avatar_url} alt="Agent" className="h-full w-full rounded-full object-cover" />
                  ) : (
-                   <ShoppingBag className="h-6 w-6 text-amber-500" />
+                   product.profiles.full_name.charAt(0).toUpperCase()
                  )}
                </div>
-               <div>
+               <div className="flex-1 min-w-[120px]">
                  <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Expert Handler</p>
-                 <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1">
-                   {product.profiles.full_name}
-                   {product.profiles.is_verified && <BadgeCheck className="w-4 h-4 text-amber-500" />}
+                 <p className="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1 flex-wrap">
+                   <span className="truncate">{product.profiles.full_name}</span>
+                   {product.profiles.is_verified && <BadgeCheck className="w-4 h-4 shrink-0 text-amber-500" />}
                  </p>
                </div>
-               <div className="ml-auto">
-                 <Badge variant="outline" className="text-[10px] border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400">Verified Professional</Badge>
+               <div className="ml-auto w-full sm:w-auto mt-2 sm:mt-0">
+                 <Badge variant="outline" className="w-full justify-center sm:w-auto text-[10px] border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400">Verified Professional</Badge>
                </div>
              </div>
+
           )}
 
           {product.description && (
