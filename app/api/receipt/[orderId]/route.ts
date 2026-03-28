@@ -2,7 +2,9 @@ import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 import { formatCurrency } from "@/lib/utils"
 
-export async function GET(req: Request, { params }: { params: { orderId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
+  const { orderId } = await params
+  
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -10,7 +12,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
   const { data: order } = await supabase
     .from("orders")
     .select(`*, products(name, brand, images), services(name, category), profiles!orders_user_id_fkey(full_name, email), agent:profiles!orders_client_id_fkey(full_name, phone)`)
-    .eq("id", params.orderId)
+    .eq("id", orderId)
     .single()
 
   if (!order) return NextResponse.json({ error: "Not found" }, { status: 404 })
