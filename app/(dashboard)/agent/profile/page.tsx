@@ -1,4 +1,25 @@
+import { createClient } from "@/lib/supabase/server"
+import { redirect } from "next/navigation"
+import { Card, CardContent } from "@/components/ui/card"
+import { Mail, Phone, Shield, CheckCircle } from "lucide-react"
+import { revalidatePath } from "next/cache"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 import AgentPayoutSettings from "@/components/store/agent-payout-settings"
+
+async function saveAgentSettings(formData: FormData) {
+  "use server"
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  await supabase.from("profiles").update({
+    phone: formData.get("phone") as string,
+  }).eq("id", user.id)
+
+  revalidatePath("/agent/profile")
+}
 
 export default async function ClientProfilePage() {
   const supabase = await createClient()
