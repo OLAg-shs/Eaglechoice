@@ -6,7 +6,7 @@ import { useState } from "react"
 import {
   LayoutDashboard, ShoppingBag, ClipboardList, CreditCard,
   MessageSquare, Bell, Star, Users, Settings, Package,
-  Briefcase, ChevronLeft, ChevronRight, LogOut, Shield
+  Briefcase, ChevronLeft, ChevronRight, LogOut, Shield, Store
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { signOut as signOutAction } from "@/lib/actions/auth"
@@ -23,6 +23,7 @@ function getNavItems(role: string): NavItem[] {
   if (role === "admin") {
     return [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/stores", label: "Stores", icon: Store },
       { href: "/admin/agents", label: "Agents", icon: Users },
       { href: "/admin/products", label: "Products", icon: Package },
       { href: "/admin/services", label: "Services", icon: Briefcase },

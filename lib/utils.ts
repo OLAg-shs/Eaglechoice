@@ -40,3 +40,9 @@ export function generateReference(): string {
   const random = Math.random().toString(36).substring(2, 8)
   return `EC-PAY-${timestamp}-${random}`.toUpperCase()
 }
+
+export function calculatePlatformCommission(amount: number, rate: number = 0.05): { platform: number; seller: number } {
+  const platform = Math.round(amount * rate * 100) / 100
+  const seller = Math.round((amount - platform) * 100) / 100
+  return { platform, seller }
+}

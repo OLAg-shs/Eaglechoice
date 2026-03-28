@@ -44,8 +44,15 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
   }
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
-  if (!profile || (profile.role !== "admin" && profile.role !== "client")) {
+  if (!profile || (profile.role !== "admin" && profile.role !== "client" && profile.role !== "seller")) {
     return { error: "Unauthorized" }
+  }
+
+  let store_id: string | null = null
+  if (profile.role === "seller") {
+    const { data: store } = await supabase.from("stores").select("id").eq("owner_id", user.id).single()
+    if (!store) return { error: "You must create a store first" }
+    store_id = store.id
   }
 
   let specifications: Record<string, string> | undefined
@@ -54,7 +61,7 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
     try {
       specifications = JSON.parse(specificationsRaw)
     } catch {
-      return { error: "Invalid specifications format" }
+      // fallback
     }
   }
 
@@ -79,7 +86,8 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
   const imagesRaw = formData.get("images") as string
   if (imagesRaw) {
     try {
-      images = [...images, ...JSON.parse(imagesRaw)]
+      const parsed = JSON.parse(imagesRaw)
+      if (Array.isArray(parsed)) images = [...images, ...parsed]
     } catch {
       const split = imagesRaw.split(",").map((s) => s.trim()).filter(Boolean)
       images = [...images, ...split]
@@ -89,13 +97,14 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
   const rawData = {
     name: formData.get("name") as string,
     description: (formData.get("description") as string) || undefined,
-    price: formData.get("price") as string,
-    category: formData.get("category") as string,
+    price: formData.get("base_price") as string || formData.get("price") as string,
+    category: formData.get("category") as string || "general",
     brand: (formData.get("brand") as string) || undefined,
-    specifications,
+    specifications: specifications || {},
     images,
-    stock_quantity: formData.get("stock_quantity") as string,
-    is_available: formData.get("is_available") === "true",
+    stock_quantity: formData.get("stock") as string || formData.get("stock_quantity") as string,
+    is_available: formData.get("is_available") === "true" || formData.get("is_available") === "on",
+    store_id,
   }
 
   const validated = productSchema.safeParse(rawData)
@@ -105,7 +114,8 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
 
   const productData = {
     ...validated.data,
-    client_id: profile.role === "client" ? user.id : null
+    client_id: profile.role === "client" ? user.id : null,
+    store_id: validated.data.store_id || store_id,
   }
 
   const { error } = await supabase.from("products").insert(productData)
@@ -116,6 +126,11 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
 
   revalidatePath("/admin/products")
   revalidatePath("/agent/products")
+  if (store_id) {
+    const { data: store } = await supabase.from("stores").select("slug").eq("id", store_id).single()
+    if (store) revalidatePath(`/store/${store.slug}/products`)
+  }
+  
   return { success: true }
 }
 
@@ -128,8 +143,17 @@ export async function updateProduct(id: string, formData: FormData): Promise<{ e
   }
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
-  if (!profile || (profile.role !== "admin" && profile.role !== "client")) {
+  if (!profile || (profile.role !== "admin" && profile.role !== "client" && profile.role !== "seller")) {
     return { error: "Unauthorized" }
+  }
+
+  // If seller, verify ownership
+  if (profile.role === "seller") {
+    const { data: product } = await supabase.from("products").select("store_id").eq("id", id).single()
+    const { data: store } = await supabase.from("stores").select("id").eq("owner_id", user.id).single()
+    if (!product || !store || product.store_id !== store.id) {
+      return { error: "Unauthorized access to this product" }
+    }
   }
 
   let specifications: Record<string, string> | undefined
@@ -138,7 +162,7 @@ export async function updateProduct(id: string, formData: FormData): Promise<{ e
     try {
       specifications = JSON.parse(specificationsRaw)
     } catch {
-      return { error: "Invalid specifications format" }
+      // fallback
     }
   }
 
@@ -152,16 +176,16 @@ export async function updateProduct(id: string, formData: FormData): Promise<{ e
     }
   }
 
-  const rawData = {
+  const rawData: any = {
     name: formData.get("name") as string,
     description: (formData.get("description") as string) || undefined,
-    price: formData.get("price") as string,
-    category: formData.get("category") as string,
+    price: formData.get("base_price") as string || formData.get("price") as string,
+    category: formData.get("category") as string || "general",
     brand: (formData.get("brand") as string) || undefined,
-    specifications,
-    images,
-    stock_quantity: formData.get("stock_quantity") as string,
-    is_available: formData.get("is_available") === "true",
+    specifications: specifications || {},
+    images: images && images.length > 0 ? images : undefined,
+    stock_quantity: formData.get("stock") as string || formData.get("stock_quantity") as string,
+    is_available: formData.get("is_available") === "true" || formData.get("is_available") === "on",
   }
 
   const validated = productSchema.safeParse(rawData)
@@ -180,6 +204,12 @@ export async function updateProduct(id: string, formData: FormData): Promise<{ e
 
   revalidatePath("/admin/products")
   revalidatePath("/agent/products")
+  const { data: updatedProduct } = await supabase.from("products").select("store_id").eq("id", id).single()
+  if (updatedProduct?.store_id) {
+    const { data: store } = await supabase.from("stores").select("slug").eq("id", updatedProduct.store_id).single()
+    if (store) revalidatePath(`/store/${store.slug}/products`)
+  }
+
   return { success: true }
 }
 
@@ -192,8 +222,17 @@ export async function deleteProduct(id: string): Promise<{ error?: string; succe
   }
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
-  if (!profile || (profile.role !== "admin" && profile.role !== "client")) {
+  if (!profile || (profile.role !== "admin" && profile.role !== "client" && profile.role !== "seller")) {
     return { error: "Unauthorized" }
+  }
+
+  // If seller, verify ownership
+  if (profile.role === "seller") {
+    const { data: product } = await supabase.from("products").select("store_id").eq("id", id).single()
+    const { data: store } = await supabase.from("stores").select("id").eq("owner_id", user.id).single()
+    if (!product || !store || product.store_id !== store.id) {
+      return { error: "Unauthorized access to this product" }
+    }
   }
 
   const { error } = await supabase
