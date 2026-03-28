@@ -149,8 +149,8 @@ export async function GET(req: NextRequest) {
                   src={imageData}
                   alt=""
                   style={{ 
-                    maxWidth: "100%", 
-                    maxHeight: "100%", 
+                    width: "100%", 
+                    height: "320px", 
                     objectFit: "contain",
                   }}
                 />
