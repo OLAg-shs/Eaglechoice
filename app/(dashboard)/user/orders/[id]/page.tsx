@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { ShoppingBag, Briefcase, Clock, CheckCircle2, XCircle, ChevronLeft } from "lucide-react"
+import { ShoppingBag, Briefcase, Clock, CheckCircle2, XCircle, ChevronLeft, Truck } from "lucide-react"
 import Link from "next/link"
 import { PayButton } from "@/components/payments/pay-button"
 
@@ -76,14 +76,62 @@ export default async function OrderDetailPage({ params }: { params: { id: string
             </CardContent>
           </Card>
 
-          {Object.keys(order.form_data || {}).length > 0 && (
+          {order.form_data?.tracking && (
+            <Card className="border-indigo-100 dark:border-indigo-900/50 bg-gradient-to-br from-indigo-50/30 to-white dark:from-indigo-900/10 dark:to-transparent">
+              <CardHeader className="pb-4 border-b border-indigo-50 dark:border-indigo-900/20">
+                <CardTitle className="text-base flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                  <Truck className="h-5 w-5" /> Live Tracking Logistics
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4 space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {order.form_data.tracking.eta && (
+                    <div>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Estimated Arrival</p>
+                      <p className="font-bold text-gray-900 dark:text-gray-100">{order.form_data.tracking.eta}</p>
+                    </div>
+                  )}
+                  {order.form_data.tracking.location && (
+                    <div>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Current Location</p>
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-2 w-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse" />
+                        <p className="font-bold text-gray-900 dark:text-gray-100">{order.form_data.tracking.location}</p>
+                      </div>
+                    </div>
+                  )}
+                  {order.form_data.tracking.bus_number && (
+                    <div>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Vehicle / Bus Number</p>
+                      <p className="font-mono bg-white dark:bg-gray-800 shadow-sm px-2 py-1 rounded inline-block text-gray-900 dark:text-gray-100 border border-gray-100 dark:border-gray-700">{order.form_data.tracking.bus_number}</p>
+                    </div>
+                  )}
+                </div>
+                {order.form_data.tracking.image_url && (
+                  <div className="mt-4 pt-4 border-t border-indigo-50 dark:border-indigo-900/20">
+                    <p className="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-2">Package / Waybill Picture</p>
+                    <a href={order.form_data.tracking.image_url} target="_blank" rel="noreferrer" className="block w-full overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm relative group">
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-10 flex items-center justify-center">
+                        <span className="opacity-0 group-hover:opacity-100 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full font-medium transition-opacity backdrop-blur-sm">Click to Enlarge</span>
+                      </div>
+                      <img src={order.form_data.tracking.image_url} alt="Vehicle picture" className="w-full h-auto object-cover max-h-64 transition-transform duration-500 group-hover:scale-105" />
+                    </a>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {Object.keys(order.form_data || {}).filter(k => k !== 'tracking').length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">Form Details</CardTitle></CardHeader>
               <CardContent className="grid gap-4 text-sm">
-                {Object.entries(order.form_data).map(([key, value]) => (
+                {Object.entries(order.form_data)
+                  .filter(([key]) => key !== 'tracking')
+                  .map(([key, value]) => (
                   <div key={key}>
                     <p className="text-gray-500 capitalize">{key.replace(/_/g, " ")}</p>
-                    <p className="font-medium text-gray-900">{value as string}</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{value as string}</p>
                   </div>
                 ))}
               </CardContent>

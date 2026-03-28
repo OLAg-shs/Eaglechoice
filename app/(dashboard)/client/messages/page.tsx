@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { formatRelativeTime } from "@/lib/utils"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ContactAdminButton } from "@/components/messages/contact-admin-button"
 
 export default async function ClientMessagesPage() {
   const supabase = await createClient()
@@ -27,9 +28,12 @@ export default async function ClientMessagesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
-        <p className="text-sm text-gray-500 mt-1">Conversations with customers</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
+          <p className="text-sm text-gray-500 mt-1">Conversations with customers</p>
+        </div>
+        <ContactAdminButton />
       </div>
 
       {!conversations?.length ? (

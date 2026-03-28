@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { orderSchema } from "@/lib/validations/order"
 import { ALLOWED_TRANSITIONS, NOTIFICATION_TYPES, ORDER_STATUS_LABELS } from "@/lib/constants"
@@ -353,4 +353,78 @@ export async function getClients(): Promise<{ data: any[] | null; error: string 
   }
 
   return { data, error: null }
+}
+
+export async function updateOrderTracking(formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const orderId = formData.get("orderId") as string
+  const eta = formData.get("eta") as string
+  const location = formData.get("location") as string
+  const bus_number = formData.get("bus_number") as string
+  const file = formData.get("image") as File | null
+
+  let image_url = formData.get("current_image_url") as string || ""
+
+  if (file && file.size > 0) {
+    const adminSupabase = await createAdminClient()
+    const fileExt = file.name.split('.').pop() || 'png'
+    const fileName = `tracking/${orderId}-${Date.now()}.${fileExt}`
+    
+    const { error: uploadError } = await adminSupabase.storage
+      .from('files')
+      .upload(fileName, file, { cacheControl: '3600', upsert: false })
+      
+    if (!uploadError) {
+      const { data: { publicUrl } } = adminSupabase.storage.from('files').getPublicUrl(fileName)
+      image_url = publicUrl
+    }
+  }
+
+  const { data: order, error: fetchError } = await supabase
+    .from("orders")
+    .select("form_data, user_id, status")
+    .eq("id", orderId)
+    .single()
+
+  if (fetchError || !order) return { error: "Order not found" }
+
+  const currentFormData = order.form_data || {}
+  const currentTracking = currentFormData.tracking || {}
+  
+  const newTracking = { 
+    ...currentTracking, 
+    eta: eta !== "" ? eta : currentTracking.eta, 
+    location: location !== "" ? location : currentTracking.location, 
+    bus_number: bus_number !== "" ? bus_number : currentTracking.bus_number, 
+    image_url: image_url || currentTracking.image_url 
+  }
+  
+  const newFormData = { ...currentFormData, tracking: newTracking }
+
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({ form_data: newFormData })
+    .eq("id", orderId)
+
+  if (updateError) return { error: updateError.message }
+
+  // Notify user
+  await supabase.from("notifications").insert({
+    user_id: order.user_id,
+    type: NOTIFICATION_TYPES.ORDER_STATUS,
+    title: "Logistics Package Update",
+    content: "Your package tracking details have been updated.",
+    link: `/user/orders/${orderId}`,
+    metadata: { order_id: orderId, tracking_update: true },
+  })
+
+  revalidatePath("/client/orders")
+  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath("/admin/orders")
+
+  return { success: true }
 }

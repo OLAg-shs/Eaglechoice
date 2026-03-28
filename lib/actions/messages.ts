@@ -234,3 +234,30 @@ export async function getOrCreateConversation(
 
   return { data: conversation, error: null }
 }
+
+export async function initiateAdminChat(): Promise<{ data: any | null; error: string | null }> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: null, error: "Not authenticated" }
+
+  const { data: adminProfile } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "admin")
+    .limit(1)
+    .single()
+
+  if (!adminProfile) return { data: null, error: "No admin found" }
+
+  return getOrCreateConversation(adminProfile.id, undefined, "support")
+}
+
+export async function initiateInquiry(agentId: string): Promise<{ data: any | null; error: string | null }> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: null, error: "Not authenticated" }
+
+  return getOrCreateConversation(agentId, undefined, "inquiry")
+}

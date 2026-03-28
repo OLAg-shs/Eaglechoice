@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { ShoppingBag, Briefcase, Mail, Phone, MapPin, ExternalLink } from "lucide-react"
+import { ShoppingBag, Briefcase, Mail, Phone, MapPin, ExternalLink, Truck } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { revalidatePath } from "next/cache"
@@ -76,11 +76,36 @@ export default async function AdminOrderDetailPage({ params }: { params: { id: s
             </CardContent>
           </Card>
 
-          {Object.keys(order.form_data || {}).length > 0 && (
+          {order.form_data?.tracking && (
+            <Card className="border-indigo-100 dark:border-indigo-900/50 bg-gradient-to-br from-indigo-50/30 to-white dark:from-indigo-900/10 dark:to-transparent">
+              <CardHeader className="pb-3 border-b border-indigo-50 dark:border-indigo-900/20">
+                <CardTitle className="text-base flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                  <Truck className="h-5 w-5" /> Logistics Tracking (Admin View)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4 space-y-4">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {order.form_data.tracking.eta && (<div><p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">ETA</p><p className="font-bold">{order.form_data.tracking.eta}</p></div>)}
+                  {order.form_data.tracking.location && (<div><p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Location</p><div className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" /><p className="font-bold">{order.form_data.tracking.location}</p></div></div>)}
+                  {order.form_data.tracking.bus_number && (<div><p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Bus / Vehicle</p><p className="font-mono bg-white dark:bg-gray-800 px-2 py-1 rounded border text-sm inline-block">{order.form_data.tracking.bus_number}</p></div>)}
+                </div>
+                {order.form_data.tracking.image_url && (
+                  <div className="pt-3 border-t border-indigo-50 dark:border-indigo-900/20">
+                    <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-2">Vehicle/Waybill Picture</p>
+                    <a href={order.form_data.tracking.image_url} target="_blank" rel="noreferrer" className="block rounded-lg overflow-hidden max-w-xs border hover:opacity-90 transition-opacity">
+                      <img src={order.form_data.tracking.image_url} alt="Vehicle" className="w-full h-auto object-cover max-h-48" />
+                    </a>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {Object.keys(order.form_data || {}).filter(k => k !== 'tracking').length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">Custom Form Data</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-2 gap-4 text-sm">
-                {Object.entries(order.form_data).map(([k, v]) => (
+                {Object.entries(order.form_data).filter(([k]) => k !== 'tracking').map(([k, v]) => (
                   <div key={k}>
                     <p className="text-gray-400 uppercase text-[10px] font-bold">{k.replace(/_/g, " ")}</p>
                     <p className="font-medium">{v as string}</p>

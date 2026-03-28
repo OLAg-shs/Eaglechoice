@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { OrderStatusUpdater } from "@/components/orders/order-status-updater"
+import { TrackingUpdater } from "@/components/orders/tracking-updater"
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -74,7 +75,10 @@ export default async function ClientOrdersPage() {
                     <p className="font-bold text-lg text-gray-900">{formatCurrency(order.total_amount)}</p>
                   </div>
                 </div>
-                <OrderStatusUpdater orderId={order.id} currentStatus={order.status} role="client" />
+                <div className="mt-4 space-y-2">
+                  <OrderStatusUpdater orderId={order.id} currentStatus={order.status} role="client" />
+                  <TrackingUpdater orderId={order.id} currentTracking={order.form_data?.tracking} />
+                </div>
               </CardContent>
             </Card>
           ))}

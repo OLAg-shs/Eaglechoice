@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { PlaceOrderForm } from "@/components/orders/place-order-form"
 import type { Metadata } from "next"
 import { ShareButton } from "@/components/share-button"
+import { InquiryButton } from "@/components/messages/inquiry-button"
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://eagle-choice.vercel.app"
 
@@ -121,6 +122,9 @@ export default async function ProductDetailPage({
                 <Badge className="mt-1 bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-500/20 hover:bg-green-500/20">
                   {product.stock_quantity} units in stock
                 </Badge>
+              ) : (
+                <Badge variant="destructive" className="mt-1">Out of stock</Badge>
+              )}
             </div>
           </div>
 
@@ -160,7 +164,8 @@ export default async function ProductDetailPage({
                    {product.profiles.is_verified && <BadgeCheck className="w-4 h-4 shrink-0 text-amber-500" />}
                  </p>
                </div>
-               <div className="ml-auto w-full sm:w-auto mt-2 sm:mt-0">
+               <div className="ml-auto w-full sm:w-auto mt-2 sm:mt-0 flex gap-2 items-center flex-wrap">
+                 <InquiryButton agentId={product.profiles.id} isAuthenticated={!!user} />
                  <Badge variant="outline" className="w-full justify-center sm:w-auto text-[10px] border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400">Verified Professional</Badge>
                </div>
              </div>
