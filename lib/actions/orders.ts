@@ -298,8 +298,8 @@ export async function cancelOrder(orderId: string): Promise<{ error?: string; su
     return { error: "Order not found" }
   }
 
-  // Can only cancel if pending or in_progress
-  if (order.status !== "pending" && order.status !== "in_progress") {
+  // Can only cancel if pending, agent_confirmed, or in_progress
+  if (!["pending", "agent_confirmed", "in_progress"].includes(order.status)) {
     return { error: "This order can no longer be cancelled" }
   }
 

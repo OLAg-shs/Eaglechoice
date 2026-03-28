@@ -9,6 +9,7 @@ import { PayButton } from "@/components/payments/pay-button"
 import { ReceiptUploader } from "@/components/payments/receipt-uploader"
 import { CountdownTimer } from "@/components/orders/countdown-timer"
 import { CustomerMessageToggle } from "@/components/orders/messaging-toggle"
+import { CancelOrderButton } from "@/components/orders/customer-action-buttons"
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -40,6 +41,13 @@ export default async function OrderDetailPage({ params }: { params: { id: string
   }
 
   const agent = order.profiles as any
+  
+  // Calculate dynamic expiry for older missing orders
+  let expiryStr = order.form_data?.expires_at;
+  if (!expiryStr && order.status === "agent_confirmed") {
+     expiryStr = new Date(new Date(order.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  }
+  const isTimerActive = ["pending", "agent_confirmed", "payment_pending"].includes(order.status) && expiryStr;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -54,12 +62,15 @@ export default async function OrderDetailPage({ params }: { params: { id: string
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="flex items-center gap-3">
+            {["pending", "agent_confirmed"].includes(order.status) && (
+              <CancelOrderButton orderId={order.id} />
+            )}
             <Badge className={statusColors[order.status] || "bg-gray-100 text-gray-700"}>
               {order.status.replace("_", " ").toUpperCase()}
             </Badge>
           </div>
-          {["pending", "agent_confirmed", "payment_pending"].includes(order.status) && order.form_data?.expires_at && (
-            <CountdownTimer expiresAt={order.form_data.expires_at} />
+          {isTimerActive && (
+            <CountdownTimer expiresAt={expiryStr} />
           )}
         </div>
       </div>
