@@ -16,11 +16,15 @@ export async function GET(req: NextRequest) {
     let price = searchParams.get("price") || ""
     let type = searchParams.get("type") || "product"
     let image = searchParams.get("image") || ""
-    let specs: string[] = [
-      searchParams.get("s1"),
-      searchParams.get("s2"),
-      searchParams.get("s3")
-    ].filter(Boolean) as string[]
+    
+    // Parse legacy specs from URL
+    let specsData: { key: string, value: string }[] = []
+    const s1 = searchParams.get("s1")
+    const s2 = searchParams.get("s2")
+    const s3 = searchParams.get("s3")
+    if (s1) specsData.push({ key: "Feature 1", value: s1 })
+    if (s2) specsData.push({ key: "Feature 2", value: s2 })
+    if (s3) specsData.push({ key: "Feature 3", value: s3 })
 
     const id = searchParams.get("id")
     
@@ -34,7 +38,7 @@ export async function GET(req: NextRequest) {
           price = formatCurrency(p.price)
           image = p.images?.[0] || image
           if (p.specifications && typeof p.specifications === 'object') {
-            specs = Object.entries(p.specifications).slice(0, 3).map(([k, v]) => `${k}: ${v}`)
+            specsData = Object.entries(p.specifications).slice(0, 8).map(([k, v]) => ({ key: String(k), value: String(v) }))
           }
         }
       } else if (type === "service") {
@@ -44,31 +48,29 @@ export async function GET(req: NextRequest) {
           price = formatCurrency(s.base_price)
           image = s.cover_image_url || image
           if (Array.isArray(s.required_documents)) {
-            specs = s.required_documents.slice(0, 3)
+            specsData = s.required_documents.slice(0, 6).map((doc, i) => ({ key: `Document ${i+1}`, value: String(doc) }))
           }
         }
       }
     }
 
-    // Robust colors inspired by the site's UI
-    const accentColor = "#f59e0b" // Orange/Amber
+    const accentColor = "#f59e0b" // Amber
     const priceColor = "#f59e0b"
 
-    // Fetch image and convert to base64 for robustness in Edge Runtime
     let imageData: string | null = null
     if (image && image.startsWith("http")) {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7000); // 7s timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 7000)
 
         const res = await fetch(image, {
           signal: controller.signal,
           headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
           }
         })
         
-        clearTimeout(timeoutId);
+        clearTimeout(timeoutId)
 
         if (res.ok) {
           const buffer = await res.arrayBuffer()
@@ -88,148 +90,150 @@ export async function GET(req: NextRequest) {
             height: "100%",
             width: "100%",
             display: "flex",
-            flexDirection: "column",
-            backgroundColor: "#fcfcfc", // Very clean off-white
+            backgroundColor: "#f4f4f5", // Light gray background
             fontFamily: "sans-serif",
             padding: "30px",
             position: "relative",
           }}
         >
-          {/* Main Card Container */}
+          {/* Main Card Container shadow and border */}
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
               flex: 1,
               backgroundColor: "white",
               borderRadius: "24px",
-              boxShadow: "0 20px 50px rgba(0,0,0,0.05)",
-              border: "1px solid #eeeeee",
+              boxShadow: "0 20px 50px rgba(0,0,0,0.06)",
+              border: "1px solid #e4e4e7",
               overflow: "hidden",
             }}
           >
-            {/* Header: Site Name */}
+            {/* Left Side: Product Image Showcase */}
             <div style={{
-              padding: "20px 40px",
-              borderBottom: "1px solid #f5f5f5",
+              flex: "0 0 500px",
               display: "flex",
+              flexDirection: "column",
+              backgroundColor: "white",
+              borderRight: "1px solid #f4f4f5",
               alignItems: "center",
-              gap: "12px"
+              justifyContent: "center",
+              padding: "40px",
             }}>
-              <div style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "8px",
-                backgroundColor: accentColor,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "20px",
-                fontWeight: "900",
-                color: "white"
-              }}>E</div>
-              <span style={{ fontSize: "24px", fontWeight: "900", color: "#111", letterSpacing: "-1px" }}>Eagle Choice</span>
+               {imageData ? (
+                 // eslint-disable-next-line @next/next/no-img-element
+                 <img
+                   src={imageData}
+                   alt=""
+                   style={{ 
+                     maxWidth: "100%", 
+                     maxHeight: "450px", 
+                     objectFit: "contain",
+                   }}
+                 />
+               ) : (
+                 <div style={{ fontSize: "120px", fontWeight: "900", color: "#f4f4f5" }}>
+                   {type.slice(0, 3).toUpperCase()}
+                 </div>
+               )}
             </div>
 
-            {/* Image Area (Large) */}
+            {/* Right Side: Details & Specs */}
             <div style={{
               flex: 1,
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "white",
-              padding: "40px",
-              position: "relative",
+              flexDirection: "column",
+              backgroundColor: "#fafafa",
+              padding: "50px 60px",
             }}>
-              {imageData ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={imageData}
-                  alt=""
-                  style={{ 
-                    maxWidth: "100%", 
-                    maxHeight: "100%", 
-                    objectFit: "contain",
-                  }}
-                />
-              ) : (
-                <div style={{ fontSize: "100px", fontWeight: "900", color: "#f0f0f0" }}>
-                  {type.slice(0, 3).toUpperCase()}
-                </div>
-              )}
-            </div>
-
-            {/* Content Footer (Title & Price) */}
-            <div style={{
-              padding: "40px 50px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-end",
-              background: "linear-gradient(to top, #ffffff, #fafafa)",
-              borderTop: "1px solid #f5f5f5"
-            }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "60%" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                   <div style={{ width: "8px", height: "8px", borderRadius: "2px", backgroundColor: accentColor }} />
-                   <span style={{ fontSize: "14px", fontWeight: "800", color: "#888", letterSpacing: "2px" }}>{type.toUpperCase()}</span>
-                </div>
-                <div style={{ 
-                  fontSize: title.length > 20 ? "48px" : "64px", 
-                  fontWeight: "900", 
-                  color: "#111", 
-                  lineHeight: "1",
-                  letterSpacing: "-2px"
-                }}>
-                  {title}
-                </div>
-                {specs.length > 0 && (
-                  <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                    {specs.map((spec, i) => (
-                      <div key={i} style={{ 
-                        fontSize: "18px", 
-                        color: "#666", 
-                        fontWeight: "600",
-                        padding: "4px 12px",
-                        backgroundColor: "#f5f5f5",
-                        borderRadius: "8px"
-                      }}>{spec}</div>
-                    ))}
-                  </div>
-                )}
+              {/* Header Badge */}
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "30px" }}>
+                 <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: accentColor, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 900 }}>E</div>
+                 <span style={{ fontSize: 26, fontWeight: 900, color: "#111", letterSpacing: "-1px" }}>Eagle Choice</span>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
-                <div style={{ 
-                  fontSize: "56px", 
-                  fontWeight: "900", 
-                  color: priceColor,
-                  lineHeight: "1",
-                  letterSpacing: "-1px"
-                }}>
+              {/* Type Category */}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                 <div style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: accentColor }} />
+                 <span style={{ fontSize: 13, fontWeight: 900, color: "#888", letterSpacing: "3px" }}>{type.toUpperCase()}</span>
+              </div>
+
+              {/* Title */}
+              <div style={{ 
+                fontSize: title.length > 50 ? "36px" : title.length > 30 ? "42px" : "48px", 
+                fontWeight: 900, 
+                color: "#111", 
+                lineHeight: 1.1, 
+                letterSpacing: "-1.5px", 
+                marginBottom: "30px" 
+              }}>
+                {title}
+              </div>
+
+              {/* Price & Badge */}
+              <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "40px" }}>
+                <div style={{ fontSize: "48px", fontWeight: 900, color: priceColor, letterSpacing: "-1px" }}>
                   {price.replace('GH₵', 'GH')}
                 </div>
-                <div style={{
-                  padding: "6px 14px",
-                  backgroundColor: "#ecfdf5",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                  fontWeight: "900",
-                  color: "#10b981", // Green for stock
-                  letterSpacing: "1px"
-                }}>VERIFIED LISTING</div>
+                <div style={{ padding: "8px 16px", backgroundColor: "#ecfdf5", borderRadius: 8, fontSize: 13, fontWeight: 900, color: "#10b981", letterSpacing: "1px" }}>
+                   VERIFIED LISTING
+                </div>
               </div>
+
+              {/* Specifications Grid */}
+              {specsData.length > 0 && (
+                 <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                    {specsData.map((s, i) => (
+                        <div key={i} style={{ 
+                          display: "flex", 
+                          flexDirection: "column", 
+                          backgroundColor: "white", 
+                          padding: "12px 16px", 
+                          borderRadius: "12px", 
+                          border: "1px solid #e4e4e7", 
+                          width: "250px" 
+                        }}>
+                           <span style={{ 
+                             fontSize: 12, 
+                             fontWeight: 900, 
+                             color: "#a1a1aa", 
+                             textTransform: "uppercase", 
+                             letterSpacing: "1px",
+                             marginBottom: "4px" 
+                           }}>
+                             {s.key.replace('_', ' ')}
+                           </span>
+                           <span style={{ 
+                             fontSize: 18, 
+                             fontWeight: 800, 
+                             color: "#27272a",
+                             lineHeight: 1.2,
+                             // Truncate text if it's too long
+                             overflow: "hidden",
+                             textOverflow: "ellipsis",
+                             whiteSpace: "nowrap"
+                           }}>
+                             {s.value}
+                           </span>
+                        </div>
+                    ))}
+                 </div>
+              )}
             </div>
           </div>
           
-          {/* Footer Watermark */}
+          {/* Footer Web Watermark */}
           <div style={{
             position: "absolute",
-            bottom: "45px",
-            right: "80px",
-            fontSize: "12px",
-            color: "rgba(0,0,0,0.2)",
+            bottom: "50px",
+            right: "50px",
+            padding: "10px 20px",
+            backgroundColor: "rgba(255,255,255,0.8)",
+            borderRadius: "20px",
+            fontSize: "14px",
+            color: "#aaa",
             fontWeight: "bold",
-            letterSpacing: "1px"
+            letterSpacing: "1px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.05)"
           }}>eaglechoice.vercel.app</div>
         </div>
       ),
@@ -239,7 +243,6 @@ export async function GET(req: NextRequest) {
       }
     )
 
-    // Force download if requested
     if (searchParams.get("download") === "1") {
       const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_branded_card.png`
       response.headers.set("Content-Disposition", `attachment; filename="${filename}"`)
@@ -251,3 +254,4 @@ export async function GET(req: NextRequest) {
     return new Response(`Failed to generate the image`, { status: 500 })
   }
 }
+
