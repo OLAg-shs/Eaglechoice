@@ -37,6 +37,7 @@ export async function generateMetadata({
   const ogImageUrl = new URL(`${currentUrl}/api/og`)
   ogImageUrl.searchParams.set("id", id)
   ogImageUrl.searchParams.set("type", "service")
+  ogImageUrl.searchParams.set("ext", ".png")
 
   return {
     title: `${service.name} — Eagle Choice`,

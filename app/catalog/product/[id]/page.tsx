@@ -40,6 +40,7 @@ export async function generateMetadata({
   const ogImageUrl = new URL(`${currentUrl}/api/og`)
   ogImageUrl.searchParams.set("id", id)
   ogImageUrl.searchParams.set("type", "product")
+  ogImageUrl.searchParams.set("ext", ".png") // Forces WhatsApp scraper to recognize it as an image
   
   if (agentName) ogImageUrl.searchParams.set("badge", `Expert: ${agentName}`)
 
