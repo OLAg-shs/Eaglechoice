@@ -29,7 +29,7 @@ export default async function ClientProductsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
           <p className="text-sm text-gray-500 mt-1">Manage laptops and accessories</p>
         </div>
-        <Link href="/client/products/new">
+        <Link href="/agent/products/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
             Add Product
@@ -42,7 +42,7 @@ export default async function ClientProductsPage() {
           <Package className="mb-4 h-16 w-16 text-gray-200" />
           <h3 className="text-lg font-medium text-gray-900">No products yet</h3>
           <p className="mt-1 text-sm text-gray-500">Add your first product to get started</p>
-          <Link href="/client/products/new" className="mt-4">
+          <Link href="/agent/products/new" className="mt-4">
             <Button><Plus className="mr-2 h-4 w-4" />Add Product</Button>
           </Link>
         </div>
@@ -72,7 +72,7 @@ export default async function ClientProductsPage() {
                 <div className="mt-3 flex gap-2">
                   {product.client_id === user.id ? (
                     <>
-                      <Link href={`/client/products/${product.id}/edit`} className="flex-1">
+                      <Link href={`/agent/products/${product.id}/edit`} className="flex-1">
                         <Button variant="outline" size="sm" className="w-full">Edit</Button>
                       </Link>
                       <AdminProductActions productId={product.id} />

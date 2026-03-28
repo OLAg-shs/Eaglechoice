@@ -32,7 +32,7 @@ export default async function CatalogLayout({
             <div className="hidden sm:flex items-center gap-4">
               {user ? (
                 <Button asChild variant="ghost" size="sm" className="gap-2">
-                  <Link href="/user">
+                  <Link href="/client">
                     <LayoutDashboard className="h-4 w-4" />
                     My Dashboard
                   </Link>

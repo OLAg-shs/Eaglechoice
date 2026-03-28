@@ -410,12 +410,12 @@ export async function updateOrderTracking(formData: FormData): Promise<{ error?:
     type: NOTIFICATION_TYPES.ORDER_STATUS,
     title: "Logistics Package Update",
     content: "Your package tracking details have been updated.",
-    link: `/user/orders/${orderId}`,
+    link: `/client/orders/${orderId}`,
     metadata: { order_id: orderId, tracking_update: true },
   })
 
-  revalidatePath("/client/orders")
-  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath("/agent/orders")
+  revalidatePath(`/client/orders/${orderId}`)
   revalidatePath("/admin/orders")
 
   return { success: true }
@@ -453,12 +453,12 @@ export async function uploadPaymentProof(formData: FormData): Promise<{ error?: 
       type: NOTIFICATION_TYPES.PAYMENT_RECEIVED,
       title: "Payment Proof Submitted 📎",
       content: `Customer uploaded a payment receipt for order ${order.order_number}. Please verify.`,
-      link: `/client/orders`,
+      link: `/agent/orders`,
       metadata: { order_id: orderId },
     })
   }
 
-  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath(`/client/orders/${orderId}`)
   return { success: true, url: publicUrl }
 }
 
@@ -477,12 +477,12 @@ export async function confirmPaymentProof(orderId: string): Promise<{ error?: st
     type: NOTIFICATION_TYPES.ORDER_STATUS,
     title: "Payment Confirmed ✅",
     content: `Your payment for order ${order.order_number} has been verified. We're now processing your order!`,
-    link: `/user/orders/${orderId}`,
+    link: `/client/orders/${orderId}`,
     metadata: { order_id: orderId },
   })
 
-  revalidatePath(`/client/orders`)
-  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath(`/agent/orders`)
+  revalidatePath(`/client/orders/${orderId}`)
   revalidatePath("/admin/orders")
   return { success: true }
 }
@@ -514,12 +514,12 @@ export async function rejectOrder(orderId: string, reason: string): Promise<{ er
     type: NOTIFICATION_TYPES.ORDER_STATUS,
     title: "Order Rejected",
     content: "The agent has politely rejected your order request.",
-    link: `/user/orders/${orderId}`,
+    link: `/client/orders/${orderId}`,
     metadata: { order_id: orderId, new_status: "cancelled" },
   })
 
-  revalidatePath("/client/orders")
-  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath("/agent/orders")
+  revalidatePath(`/client/orders/${orderId}`)
   revalidatePath("/admin/orders")
   return { success: true }
 }
@@ -550,12 +550,12 @@ export async function extendOrderDeadline(orderId: string): Promise<{ error?: st
     type: NOTIFICATION_TYPES.ORDER_STATUS,
     title: "Deadline Extended ⏳",
     content: "The agent has extended the negotiation and payment deadline for your order by 7 days.",
-    link: `/user/orders/${orderId}`,
+    link: `/client/orders/${orderId}`,
     metadata: { order_id: orderId },
   })
 
-  revalidatePath("/client/orders")
-  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath("/agent/orders")
+  revalidatePath(`/client/orders/${orderId}`)
   return { success: true }
 }
 
@@ -604,8 +604,8 @@ export async function enableOrderMessaging(orderId: string): Promise<{ data?: an
     .update({ form_data: { ...currentFormData, messaging_enabled: true } })
     .eq("id", orderId)
 
-  revalidatePath(`/user/orders/${orderId}`)
-  revalidatePath("/client/orders")
+  revalidatePath(`/client/orders/${orderId}`)
+  revalidatePath("/agent/orders")
   return { data: { conversationId: convId } }
 }
 
@@ -641,12 +641,12 @@ export async function acceptOrder(orderId: string): Promise<{ success?: boolean;
     type: NOTIFICATION_TYPES.ORDER_STATUS,
     title: "Order Accepted! 🎉",
     content: "The agent has accepted your order. You have 7 days to negotiate and finalize payment.",
-    link: `/user/orders/${orderId}`,
+    link: `/client/orders/${orderId}`,
     metadata: { order_id: orderId, new_status: "agent_confirmed" },
   })
 
-  revalidatePath("/client/orders")
-  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath("/agent/orders")
+  revalidatePath(`/client/orders/${orderId}`)
   revalidatePath("/admin/orders")
 
   return { success: true }

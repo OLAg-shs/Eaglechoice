@@ -123,11 +123,11 @@ export async function processSuccessfulPayment(reference: string) {
       type: "commission_earned",
       title: "Commission Earned! 🎉",
       content: `You earned GHS ${commissionAmount} (${pointsToAdd} points) from order ${order.order_number}.`,
-      link: `/client/points`
+      link: `/agent/points`
     })
   }
 
-  revalidatePath("/user/orders")
+  revalidatePath("/client/orders")
   revalidatePath("/admin/orders")
   
   return { success: true }

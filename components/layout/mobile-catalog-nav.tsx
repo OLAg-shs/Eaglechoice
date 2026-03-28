@@ -42,7 +42,7 @@ export function MobileCatalogNav({ isLoggedIn }: { isLoggedIn: boolean }) {
 
             {isLoggedIn ? (
               <Link
-                href="/user"
+                href="/client"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-4 rounded-xl px-4 py-4 text-lg font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
               >

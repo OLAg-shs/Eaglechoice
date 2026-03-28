@@ -73,13 +73,15 @@ export async function updateSession(request: NextRequest) {
     }
 
     const role = profile.role
+    const urlPrefix = role === "admin" ? "admin" : role === "client" ? "agent" : "client"
+    
     const url = request.nextUrl.clone()
-    url.pathname = `/${role}`
+    url.pathname = `/${urlPrefix}`
     return NextResponse.redirect(url)
   }
 
   // Role-based route protection
-  if (user && (pathname.startsWith("/admin") || pathname.startsWith("/client") || pathname.startsWith("/user") || pathname === "/")) {
+  if (user && (pathname.startsWith("/admin") || pathname.startsWith("/agent") || pathname.startsWith("/client") || pathname === "/")) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -92,18 +94,19 @@ export async function updateSession(request: NextRequest) {
     }
 
     const role = profile.role
+    const urlPrefix = role === "admin" ? "admin" : role === "client" ? "agent" : "client"
 
     // Check if user is accessing the correct role path (ignore exact root "/")
     if (pathname !== "/") {
       const requestedRole = pathname.split("/")[1]
-      if (requestedRole !== role) {
+      if (requestedRole !== urlPrefix) {
         const url = request.nextUrl.clone()
-        url.pathname = `/${role}`
+        url.pathname = `/${urlPrefix}`
         return NextResponse.redirect(url)
       }
     } else {
       const url = request.nextUrl.clone()
-      url.pathname = `/${role}`
+      url.pathname = `/${urlPrefix}`
       return NextResponse.redirect(url)
     }
   }

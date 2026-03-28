@@ -61,7 +61,7 @@ export default function CartCheckoutPage() {
       toast({ title: "Orders Placed! 🎉", description: "Your agent(s) will review and confirm your order(s) shortly." })
       // redirect to the first order
       const firstOrderId = results[0]?.data?.id
-      router.push(firstOrderId ? `/user/orders/${firstOrderId}` : "/user/orders")
+      router.push(firstOrderId ? `/client/orders/${firstOrderId}` : "/user/orders")
     } catch (err: any) {
       toast({ variant: "destructive", title: "Order Failed", description: err.message })
       setLoading(false)

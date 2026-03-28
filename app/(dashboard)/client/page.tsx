@@ -1,42 +1,32 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ClipboardList, Star, MessageSquare, TrendingUp } from "lucide-react"
+import { ShoppingBag, ClipboardList, CreditCard, MessageSquare } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
-export default async function ClientDashboard() {
+export default async function UserDashboard() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
   const { data: profile } = await supabase.from("profiles").select("role, full_name").eq("id", user.id).single()
-  if (profile?.role !== "client") redirect("/login")
+  if (profile?.role !== "user") redirect("/login")
 
   const [
     { count: totalOrders },
-    { count: pendingOrders },
-    { count: completedOrders },
-    { data: pointsData },
+    { count: activeOrders },
     { data: recentOrders },
-    { count: unreadMessages },
+    { data: products },
+    { data: services },
   ] = await Promise.all([
-    supabase.from("orders").select("*", { count: "exact", head: true }).eq("client_id", user.id),
-    supabase.from("orders").select("*", { count: "exact", head: true }).eq("client_id", user.id).eq("status", "pending"),
-    supabase.from("orders").select("*", { count: "exact", head: true }).eq("client_id", user.id).eq("status", "completed"),
-    supabase.from("points_ledger").select("balance_after").eq("client_id", user.id).order("created_at", { ascending: false }).limit(1),
-    supabase.from("orders").select("*, profiles!orders_user_id_fkey(full_name), products(name), services(name)").eq("client_id", user.id).order("created_at", { ascending: false }).limit(5),
-    supabase.from("messages").select("*", { count: "exact", head: true }).eq("is_read", false).neq("sender_id", user.id),
+    supabase.from("orders").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("orders").select("*", { count: "exact", head: true }).eq("user_id", user.id).in("status", ["pending", "in_progress", "payment_pending", "paid", "processing"]),
+    supabase.from("orders").select("*, products(name), services(name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(3),
+    supabase.from("products").select("id, name, price, images, category").eq("is_available", true).limit(4),
+    supabase.from("services").select("id, name, base_price, category").eq("is_available", true).limit(4),
   ])
-
-  const pointsBalance = pointsData?.[0]?.balance_after ?? 0
-  const pointsGHS = (pointsBalance / 100).toFixed(2)
-
-  const stats = [
-    { title: "Assigned Orders", value: totalOrders ?? 0, icon: ClipboardList, color: "text-blue-600", bg: "bg-blue-50" },
-    { title: "Pending", value: pendingOrders ?? 0, icon: TrendingUp, color: "text-yellow-600", bg: "bg-yellow-50" },
-    { title: "Completed", value: completedOrders ?? 0, icon: TrendingUp, color: "text-green-600", bg: "bg-green-50" },
-    { title: "Points Balance", value: `${pointsBalance.toLocaleString()} pts`, icon: Star, color: "text-purple-600", bg: "bg-purple-50" },
-  ]
 
   const statusColors: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-700",
@@ -51,65 +41,113 @@ export default async function ClientDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Welcome, {profile.full_name?.split(" ")[0]}!</h1>
-        <p className="text-sm text-gray-500 mt-1">Your agent dashboard</p>
+        <p className="text-sm text-gray-500 mt-1">What can we help you with today?</p>
       </div>
 
+      {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardContent className="p-4">
-              <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${stat.bg}`}>
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
+        <Link href="/client/catalog" className="group">
+          <Card className="hover:border-blue-200 hover:shadow-md transition-all">
+            <CardContent className="p-4 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                <ShoppingBag className="h-6 w-6 text-blue-600" />
               </div>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              <p className="mt-1 text-xs text-gray-500">{stat.title}</p>
+              <p className="text-sm font-semibold text-gray-900">Browse Catalog</p>
+              <p className="text-xs text-gray-500">Laptops & services</p>
             </CardContent>
           </Card>
-        ))}
+        </Link>
+        <Link href="/client/orders" className="group">
+          <Card className="hover:border-green-200 hover:shadow-md transition-all">
+            <CardContent className="p-4 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-green-50 group-hover:bg-green-100 transition-colors">
+                <ClipboardList className="h-6 w-6 text-green-600" />
+              </div>
+              <p className="text-sm font-semibold text-gray-900">My Orders</p>
+              <p className="text-xs text-gray-500">{activeOrders ?? 0} active</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/client/payments" className="group">
+          <Card className="hover:border-purple-200 hover:shadow-md transition-all">
+            <CardContent className="p-4 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 group-hover:bg-purple-100 transition-colors">
+                <CreditCard className="h-6 w-6 text-purple-600" />
+              </div>
+              <p className="text-sm font-semibold text-gray-900">Payments</p>
+              <p className="text-xs text-gray-500">History & receipts</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/client/messages" className="group">
+          <Card className="hover:border-pink-200 hover:shadow-md transition-all">
+            <CardContent className="p-4 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-pink-50 group-hover:bg-pink-100 transition-colors">
+                <MessageSquare className="h-6 w-6 text-pink-600" />
+              </div>
+              <p className="text-sm font-semibold text-gray-900">Messages</p>
+              <p className="text-xs text-gray-500">Chat with agents</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
-      {pointsBalance > 0 && (
-        <Card className="border-purple-100 bg-purple-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <Star className="h-6 w-6 text-purple-600" />
-              <div>
-                <p className="font-semibold text-purple-900">
-                  {pointsBalance.toLocaleString()} points ≈ GH₵ {pointsGHS}
-                </p>
-                <p className="text-xs text-purple-600">100 points = GH₵ 1.00 · Min 1,000 pts to redeem</p>
-              </div>
+      {/* Recent Orders */}
+      {(recentOrders?.length ?? 0) > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <CardTitle className="text-base">Recent Orders</CardTitle>
+            <Link href="/client/orders" className="text-sm text-blue-600 hover:underline">View all</Link>
+          </CardHeader>
+          <CardContent>
+            <div className="divide-y">
+              {recentOrders?.map((order: any) => (
+                <div key={order.id} className="flex items-center justify-between py-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{order.order_number}</p>
+                    <p className="text-xs text-gray-500">{order.products?.name || order.services?.name}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-semibold">{formatCurrency(order.total_amount)}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[order.status] || "bg-gray-100 text-gray-700"}`}>
+                      {order.status.replace("_", " ")}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Recent Orders</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!recentOrders?.length ? (
-            <p className="text-center text-sm text-gray-500 py-4">No orders assigned yet</p>
-          ) : (
-            <div className="divide-y">
-              {recentOrders.map((order: any) => (
-                <div key={order.id} className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{order.order_number}</p>
-                    <p className="text-xs text-gray-500">
-                      {(order.profiles as any)?.full_name} · {order.products?.name || order.services?.name}
-                    </p>
+      {/* Featured Products */}
+      {(products?.length ?? 0) > 0 && (
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-semibold text-gray-900">Featured Products</h2>
+            <Link href="/client/catalog" className="text-sm text-blue-600 hover:underline">See all</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {products?.map((p: any) => (
+              <Link key={p.id} href={`/client/catalog/product/${p.id}`}>
+                <Card className="hover:shadow-md transition-shadow overflow-hidden">
+                  <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                    {p.images?.[0] ? (
+                      <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <ShoppingBag className="h-10 w-10 text-gray-300" />
+                    )}
                   </div>
-                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[order.status] || "bg-gray-100 text-gray-700"}`}>
-                    {order.status.replace("_", " ")}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                  <CardContent className="p-3">
+                    <p className="text-sm font-medium text-gray-900 line-clamp-1">{p.name}</p>
+                    <p className="mt-1 text-sm font-bold text-blue-600">{formatCurrency(p.price)}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

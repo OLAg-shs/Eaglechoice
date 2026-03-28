@@ -61,7 +61,7 @@ export async function createProduct(formData: FormData) {
   if (error) throw new Error(`Database error: ${error.message}`)
   
   revalidatePath("/admin/products")
-  revalidatePath("/user/catalog")
+  revalidatePath("/client/catalog")
   return { success: true }
 }
 
@@ -114,7 +114,7 @@ export async function createService(formData: FormData) {
   if (error) throw new Error(`Database error: ${error.message}`)
   
   revalidatePath("/admin/services")
-  revalidatePath("/user/catalog")
+  revalidatePath("/client/catalog")
   return { success: true }
 }
 

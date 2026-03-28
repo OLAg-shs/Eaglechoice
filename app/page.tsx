@@ -22,8 +22,8 @@ export default async function RootPage() {
   if (profile.role === "admin") {
     redirect("/admin")
   } else if (profile.role === "client") {
-    redirect("/client")
+    redirect("/agent")
   } else {
-    redirect("/user")
+    redirect("/client")
   }
 }

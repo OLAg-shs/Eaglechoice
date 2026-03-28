@@ -33,14 +33,14 @@ export default function ClientNewProductPage() {
       setError(result.error)
       setLoading(false)
     } else {
-      router.push("/client/products")
+      router.push("/agent/products")
     }
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <Link href="/client/products" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-4">
+        <Link href="/agent/products" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-4">
           <ArrowLeft className="h-4 w-4" />Back to Products
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
@@ -103,7 +103,7 @@ export default function ClientNewProductPage() {
           <Button type="submit" disabled={loading} className="flex-1">
             {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : "Add Product"}
           </Button>
-          <Link href="/client/products">
+          <Link href="/agent/products">
             <Button type="button" variant="outline">Cancel</Button>
           </Link>
         </div>

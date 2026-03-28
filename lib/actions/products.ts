@@ -97,7 +97,7 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
   }
 
   revalidatePath("/admin/products")
-  revalidatePath("/client/products")
+  revalidatePath("/agent/products")
   return { success: true }
 }
 
@@ -161,7 +161,7 @@ export async function updateProduct(id: string, formData: FormData): Promise<{ e
   }
 
   revalidatePath("/admin/products")
-  revalidatePath("/client/products")
+  revalidatePath("/agent/products")
   return { success: true }
 }
 
@@ -188,6 +188,6 @@ export async function deleteProduct(id: string): Promise<{ error?: string; succe
   }
 
   revalidatePath("/admin/products")
-  revalidatePath("/client/products")
+  revalidatePath("/agent/products")
   return { success: true }
 }

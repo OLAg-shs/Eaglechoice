@@ -1,143 +1,93 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ClipboardList, CheckCheck, FileCheck2 } from "lucide-react"
+import { ClipboardList, Plus } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import Link from "next/link"
-import { OrderStatusUpdater } from "@/components/orders/order-status-updater"
-import { TrackingUpdater } from "@/components/orders/tracking-updater"
-import { AcceptOrderButton, VerifyPaymentButton, ExtendDeadlineButton } from "@/components/orders/agent-action-buttons"
-import { RejectOrderDialog } from "@/components/orders/reject-order-dialog"
-import { CountdownTimer } from "@/components/orders/countdown-timer"
-import { AgentMessageButton } from "@/components/orders/messaging-toggle"
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-700",
-  agent_confirmed: "bg-teal-100 text-teal-700",
-  in_progress: "bg-blue-100 text-blue-700",
-  payment_pending: "bg-orange-100 text-orange-700",
-  paid: "bg-green-100 text-green-700",
-  processing: "bg-indigo-100 text-indigo-700",
-  completed: "bg-emerald-100 text-emerald-700",
-  cancelled: "bg-red-100 text-red-700",
+  pending: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400",
+  in_progress: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+  payment_pending: "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400",
+  paid: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400",
+  processing: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400",
+  completed: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400",
+  cancelled: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400",
 }
 
-export default async function ClientOrdersPage() {
+export default async function UserOrdersPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
-  if (profile?.role !== "client") redirect("/login")
+  if (profile?.role !== "user") redirect("/login")
 
   const { data: orders } = await supabase
     .from("orders")
     .select(`
       *,
-      user_profile:profiles!orders_user_id_fkey(full_name, email, phone),
-      products(name, price),
-      services(name, base_price)
+      client_profile:profiles!orders_client_id_fkey(full_name),
+      products(name),
+      services(name),
+      payments(status, paid_at)
     `)
-    .eq("client_id", user.id)
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">My Assigned Orders</h1>
-        <p className="text-sm text-gray-500 mt-1">{orders?.length ?? 0} orders</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors">My Orders</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{orders?.length ?? 0} total orders</p>
+        </div>
+        <Link href="/client/catalog">
+          <Button><Plus className="mr-2 h-4 w-4" />New Order</Button>
+        </Link>
       </div>
 
       {!orders?.length ? (
         <div className="flex flex-col items-center py-16 text-center">
           <ClipboardList className="mb-4 h-16 w-16 text-gray-200" />
-          <p className="text-gray-500">No orders assigned to you yet</p>
+          <h3 className="text-lg font-medium text-gray-900">No orders yet</h3>
+          <p className="text-sm text-gray-500 mb-4">Browse our catalog to place your first order</p>
+          <Link href="/client/catalog">
+            <Button>Browse Catalog</Button>
+          </Link>
         </div>
       ) : (
-        <div className="space-y-4">
-          {orders.map((order: any) => (
-            <Card key={order.id}>
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-900">{order.order_number}</span>
-                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${statusColors[order.status] || "bg-gray-100 text-gray-700"}`}>
-                        {order.status === 'agent_confirmed' ? 'Accepted' : order.status.replace(/_/g, " ")}
-                      </span>
+        <div className="space-y-3">
+            {orders.map((order: any) => (
+            <Link key={order.id} href={`/client/orders/${order.id}`}>
+              <Card className="hover-lift cursor-pointer bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 transition-colors">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-900 dark:text-white transition-colors">{order.order_number}</span>
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize transition-colors ${statusColors[order.status] || "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}`}>
+                          {order.status.replace(/_/g, " ")}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 transition-colors">
+                        {order.products?.name || order.services?.name}
+                      </p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 transition-colors">
+                        Agent: {order.client_profile?.full_name} · {formatDate(order.created_at)}
+                      </p>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Customer: {order.user_profile?.full_name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {order.products?.name || order.services?.name} · {formatDate(order.created_at)}
-                    </p>
-                    {order.notes && (
-                      <p className="mt-2 text-sm text-gray-500 bg-gray-50 rounded p-2">{order.notes}</p>
-                    )}
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="font-bold text-lg text-gray-900">{formatCurrency(order.total_amount)}</p>
-                  </div>
-                </div>
-                <div className="mt-4 space-y-2">
-                  {/* Logistics & Status Updaters — shown only AFTER payment */}
-                  {["paid", "processing", "completed", "in_progress"].includes(order.status) && (
-                    <>
-                      <OrderStatusUpdater orderId={order.id} currentStatus={order.status} role="client" />
-                      <TrackingUpdater orderId={order.id} currentTracking={order.form_data?.tracking} />
-                    </>
-                  )}
-                  {/* Countdown Timer & Deadlines Logic */}
-                  {(() => {
-                    let expiryStr = order.form_data?.expires_at;
-                    if (!expiryStr && order.status === "agent_confirmed") {
-                       // Backward-compatibility: calculate missing deadline for older orders
-                       expiryStr = new Date(new Date(order.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
-                    }
-                    
-                    const isTimerActive = ["pending", "agent_confirmed", "payment_pending"].includes(order.status) && expiryStr;
-                    const isTimeUp = expiryStr ? new Date(expiryStr).getTime() <= new Date().getTime() : false;
-
-                    return (
-                      <>
-                        {isTimerActive && (
-                          <div className="mb-4">
-                            <p className="text-xs text-gray-500 mb-1">Time remaining for customer payment action:</p>
-                            <CountdownTimer expiresAt={expiryStr} />
-                          </div>
-                        )}
-
-                        {/* Extend/Reject — shown only when status is agent_confirmed AND time has expired */}
-                        {order.status === "agent_confirmed" && isTimeUp && (
-                          <div className="grid grid-cols-2 gap-2 mt-2">
-                            <ExtendDeadlineButton orderId={order.id} />
-                            <RejectOrderDialog orderId={order.id} />
-                          </div>
-                        )}
-                      </>
-                    )
-                  })()}
-
-                  {/* Messaging Access Visualizer */}
-                  {order.status !== "pending" && order.status !== "cancelled" && (
-                     <AgentMessageButton enabled={!!order.form_data?.messaging_enabled} />
-                  )}
-
-                  {/* Verify Receipt — shown when customer uploaded proof */}
-                  {order.form_data?.payment_proof_url && order.status === "paid" && (
-                    <div className="space-y-2">
-                      <a href={order.form_data.payment_proof_url} target="_blank" rel="noreferrer"
-                        className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 underline font-medium">
-                        <FileCheck2 className="h-4 w-4" /> View Customer Receipt Proof
-                      </a>
-                      <VerifyPaymentButton orderId={order.id} />
+                    <div className="text-right shrink-0">
+                      <p className="font-bold text-gray-900 dark:text-white transition-colors">{formatCurrency(order.total_amount)}</p>
+                      {order.status === "payment_pending" && (
+                        <span className="text-xs font-medium text-orange-600 dark:text-orange-400">⚡ Payment needed</span>
+                      )}
                     </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       )}

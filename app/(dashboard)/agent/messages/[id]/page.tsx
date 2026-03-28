@@ -4,25 +4,17 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { ChatWindow } from "@/components/chat/chat-window"
 
-export default async function ChatPage({
-  params,
-}: {
-  params: { id: string }
-}) {
+export default async function ClientChatPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
   const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
-  const rolePath = profile?.role === "admin" ? "admin" : profile?.role === "client" ? "client" : "user"
+  if (profile?.role !== "client") redirect("/login")
 
   const { data: conversation } = await supabase
     .from("conversations")
-    .select(`
-      *,
-      p1:profiles!conversations_participant_1_fkey(id, full_name, role),
-      p2:profiles!conversations_participant_2_fkey(id, full_name, role)
-    `)
+    .select(`*, p1:profiles!conversations_participant_1_fkey(id, full_name), p2:profiles!conversations_participant_2_fkey(id, full_name)`)
     .eq("id", params.id)
     .single()
 
@@ -36,30 +28,18 @@ export default async function ChatPage({
     .eq("conversation_id", params.id)
     .order("created_at", { ascending: true })
 
-  // Mark unread messages as read
-  await supabase
-    .from("messages")
-    .update({ is_read: true })
-    .eq("conversation_id", params.id)
-    .neq("sender_id", user.id)
-    .eq("is_read", false)
+  await supabase.from("messages").update({ is_read: true })
+    .eq("conversation_id", params.id).neq("sender_id", user.id).eq("is_read", false)
 
   return (
     <div className="flex flex-col h-full max-h-[calc(100vh-4rem-3rem)] -m-4 md:-m-6">
-      {/* Header */}
       <div className="flex items-center gap-3 border-b bg-white px-4 py-3">
-        <Link href={`/${rolePath}/messages`} className="hover:text-gray-900 text-gray-400">
+        <Link href="/agent/messages" className="hover:text-gray-900 text-gray-400">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h2 className="font-semibold text-gray-900">{other?.full_name}</h2>
-        <span className="text-xs text-gray-400 capitalize">{other?.role}</span>
       </div>
-
-      <ChatWindow
-        conversationId={params.id}
-        currentUserId={user.id}
-        initialMessages={messages || []}
-      />
+      <ChatWindow conversationId={params.id} currentUserId={user.id} initialMessages={messages || []} />
     </div>
   )
 }

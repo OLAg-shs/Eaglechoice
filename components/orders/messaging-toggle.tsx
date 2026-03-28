@@ -20,7 +20,7 @@ export function CustomerMessageToggle({ orderId }: { orderId: string }) {
        toast({ variant: "destructive", title: "Setup Failed", description: res.error })
     } else if (res?.data?.conversationId) {
        toast({ title: "Chat Opened! 💬", description: "You securely granted the agent messaging access." })
-       router.push(`/user/messages/${res.data.conversationId}`)
+       router.push(`/client/messages/${res.data.conversationId}`)
     }
   }
 
@@ -42,7 +42,7 @@ export function AgentMessageButton({ enabled }: { enabled: boolean }) {
      )
   }
   return (
-    <Button onClick={() => router.push(`/client/messages`)} className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2 mt-2">
+    <Button onClick={() => router.push(`/agent/messages`)} className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2 mt-2">
       <MessageSquare className="h-4 w-4" /> Message Customer
     </Button>
   )

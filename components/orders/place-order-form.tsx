@@ -81,7 +81,7 @@ export function PlaceOrderForm({ type, itemId, itemPrice, clients, category, pre
       setError(result.error)
       setLoading(false)
     } else {
-      router.push(`/user/orders/${result.data.id}`)
+      router.push(`/client/orders/${result.data.id}`)
     }
   }
 

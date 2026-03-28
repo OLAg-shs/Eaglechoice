@@ -20,7 +20,7 @@ export function ContactAdminButton() {
     if (result.error) {
       toast({ variant: "destructive", title: "Error", description: result.error })
     } else if (result.data) {
-      router.push(`/client/messages/${result.data.id}`)
+      router.push(`/agent/messages/${result.data.id}`)
     }
   }
 

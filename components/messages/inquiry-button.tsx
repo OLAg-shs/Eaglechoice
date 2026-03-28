@@ -25,7 +25,7 @@ export function InquiryButton({ agentId, isAuthenticated }: { agentId: string; i
     if (result.error) {
       toast({ variant: "destructive", title: "Error", description: result.error })
     } else if (result.data) {
-      router.push(`/user/messages/${result.data.id}`)
+      router.push(`/client/messages/${result.data.id}`)
     }
   }
 
