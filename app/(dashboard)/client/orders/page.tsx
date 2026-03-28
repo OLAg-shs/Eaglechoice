@@ -102,8 +102,8 @@ export default async function ClientOrdersPage() {
                     <AcceptOrderButton orderId={order.id} />
                   )}
 
-                  {/* Extend/Reject — shown when status is agent_confirmed */}
-                  {order.status === "agent_confirmed" && (
+                  {/* Extend/Reject — shown when status is agent_confirmed AND time has expired */}
+                  {order.status === "agent_confirmed" && (!order.form_data?.expires_at || new Date(order.form_data.expires_at).getTime() <= new Date().getTime()) && (
                     <div className="grid grid-cols-2 gap-2 mt-2">
                        <ExtendDeadlineButton orderId={order.id} />
                        <RejectOrderDialog orderId={order.id} />
