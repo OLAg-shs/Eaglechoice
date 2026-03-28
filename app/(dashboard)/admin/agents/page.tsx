@@ -32,7 +32,7 @@ export default async function AdminClientsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Agents</h1>
           <p className="text-sm text-gray-500 mt-1">Manage your sales agents</p>
         </div>
-        <Link href="/admin/clients/new">
+        <Link href="/admin/agents/new">
           <Button>Add New Agent</Button>
         </Link>
       </div>

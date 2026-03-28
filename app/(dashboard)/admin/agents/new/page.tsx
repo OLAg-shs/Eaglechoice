@@ -26,14 +26,14 @@ export default function NewAgentPage() {
       setError(result.error)
       setLoading(false)
     } else {
-      router.push("/admin/clients")
+      router.push("/admin/agents")
     }
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <Link href="/admin/clients" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-4">
+        <Link href="/admin/agents" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-4">
           <ArrowLeft className="h-4 w-4" />Back to Agents
         </Link>
         <h1 className="text-2xl font-bold text-gray-900">Add New Agent</h1>
@@ -68,7 +68,7 @@ export default function NewAgentPage() {
           <Button type="submit" disabled={loading} className="flex-1">
             {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</> : "Create Agent"}
           </Button>
-          <Link href="/admin/clients">
+          <Link href="/admin/agents">
             <Button type="button" variant="outline">Cancel</Button>
           </Link>
         </div>
