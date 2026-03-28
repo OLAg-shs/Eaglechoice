@@ -11,23 +11,23 @@ function slugify(name: string): string {
     .slice(0, 40)
 }
 
-export async function createStore(input: {
-  name: string
-  tagline?: string
-  description?: string
-  brand_color?: string
-  category_tags?: string
-  logo?: string
-}): Promise<{ error?: string; slug?: string }> {
+export async function createStore(formData: FormData): Promise<{ error?: string; slug?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: "Not authenticated" }
 
-  const name = input.name?.trim()
-  const tagline = input.tagline?.trim()
-  const description = input.description?.trim()
-  const brand_color = input.brand_color || "#2563eb"
-  const category_tags_raw = input.category_tags || ""
+  const name = (formData.get("name") as string)?.trim()
+  const tagline = (formData.get("tagline") as string)?.trim()
+  const description = (formData.get("description") as string)?.trim()
+  const brand_color = (formData.get("brand_color") as string) || "#2563eb"
+  const theme_id = (formData.get("theme_id") as string) || "modern"
+  const font_preset = (formData.get("font_preset") as string) || "sans"
+  
+  const payout_bank_name = formData.get("payout_bank_name") as string
+  const payout_account_number = formData.get("payout_account_number") as string
+  const payout_account_name = formData.get("payout_account_name") as string
+
+  const category_tags_raw = (formData.get("category_tags") as string) || ""
   const category_tags = category_tags_raw.split(",").map(s => s.trim()).filter(Boolean)
 
   if (!name) return { error: "Store name is required" }
@@ -43,15 +43,19 @@ export async function createStore(input: {
     name,
     slug,
     owner_id: user.id,
-    logo_url: input.logo || null,
     brand_color,
     tagline: tagline || null,
     description: description || null,
     category_tags,
+    theme_id,
+    font_preset,
+    payout_bank_name,
+    payout_account_number,
+    payout_account_name,
     commission_rate: 0.05,
     is_active: true,
-    is_verified: false, // Must be verified by admin
-    accepted_terms: true, // They accept in the wizard
+    is_verified: false,
+    accepted_terms: true,
   })
 
   if (error) return { error: error.message }
@@ -143,6 +147,10 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
   const brand_color = formData.get("brand_color") as string
   const theme_id = formData.get("theme_id") as string
   const font_preset = formData.get("font_preset") as string
+  const payout_bank_name = formData.get("payout_bank_name") as string
+  const payout_account_number = formData.get("payout_account_number") as string
+  const payout_account_name = formData.get("payout_account_name") as string
+  
   const category_tags_raw = (formData.get("category_tags") as string) || ""
   const category_tags = category_tags_raw.split(",").map(s => s.trim()).filter(Boolean)
 
@@ -158,7 +166,10 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
     }
   }
 
-  const updates: any = { name, tagline, description, brand_color, category_tags, theme_id, font_preset }
+  const updates: any = { 
+    name, tagline, description, brand_color, category_tags, theme_id, font_preset,
+    payout_bank_name, payout_account_number, payout_account_name
+  }
   if (logo_url) updates.logo_url = logo_url
 
   const { error } = await supabase.from("stores").update(updates).eq("id", storeId)

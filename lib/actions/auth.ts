@@ -103,6 +103,32 @@ export async function toggleClientActive(
   return { success: true }
 }
 
+export async function updateProfile(formData: FormData): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const full_name = (formData.get("full_name") as string)?.trim()
+  const phone = (formData.get("phone") as string)?.trim()
+  const momo_number = (formData.get("momo_number") as string)?.trim()
+  const momo_provider = formData.get("momo_provider") as string
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ 
+      full_name, 
+      phone, 
+      momo_number, 
+      momo_provider 
+    })
+    .eq("id", user.id)
+
+  if (error) return { error: error.message }
+  
+  revalidatePath("/", "layout")
+  return { success: true }
+}
+
 export async function toggleClientVerified(
   clientId: string,
   isVerified: boolean

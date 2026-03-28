@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Palette, Tag, ImageIcon, Loader2, Save, Globe } from "lucide-react"
+import { Palette, Tag, ImageIcon, Loader2, Save, Globe, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,6 +14,14 @@ const CATEGORY_PRESETS = [
   "Electronics", "Fashion", "Food & Drinks", "Health & Beauty",
   "Home & Living", "Sports", "Books", "Auto Parts",
   "Computers", "Phones & Tablets", "Clothing", "Services",
+]
+
+const GHANA_BANKS = [
+  "Absa Bank Ghana", "Access Bank Ghana", "ADB Bank", "Bank of Africa", 
+  "CalBank", "Ecobank Ghana", "FBN Bank", "Fidelity Bank", "First Atlantic Bank", 
+  "First National Bank", "G-Money", "GCB Bank", "GTBank", "National Investment Bank", 
+  "OmniBSIC Bank", "Prudential Bank", "Republic Bank", "Societe Generale Ghana", 
+  "Stanbic Bank", "Standard Chartered Bank", "UBA Ghana", "Universal Merchant Bank", "Zenith Bank"
 ]
 
 const THEMES = [
@@ -38,6 +46,12 @@ export default function StoreSettingsForm({ store }: { store: any }) {
   const [brandColor, setBrandColor] = useState(store.brand_color || "#2563eb")
   const [themeId, setThemeId] = useState(store.theme_id || "modern")
   const [fontPreset, setFontPreset] = useState(store.font_preset || "sans")
+  
+  // Payout State
+  const [bankName, setBankName] = useState(store.payout_bank_name || "")
+  const [accountNumber, setAccountNumber] = useState(store.payout_account_number || "")
+  const [accountName, setAccountName] = useState(store.payout_account_name || "")
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>(store.category_tags || [])
   const [logoPreview, setLogoPreview] = useState<string | null>(store.logo_url)
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -59,6 +73,9 @@ export default function StoreSettingsForm({ store }: { store: any }) {
     formData.set("brand_color", brandColor)
     formData.set("theme_id", themeId)
     formData.set("font_preset", fontPreset)
+    formData.set("payout_bank_name", bankName)
+    formData.set("payout_account_number", accountNumber)
+    formData.set("payout_account_name", accountName)
     formData.set("category_tags", selectedCategories.join(","))
     if (logoFile) formData.set("logo", logoFile)
 
@@ -122,8 +139,49 @@ export default function StoreSettingsForm({ store }: { store: any }) {
           </div>
         </div>
 
-        {/* Right Column: Visual Style Studio */}
-        <div className="space-y-6">
+          <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 shadow-sm">
+            <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
+              <CreditCard className="h-6 w-6 text-orange-600" />
+              Payout & Revenue
+            </h2>
+            
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Settlement Bank</Label>
+                <select 
+                  value={bankName} 
+                  onChange={e => setBankName(e.target.value)}
+                  className="w-full h-12 rounded-xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 px-4 text-sm font-bold appearance-none cursor-pointer focus:ring-4 focus:ring-blue-600/10 transition-all"
+                >
+                  <option value="" disabled>Select your bank...</option>
+                  {GHANA_BANKS.map(bank => <option key={bank} value={bank}>{bank}</option>)}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Account Number</Label>
+                  <Input 
+                    value={accountNumber} 
+                    onChange={e => setAccountNumber(e.target.value)} 
+                    placeholder="0000000000" 
+                    className="h-12 rounded-xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 font-bold" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Account Name</Label>
+                  <Input 
+                    value={accountName} 
+                    onChange={e => setAccountName(e.target.value)} 
+                    placeholder="e.g. Ama Opoku" 
+                    className="h-12 rounded-xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 font-bold" 
+                  />
+                </div>
+              </div>
+              <p className="text-[10px] text-gray-400 font-medium italic">Enter the details where you want your store earnings to be sent via Paystack.</p>
+            </div>
+          </div>
+
           <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 shadow-sm">
             <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
               <Palette className="h-6 w-6 text-purple-600" />

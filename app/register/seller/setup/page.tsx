@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Store, Palette, Users, ChevronRight, ChevronLeft, Loader2, Sparkles, ShieldCheck, Tag } from "lucide-react"
+import { Store, Palette, Users, ChevronRight, ChevronLeft, Loader2, Sparkles, ShieldCheck, Tag, CreditCard, Zap } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,6 +13,15 @@ const STEPS = [
   { id: 1, title: "Identity", icon: Store },
   { id: 2, title: "Vibe", icon: Palette },
   { id: 3, title: "Agents", icon: Users },
+  { id: 4, title: "Payout", icon: CreditCard },
+]
+
+const GHANA_BANKS = [
+  "Absa Bank Ghana", "Access Bank Ghana", "ADB Bank", "Bank of Africa", 
+  "CalBank", "Ecobank Ghana", "FBN Bank", "Fidelity Bank", "First Atlantic Bank", 
+  "First National Bank", "G-Money", "GCB Bank", "GTBank", "National Investment Bank", 
+  "OmniBSIC Bank", "Prudential Bank", "Republic Bank", "Societe Generale Ghana", 
+  "Stanbic Bank", "Standard Chartered Bank", "UBA Ghana", "Universal Merchant Bank", "Zenith Bank"
 ]
 
 export default function StoreSetupWizard() {
@@ -27,6 +36,11 @@ export default function StoreSetupWizard() {
   const [theme, setTheme] = useState("modern")
   const [font, setFont] = useState("sans")
   const [agentEmail, setAgentEmail] = useState("")
+  
+  // Payout State
+  const [bankName, setBankName] = useState("")
+  const [accountNumber, setAccountNumber] = useState("")
+  const [accountName, setAccountName] = useState("")
 
   async function handleLaunch() {
     setLoading(true)
@@ -35,6 +49,9 @@ export default function StoreSetupWizard() {
     formData.set("slug", slug || name.toLowerCase().replace(/\s+/g, '-'))
     formData.set("theme_id", theme)
     formData.set("font_preset", font)
+    formData.set("payout_bank_name", bankName)
+    formData.set("payout_account_number", accountNumber)
+    formData.set("payout_account_name", accountName)
     
     const result = await createStore(formData)
     setLoading(false)
@@ -188,6 +205,62 @@ export default function StoreSetupWizard() {
 
               <div className="flex gap-4">
                 <Button variant="ghost" onClick={() => setStep(2)} className="h-16 px-8 rounded-2xl font-bold text-gray-400">Back</Button>
+                <Button 
+                  onClick={() => setStep(4)} 
+                  className="flex-1 h-16 rounded-2xl font-black text-white bg-blue-600 hover:bg-black transition-all text-lg group shadow-xl shadow-blue-500/10"
+                >
+                  Configure Payouts <ChevronRight className="h-5 w-5 ml-2 group-hover:translate-x-2 transition-transform" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: PAYOUT DESTINATION */}
+          {step === 4 && (
+            <div className="space-y-10 animate-in slide-in-from-right-10 duration-500">
+              <div className="space-y-2">
+                <h2 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">Your Revenue.</h2>
+                <p className="text-gray-400 font-medium italic">Where should we send your earnings via Paystack?</p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Settlement Bank</Label>
+                  <select 
+                    value={bankName} 
+                    onChange={e => setBankName(e.target.value)}
+                    className="w-full h-16 rounded-2xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 px-6 text-xl font-bold appearance-none cursor-pointer focus:ring-4 focus:ring-blue-600/10 transition-all"
+                  >
+                    <option value="" disabled>Select Bank...</option>
+                    {GHANA_BANKS.map(bank => <option key={bank} value={bank}>{bank}</option>)}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Account Number</Label>
+                    <Input 
+                      value={accountNumber} 
+                      onChange={e => setAccountNumber(e.target.value)} 
+                      placeholder="0000000000" 
+                      className="h-16 rounded-2xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 font-bold" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Account Name</Label>
+                    <Input 
+                      value={accountName} 
+                      onChange={e => setAccountName(e.target.value)} 
+                      placeholder="e.g. Ama Opoku" 
+                      className="h-16 rounded-2xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 font-bold" 
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-gray-400 font-medium italic">You can also skip this and add it later in Store Settings.</p>
+              </div>
+
+              <div className="flex gap-4">
+                <Button variant="ghost" onClick={() => setStep(3)} className="h-16 px-8 rounded-2xl font-bold text-gray-400">Back</Button>
                 <Button 
                   onClick={handleLaunch}
                   disabled={loading}
