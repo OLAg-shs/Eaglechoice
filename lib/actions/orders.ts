@@ -105,9 +105,6 @@ export async function createOrder(formData: FormData): Promise<{ data: any | nul
     }
   }
 
-  const expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-  const injectedFormData = { ...(formDataParsed || {}), expires_at }
-
   const rawData = {
     order_type: formData.get("order_type") as string,
     product_id: (formData.get("product_id") as string) || undefined,
@@ -115,7 +112,7 @@ export async function createOrder(formData: FormData): Promise<{ data: any | nul
     client_id: formData.get("client_id") as string,
     quantity: formData.get("quantity") as string || "1",
     notes: (formData.get("notes") as string) || undefined,
-    form_data: injectedFormData,
+    form_data: formDataParsed,
   }
 
   const validated = orderSchema.safeParse(rawData)
@@ -173,14 +170,6 @@ export async function createOrder(formData: FormData): Promise<{ data: any | nul
   if (orderError) {
     return { data: null, error: orderError.message }
   }
-
-  // Create conversation between user and client
-  await supabase.from("conversations").insert({
-    participant_1: user.id,
-    participant_2: validated.data.client_id,
-    conversation_type: "order",
-    order_id: order.id,
-  })
 
   // Create notification for client
   await supabase.from("notifications").insert({
@@ -567,5 +556,97 @@ export async function extendOrderDeadline(orderId: string): Promise<{ error?: st
 
   revalidatePath("/client/orders")
   revalidatePath(`/user/orders/${orderId}`)
+  return { success: true }
+}
+
+export async function enableOrderMessaging(orderId: string): Promise<{ data?: any; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const { data: order } = await supabase.from("orders").select("client_id, user_id, form_data").eq("id", orderId).single()
+  if (!order) return { error: "Order not found" }
+  if (order.user_id !== user.id) return { error: "Unauthorized" }
+
+  // Check or spawn conversation securely
+  const { data: existingConv } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("order_id", orderId)
+    .single()
+
+  let convId = existingConv?.id
+
+  if (!convId) {
+    const { data: newConv, error: convError } = await supabase.from("conversations").insert({
+      participant_1: user.id,
+      participant_2: order.client_id,
+      order_id: orderId,
+      last_message_at: new Date().toISOString()
+    }).select().single()
+    if (convError) return { error: convError.message }
+    convId = newConv.id
+    
+    // Optional automatic buyer welcome text to break the ice
+    await supabase.from("messages").insert({
+      conversation_id: convId,
+      sender_id: user.id,
+      content: "Hello! Quick heads up: I've allowed messaging for this order. We can now discuss everything securely.",
+      message_type: "text"
+    })
+  }
+
+  // Set the flag
+  const currentFormData = order.form_data || {}
+  await supabase
+    .from("orders")
+    .update({ form_data: { ...currentFormData, messaging_enabled: true } })
+    .eq("id", orderId)
+
+  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath("/client/orders")
+  return { data: { conversationId: convId } }
+}
+
+export async function acceptOrder(orderId: string): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const { data: order } = await supabase
+    .from("orders")
+    .select("user_id, status, form_data")
+    .eq("id", orderId)
+    .single()
+
+  if (!order) return { error: "Order not found" }
+  if (order.status !== "pending") return { error: "This order is already active or cancelled." }
+
+  const currentFormData = order.form_data || {}
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+  
+  const { error: updateError } = await supabase
+    .from("orders")
+    .update({ 
+      status: "agent_confirmed",
+      form_data: { ...currentFormData, expires_at: expiresAt }
+    })
+    .eq("id", orderId)
+
+  if (updateError) return { error: updateError.message }
+
+  await supabase.from("notifications").insert({
+    user_id: order.user_id,
+    type: NOTIFICATION_TYPES.ORDER_STATUS,
+    title: "Order Accepted! 🎉",
+    content: "The agent has accepted your order. You have 7 days to negotiate and finalize payment.",
+    link: `/user/orders/${orderId}`,
+    metadata: { order_id: orderId, new_status: "agent_confirmed" },
+  })
+
+  revalidatePath("/client/orders")
+  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath("/admin/orders")
+
   return { success: true }
 }

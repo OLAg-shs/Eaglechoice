@@ -3,11 +3,12 @@ import { notFound, redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { ShoppingBag, Briefcase, Clock, CheckCircle2, XCircle, ChevronLeft, Truck } from "lucide-react"
+import { ShoppingBag, Briefcase, Clock, CheckCircle2, XCircle, ChevronLeft, Truck, MessageSquare } from "lucide-react"
 import Link from "next/link"
 import { PayButton } from "@/components/payments/pay-button"
 import { ReceiptUploader } from "@/components/payments/receipt-uploader"
 import { CountdownTimer } from "@/components/orders/countdown-timer"
+import { CustomerMessageToggle } from "@/components/orders/messaging-toggle"
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -211,6 +212,16 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                     <p className="text-sm font-semibold">{agent.full_name}</p>
                     <p className="text-xs text-gray-500">{agent.phone || "No phone listed"}</p>
                  </div>
+              </div>
+              
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                {order.form_data?.messaging_enabled ? (
+                  <Link href={`/user/messages`} className="flex items-center justify-center w-full gap-2 py-2.5 px-4 bg-gray-900 text-white rounded-md text-sm font-medium hover:bg-gray-800 transition-colors">
+                    <MessageSquare className="h-4 w-4" /> Open Chat with Agent
+                  </Link>
+                ) : (
+                  <CustomerMessageToggle orderId={order.id} />
+                )}
               </div>
             </CardContent>
           </Card>

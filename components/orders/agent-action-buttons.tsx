@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { updateOrderStatus, confirmPaymentProof, extendOrderDeadline } from "@/lib/actions/orders"
+import { confirmPaymentProof, extendOrderDeadline, acceptOrder } from "@/lib/actions/orders"
 import { Button } from "@/components/ui/button"
 import { CheckCheck, FileCheck2, Loader2, CalendarClock } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
@@ -12,7 +12,7 @@ export function AcceptOrderButton({ orderId }: { orderId: string }) {
 
   async function handleConfirm() {
     setLoading(true)
-    const res = await updateOrderStatus(orderId, "agent_confirmed")
+    const res = await acceptOrder(orderId)
     setLoading(false)
     if (res?.error) {
       toast({ variant: "destructive", title: "Action Failed", description: res.error })

@@ -10,6 +10,7 @@ import { TrackingUpdater } from "@/components/orders/tracking-updater"
 import { AcceptOrderButton, VerifyPaymentButton, ExtendDeadlineButton } from "@/components/orders/agent-action-buttons"
 import { RejectOrderDialog } from "@/components/orders/reject-order-dialog"
 import { CountdownTimer } from "@/components/orders/countdown-timer"
+import { AgentMessageButton } from "@/components/orders/messaging-toggle"
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -108,6 +109,12 @@ export default async function ClientOrdersPage() {
                        <RejectOrderDialog orderId={order.id} />
                     </div>
                   )}
+
+                  {/* Messaging Access Visualizer */}
+                  {order.status !== "pending" && order.status !== "cancelled" && (
+                     <AgentMessageButton enabled={!!order.form_data?.messaging_enabled} />
+                  )}
+
                   {/* Verify Receipt — shown when customer uploaded proof */}
                   {order.form_data?.payment_proof_url && order.status === "paid" && (
                     <div className="space-y-2">
