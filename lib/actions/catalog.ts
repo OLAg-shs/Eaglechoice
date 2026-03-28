@@ -228,10 +228,10 @@ export async function updateProduct(formData: FormData) {
       is_available,
     })
     .eq('id', id)
-    
   if (error) throw new Error(`Update failed: ${error.message}`)
   
   revalidatePath("/admin/products")
+  revalidatePath("/agent/products")
   revalidatePath("/catalog")
   revalidatePath(`/catalog/product/${id}`)
   return { success: true }

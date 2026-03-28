@@ -11,7 +11,8 @@ import { CountdownTimer } from "@/components/orders/countdown-timer"
 import { CustomerMessageToggle } from "@/components/orders/messaging-toggle"
 import { CancelOrderButton } from "@/components/orders/customer-action-buttons"
 
-export default async function OrderDetailPage({ params }: { params: { id: string } }) {
+export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
@@ -24,7 +25,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
       services(name, category),
       profiles!orders_client_id_fkey(full_name, phone, is_verified)
     `)
-    .eq("id", params.id)
+    .eq("id", id)
     .single()
 
   if (error || !order) notFound()

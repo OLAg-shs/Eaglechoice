@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { createClient, createAdminClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import { productSchema } from "@/lib/validations/product"
 
@@ -58,13 +58,31 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
     }
   }
 
-  let images: string[] | undefined
+  let images: string[] = []
+  const files = formData.getAll("image_files") as File[]
+  
+  if (files && files.length > 0) {
+    const adminSupabase = await createAdminClient()
+    for (const file of files) {
+      if (file.size === 0) continue
+      const fileExt = file.name.split('.').pop()
+      const fileName = `products/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      
+      const { error: uploadError } = await adminSupabase.storage.from('files').upload(fileName, file, { cacheControl: '3600', upsert: false })
+      if (!uploadError) {
+        const { data: { publicUrl } } = adminSupabase.storage.from('files').getPublicUrl(fileName)
+        images.push(publicUrl)
+      }
+    }
+  }
+
   const imagesRaw = formData.get("images") as string
   if (imagesRaw) {
     try {
-      images = JSON.parse(imagesRaw)
+      images = [...images, ...JSON.parse(imagesRaw)]
     } catch {
-      images = imagesRaw.split(",").map((s) => s.trim()).filter(Boolean)
+      const split = imagesRaw.split(",").map((s) => s.trim()).filter(Boolean)
+      images = [...images, ...split]
     }
   }
 

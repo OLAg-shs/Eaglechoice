@@ -90,8 +90,14 @@ export default function ClientNewProductPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="images">Image URLs (comma-separated)</Label>
+          <Label htmlFor="images">Online Image URLs (comma-separated)</Label>
           <Input id="images" name="images" placeholder="https://..., https://..." />
+        </div>
+
+        <div className="space-y-2 border-2 border-dashed border-gray-200 p-4 rounded-xl bg-gray-50/50">
+          <Label htmlFor="image_files" className="font-semibold text-gray-700">Upload Product Images from Desktop</Label>
+          <Input id="image_files" name="image_files" type="file" accept="image/*" multiple className="cursor-pointer file:cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+          <p className="text-xs text-gray-500">You can select multiple images at once.</p>
         </div>
 
         <div className="flex items-center gap-3">
