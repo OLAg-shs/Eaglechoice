@@ -55,7 +55,7 @@ export default function CartCheckoutPage() {
       }))
 
       const failed = results.find(r => r.error)
-      if (failed) throw new Error(failed.error)
+      if (failed) throw new Error(failed.error ?? "Order failed. Please try again.")
 
       clearCart()
       toast({ title: "Orders Placed! 🎉", description: "Your agent(s) will review and confirm your order(s) shortly." })
