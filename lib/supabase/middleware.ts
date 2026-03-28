@@ -39,6 +39,8 @@ export async function updateSession(request: NextRequest) {
   const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/auth/callback"]
   const isPublicRoute = publicRoutes.some((route) => pathname === route)
   const isCatalogRoute = pathname.startsWith("/catalog")
+  const isStoresRoute = pathname.startsWith("/stores")
+  const isSellRoute = pathname.startsWith("/sell")
   const isOldCatalogRoute = pathname.startsWith("/user/catalog")
   const isOgRoute = pathname.startsWith("/api/og")
   const isApiWebhook = pathname.startsWith("/api/webhooks")
@@ -47,8 +49,8 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(new URL("/catalog", request.url))
   }
 
-  // Allow webhooks, catalog viewing, and OG images through without auth
-  if (isApiWebhook || isCatalogRoute || isOgRoute) {
+  // Allow webhooks, catalog viewing, OG images, store directory, and sell pages through
+  if (isApiWebhook || isCatalogRoute || isOgRoute || isStoresRoute || isSellRoute) {
     return supabaseResponse
   }
 
@@ -73,15 +75,19 @@ export async function updateSession(request: NextRequest) {
     }
 
     const role = profile.role
-    const urlPrefix = role === "admin" ? "admin" : role === "client" ? "agent" : "client"
+    let redirectPath = "/client"
+    if (role === "admin") redirectPath = "/admin"
+    else if (role === "client") redirectPath = "/agent"
+    else if (role === "seller") redirectPath = "/store"
+    else redirectPath = "/client"
     
     const url = request.nextUrl.clone()
-    url.pathname = `/${urlPrefix}`
+    url.pathname = redirectPath
     return NextResponse.redirect(url)
   }
 
-  // Role-based route protection
-  if (user && (pathname.startsWith("/admin") || pathname.startsWith("/agent") || pathname.startsWith("/client") || pathname === "/")) {
+  // Role-based route protection for dashboards
+  if (user && (pathname.startsWith("/admin") || pathname.startsWith("/agent") || pathname.startsWith("/client") || pathname.startsWith("/store") || pathname === "/")) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -94,19 +100,25 @@ export async function updateSession(request: NextRequest) {
     }
 
     const role = profile.role
-    const urlPrefix = role === "admin" ? "admin" : role === "client" ? "agent" : "client"
+    let urlPrefix = "client"
+    if (role === "admin") urlPrefix = "admin"
+    else if (role === "client") urlPrefix = "agent"
+    else if (role === "seller") urlPrefix = "store"
+    else urlPrefix = "client"
 
-    // Check if user is accessing the correct role path (ignore exact root "/")
+    // Sellers can access /store/* freely (slug-based)
+    if (role === "seller" && pathname.startsWith("/store")) return supabaseResponse
+
     if (pathname !== "/") {
       const requestedRole = pathname.split("/")[1]
-      if (requestedRole !== urlPrefix) {
+      if (requestedRole !== urlPrefix && !(role === "seller" && requestedRole === "store")) {
         const url = request.nextUrl.clone()
-        url.pathname = `/${urlPrefix}`
+        url.pathname = role === "seller" ? "/store" : `/${urlPrefix}`
         return NextResponse.redirect(url)
       }
     } else {
       const url = request.nextUrl.clone()
-      url.pathname = `/${urlPrefix}`
+      url.pathname = role === "seller" ? "/store" : `/${urlPrefix}`
       return NextResponse.redirect(url)
     }
   }
