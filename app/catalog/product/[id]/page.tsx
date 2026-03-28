@@ -96,12 +96,6 @@ export default async function ProductDetailPage({
         <Link href="/catalog" className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />Back to Catalog
         </Link>
-        <ShareButton 
-          url={shareUrl} 
-          title={product.name} 
-          id={product.id}
-          type="product"
-        />
       </div>
 
       <Card className="bg-white dark:bg-[#111111] border-gray-200 dark:border-gray-800">

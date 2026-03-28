@@ -428,3 +428,70 @@ export async function updateOrderTracking(formData: FormData): Promise<{ error?:
 
   return { success: true }
 }
+
+export async function uploadPaymentProof(formData: FormData): Promise<{ error?: string; success?: boolean; url?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const orderId = formData.get("orderId") as string
+  const file = formData.get("proof") as File
+  if (!file || file.size === 0) return { error: "No file selected" }
+
+  const { data: order } = await supabase.from("orders").select("client_id, user_id, order_number").eq("id", orderId).single()
+  if (!order) return { error: "Order not found" }
+  if (order.user_id !== user.id) return { error: "Unauthorized" }
+
+  const adminSupabase = await createAdminClient()
+  const fileExt = file.name.split('.').pop() || 'png'
+  const fileName = `receipts/${orderId}-${Date.now()}.${fileExt}`
+
+  const { error: uploadError } = await adminSupabase.storage.from('files').upload(fileName, file, { cacheControl: '3600', upsert: false })
+  if (uploadError) return { error: uploadError.message }
+
+  const { data: { publicUrl } } = adminSupabase.storage.from('files').getPublicUrl(fileName)
+
+  const { data: existing } = await supabase.from("orders").select("form_data").eq("id", orderId).single()
+  const fd = (existing?.form_data as Record<string, any>) || {}
+  await supabase.from("orders").update({ form_data: { ...fd, payment_proof_url: publicUrl } }).eq("id", orderId)
+
+  if (order.client_id) {
+    await supabase.from("notifications").insert({
+      user_id: order.client_id,
+      type: NOTIFICATION_TYPES.PAYMENT_RECEIVED,
+      title: "Payment Proof Submitted 📎",
+      content: `Customer uploaded a payment receipt for order ${order.order_number}. Please verify.`,
+      link: `/client/orders`,
+      metadata: { order_id: orderId },
+    })
+  }
+
+  revalidatePath(`/user/orders/${orderId}`)
+  return { success: true, url: publicUrl }
+}
+
+export async function confirmPaymentProof(orderId: string): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: "Not authenticated" }
+
+  const { data: order } = await supabase.from("orders").select("user_id, order_number, client_id").eq("id", orderId).single()
+  if (!order) return { error: "Order not found" }
+
+  await supabase.from("orders").update({ status: "processing" }).eq("id", orderId)
+
+  await supabase.from("notifications").insert({
+    user_id: order.user_id,
+    type: NOTIFICATION_TYPES.ORDER_STATUS,
+    title: "Payment Confirmed ✅",
+    content: `Your payment for order ${order.order_number} has been verified. We're now processing your order!`,
+    link: `/user/orders/${orderId}`,
+    metadata: { order_id: orderId },
+  })
+
+  revalidatePath(`/client/orders`)
+  revalidatePath(`/user/orders/${orderId}`)
+  revalidatePath("/admin/orders")
+  return { success: true }
+}
+

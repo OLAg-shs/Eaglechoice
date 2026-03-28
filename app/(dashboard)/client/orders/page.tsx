@@ -1,14 +1,18 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ClipboardList } from "lucide-react"
+import { ClipboardList, CheckCheck, FileCheck2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import Link from "next/link"
 import { OrderStatusUpdater } from "@/components/orders/order-status-updater"
 import { TrackingUpdater } from "@/components/orders/tracking-updater"
+import { updateOrderStatus } from "@/lib/actions/orders"
+import { confirmPaymentProof } from "@/lib/actions/orders"
 
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
+  agent_confirmed: "bg-teal-100 text-teal-700",
   in_progress: "bg-blue-100 text-blue-700",
   payment_pending: "bg-orange-100 text-orange-700",
   paid: "bg-green-100 text-green-700",
@@ -78,6 +82,28 @@ export default async function ClientOrdersPage() {
                 <div className="mt-4 space-y-2">
                   <OrderStatusUpdater orderId={order.id} currentStatus={order.status} role="client" />
                   <TrackingUpdater orderId={order.id} currentTracking={order.form_data?.tracking} />
+                  {/* Confirm Order — shown when status is pending */}
+                  {order.status === "pending" && (
+                    <form action={async () => { "use server"; await updateOrderStatus(order.id, "agent_confirmed") }}>
+                      <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                        <CheckCheck className="h-4 w-4" /> Confirm Order
+                      </Button>
+                    </form>
+                  )}
+                  {/* Verify Receipt — shown when customer uploaded proof */}
+                  {order.form_data?.payment_proof_url && order.status === "paid" && (
+                    <div className="space-y-2">
+                      <a href={order.form_data.payment_proof_url} target="_blank" rel="noreferrer"
+                        className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400 underline font-medium">
+                        <FileCheck2 className="h-4 w-4" /> View Customer Receipt Proof
+                      </a>
+                      <form action={async () => { "use server"; await confirmPaymentProof(order.id) }}>
+                        <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white gap-2">
+                          <FileCheck2 className="h-4 w-4" /> Verify &amp; Confirm Payment
+                        </Button>
+                      </form>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

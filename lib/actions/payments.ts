@@ -7,20 +7,30 @@ import { revalidatePath } from "next/cache"
 export async function createPaymentIntent(orderId: string) {
   const supabase = await createClient()
 
-  // 1. Get order details
+  // 1. Get order details incl. agent profile
   const { data: order, error: orderErr } = await supabase
     .from("orders")
-    .select("*, profiles!orders_user_id_fkey(email)")
+    .select(`*, 
+      customer:profiles!orders_user_id_fkey(email), 
+      agent:profiles!orders_client_id_fkey(paystack_subaccount_code, commission_rate)
+    `)
     .eq("id", orderId)
     .single()
 
   if (orderErr || !order) return { error: "Order not found" }
 
-  // 2. Initialize Paystack
+  const agentSubaccountCode = (order.agent as any)?.paystack_subaccount_code as string | null
+  const agentCommissionRate = (order.agent as any)?.commission_rate as number | null
+  // Admin keeps (100 - commission) percent e.g. agent gets 15%, admin gets 85%
+  const adminPercentage = agentCommissionRate ? (100 - agentCommissionRate) : 80
+
+  // 2. Initialize Paystack (with subaccount split if agent has one)
   const res = await initializePaystackTransaction(
-    (order.profiles as any).email,
+    (order.customer as any).email,
     order.total_amount,
-    { order_id: orderId, user_id: order.user_id }
+    { order_id: orderId, user_id: order.user_id },
+    agentSubaccountCode || undefined,
+    adminPercentage
   )
 
   if (!res.status) return { error: res.message }

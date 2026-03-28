@@ -6,6 +6,7 @@ import { formatCurrency, formatDate } from "@/lib/utils"
 import { ShoppingBag, Briefcase, Clock, CheckCircle2, XCircle, ChevronLeft, Truck } from "lucide-react"
 import Link from "next/link"
 import { PayButton } from "@/components/payments/pay-button"
+import { ReceiptUploader } from "@/components/payments/receipt-uploader"
 
 export default async function OrderDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -28,6 +29,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
 
   const statusColors: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-700",
+    agent_confirmed: "bg-teal-100 text-teal-700",
     in_progress: "bg-blue-100 text-blue-700",
     payment_pending: "bg-orange-100 text-orange-700",
     paid: "bg-green-100 text-green-700",
@@ -159,15 +161,27 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                  <span>{formatCurrency(order.total_amount)}</span>
               </div>
               
-              {(order.status === "pending" || order.status === "payment_pending") && (
+              {(order.status === "agent_confirmed" || order.status === "payment_pending") && (
                 <div className="pt-4">
                    <PayButton orderId={order.id} amount={Number(order.total_amount)} />
-                   <p className="mt-3 text-[10px] text-gray-400 text-center">Secure checkout by Paystack. All major cards & mobile money accepted.</p>
+                   <p className="mt-3 text-[10px] text-gray-400 text-center">Secure checkout by Paystack. All major cards &amp; mobile money accepted.</p>
                 </div>
               )}
               {order.status === "paid" && (
-                <div className="flex items-center justify-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg font-bold text-sm">
-                   <CheckCircle2 className="h-4 w-4" /> Order is Paid
+                <div className="space-y-3">
+                  <div className="flex items-center justify-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg font-bold text-sm">
+                     <CheckCircle2 className="h-4 w-4" /> Order is Paid
+                  </div>
+                  <a href={`/api/receipt/${order.id}`} target="_blank" rel="noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
+                    🧾 Download Eagle Choice Receipt
+                  </a>
+                  <ReceiptUploader orderId={order.id} existingProofUrl={order.form_data?.payment_proof_url} />
+                </div>
+              )}
+              {order.status === "pending" && (
+                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-100 dark:border-yellow-800">
+                  <p className="text-xs text-yellow-700 dark:text-yellow-400 font-medium text-center">⏳ Waiting for your agent to confirm this order before payment.</p>
                 </div>
               )}
             </CardContent>

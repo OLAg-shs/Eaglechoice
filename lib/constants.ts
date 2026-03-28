@@ -13,6 +13,7 @@ export type UserRole = (typeof ROLES)[keyof typeof ROLES]
 
 export const ORDER_STATUSES = {
   PENDING: "pending",
+  AGENT_CONFIRMED: "agent_confirmed",
   IN_PROGRESS: "in_progress",
   PAYMENT_PENDING: "payment_pending",
   PAID: "paid",
@@ -25,6 +26,7 @@ export type OrderStatus = (typeof ORDER_STATUSES)[keyof typeof ORDER_STATUSES]
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   pending: "Pending",
+  agent_confirmed: "Agent Confirmed",
   in_progress: "In Progress",
   payment_pending: "Awaiting Payment",
   paid: "Paid",
@@ -35,6 +37,7 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
 
 export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
   pending: "bg-yellow-100 text-yellow-800",
+  agent_confirmed: "bg-teal-100 text-teal-800",
   in_progress: "bg-blue-100 text-blue-800",
   payment_pending: "bg-orange-100 text-orange-800",
   paid: "bg-green-100 text-green-800",
@@ -44,7 +47,8 @@ export const ORDER_STATUS_COLORS: Record<OrderStatus, string> = {
 }
 
 export const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
-  pending: ["in_progress", "cancelled"],
+  pending: ["agent_confirmed", "cancelled"],
+  agent_confirmed: ["in_progress", "cancelled"],
   in_progress: ["payment_pending", "cancelled"],
   payment_pending: ["paid", "cancelled"],
   paid: ["processing"],

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Footer } from "@/components/layout/footer"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { MobileCatalogNav } from "@/components/layout/mobile-catalog-nav"
+import { CartDrawerButton } from "@/components/cart/cart-drawer"
 
 export default async function CatalogLayout({
   children,
@@ -46,6 +47,9 @@ export default async function CatalogLayout({
               )}
             </div>
             
+            {/* Cart */}
+            <CartDrawerButton />
+
             {/* Mobile Nav Button */}
             <MobileCatalogNav isLoggedIn={!!user} />
           </div>
