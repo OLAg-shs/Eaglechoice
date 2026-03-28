@@ -140,7 +140,7 @@ export async function GET(req: NextRequest) {
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: "white",
-              padding: "40px",
+              padding: "15px",
               position: "relative",
             }}>
               {imageData ? (
@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
                   alt=""
                   style={{ 
                     width: "100%", 
-                    height: "320px", 
+                    height: "380px", 
                     objectFit: "contain",
                   }}
                 />
