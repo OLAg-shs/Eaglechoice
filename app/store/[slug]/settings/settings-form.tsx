@@ -137,8 +137,6 @@ export default function StoreSettingsForm({ store }: { store: any }) {
               ))}
             </div>
           </div>
-        </div>
-
           <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 shadow-sm">
             <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
               <CreditCard className="h-6 w-6 text-orange-600" />
@@ -181,7 +179,10 @@ export default function StoreSettingsForm({ store }: { store: any }) {
               <p className="text-[10px] text-gray-400 font-medium italic">Enter the details where you want your store earnings to be sent via Paystack.</p>
             </div>
           </div>
+        </div>
 
+        {/* Right Column: Aesthetics */}
+        <div className="space-y-6">
           <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 shadow-sm">
             <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
               <Palette className="h-6 w-6 text-purple-600" />
