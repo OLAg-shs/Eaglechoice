@@ -57,7 +57,7 @@ export async function updateSession(request: NextRequest) {
   // If not logged in and trying to access protected route
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
-    url.pathname = "/login"
+    url.pathname = "/register"
     return NextResponse.redirect(url)
   }
 
@@ -106,8 +106,20 @@ export async function updateSession(request: NextRequest) {
     else if (role === "seller") urlPrefix = "store"
     else urlPrefix = "client"
 
-    // Sellers can access /store/* freely (slug-based)
-    if (role === "seller" && pathname.startsWith("/store")) return supabaseResponse
+    // Sellers must have a store. If they don't, push to setup wizard.
+    if (role === "seller") {
+      const { data: store } = await supabase
+        .from("stores")
+        .select("id")
+        .eq("owner_id", user.id)
+        .single()
+      
+      if (!store && !pathname.startsWith("/register/seller/setup")) {
+        const url = request.nextUrl.clone()
+        url.pathname = "/register/seller/setup"
+        return NextResponse.redirect(url)
+      }
+    }
 
     if (pathname !== "/") {
       const requestedRole = pathname.split("/")[1]

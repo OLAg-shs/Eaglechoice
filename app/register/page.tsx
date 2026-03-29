@@ -111,6 +111,16 @@ export default function RegisterChoicePage() {
         </div>
       </div>
 
+      {/* ── TOP RIGHT: LOGIN BUTTON ── */}
+      <div className="absolute top-10 right-10 z-30">
+        <Link 
+          href="/login" 
+          className="px-6 py-3 rounded-full bg-white/10 backdrop-blur-2xl border border-white/20 text-xs font-black uppercase tracking-widest text-white hover:bg-white hover:text-black transition-all shadow-2xl"
+        >
+          Sign In
+        </Link>
+      </div>
+
     </div>
   )
 }

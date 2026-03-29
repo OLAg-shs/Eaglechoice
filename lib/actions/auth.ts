@@ -14,7 +14,7 @@ export async function signUp(formData: FormData): Promise<{ error?: string; succ
     phone: (formData.get("phone") as string) || undefined,
     password: formData.get("password") as string,
     confirm_password: formData.get("password") as string, // auto-confirm
-    role: (formData.get("role") as "user" | "client") || "user",
+    role: (formData.get("role") as "user" | "client" | "seller") || "user",
   }
 
   const validated = registerSchema.safeParse(rawData)
