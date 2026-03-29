@@ -7,6 +7,12 @@ export const productSchema = z.object({
   category: z.string().min(1, "Category is required"), // Make it flexible
   brand: z.string().optional(),
   specifications: z.record(z.string(), z.string()).optional(),
+  display_config: z.object({
+    background: z.string().optional(),
+    padding: z.string().optional(),
+    objectFit: z.string().optional(),
+    showBranding: z.boolean().optional(),
+  }).optional(),
   images: z.array(z.string()).optional(),
   stock_quantity: z.coerce.number().int().min(0).default(0),
   is_available: z.boolean().default(true),

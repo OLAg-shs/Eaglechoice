@@ -36,6 +36,9 @@ export async function createStore(formData: FormData): Promise<{ error?: string;
   const social_links_raw = formData.get("social_links") as string
   const social_links = social_links_raw ? JSON.parse(social_links_raw) : {}
 
+  const store_config_raw = formData.get("store_config") as string
+  const store_config = store_config_raw ? JSON.parse(store_config_raw) : { mode: "online", availability: "open", announcement: "" }
+
   const category_focus = (formData.get("category_focus") as string) || "General"
 
   const payout_bank_name = formData.get("payout_bank_name") as string
@@ -68,6 +71,7 @@ export async function createStore(formData: FormData): Promise<{ error?: string;
     card_config,
     dashboard_config,
     social_links,
+    store_config,
     category_focus,
     payout_bank_name,
     payout_account_number,
@@ -178,6 +182,9 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
   const social_links_raw = formData.get("social_links") as string
   const social_links = social_links_raw ? JSON.parse(social_links_raw) : undefined
 
+  const store_config_raw = formData.get("store_config") as string
+  const store_config = store_config_raw ? JSON.parse(store_config_raw) : undefined
+
   const category_focus = (formData.get("category_focus") as string) || undefined
 
   const font_preset = formData.get("font_preset") as string
@@ -208,6 +215,7 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
   if (card_config) updates.card_config = card_config
   if (dashboard_config) updates.dashboard_config = dashboard_config
   if (social_links) updates.social_links = social_links
+  if (store_config) updates.store_config = store_config
   if (category_focus) updates.category_focus = category_focus
   if (logo_url) updates.logo_url = logo_url
 

@@ -96,6 +96,16 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
     }
   }
 
+  let display_config: any = undefined
+  const displayConfigRaw = formData.get("display_config") as string
+  if (displayConfigRaw) {
+    try {
+      display_config = JSON.parse(displayConfigRaw)
+    } catch {
+      // fallback
+    }
+  }
+
   let images: string[] = []
   const files = formData.getAll("image_files") as File[]
   
@@ -132,6 +142,7 @@ export async function createProduct(formData: FormData): Promise<{ error?: strin
     category: formData.get("category") as string || "general",
     brand: (formData.get("brand") as string) || undefined,
     specifications: specifications || {},
+    display_config: display_config || undefined,
     images,
     stock_quantity: formData.get("stock") as string || formData.get("stock_quantity") as string,
     is_available: formData.get("is_available") === "true" || formData.get("is_available") === "on",
@@ -199,6 +210,16 @@ export async function updateProduct(id: string, formData: FormData): Promise<{ e
     }
   }
 
+  let display_config: any = undefined
+  const displayConfigRaw = formData.get("display_config") as string
+  if (displayConfigRaw) {
+    try {
+      display_config = JSON.parse(displayConfigRaw)
+    } catch {
+      // fallback
+    }
+  }
+
   let images: string[] | undefined
   const imagesRaw = formData.get("images") as string
   if (imagesRaw) {
@@ -216,6 +237,7 @@ export async function updateProduct(id: string, formData: FormData): Promise<{ e
     category: formData.get("category") as string || "general",
     brand: (formData.get("brand") as string) || undefined,
     specifications: specifications || {},
+    display_config: display_config || undefined,
     images: images && images.length > 0 ? images : undefined,
     stock_quantity: formData.get("stock") as string || formData.get("stock_quantity") as string,
     is_available: formData.get("is_available") === "true" || formData.get("is_available") === "on",
