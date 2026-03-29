@@ -2,13 +2,14 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Palette, Tag, ImageIcon, Loader2, Save, Globe, CreditCard } from "lucide-react"
+import { Palette, Tag, ImageIcon, Loader2, Save, Globe, CreditCard, Zap, ShieldCheck, Monitor } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { updateStore } from "@/lib/actions/stores"
+import ChoiceCardPreview from "@/components/ChoiceCardPreview"
 
 const CATEGORY_PRESETS = [
   "Electronics", "Fashion", "Food & Drinks", "Health & Beauty",
@@ -47,6 +48,10 @@ export default function StoreSettingsForm({ store }: { store: any }) {
   const [themeId, setThemeId] = useState(store.theme_id || "modern")
   const [fontPreset, setFontPreset] = useState(store.font_preset || "sans")
   
+  // Master Architect State
+  const [features, setFeatures] = useState(store.features || { ai_agents: true, branded_cards: true, analytics: true })
+  const [cardConfig, setCardConfig] = useState(store.card_config || { theme: "midnight", layout: "landscape", primary_color: brandColor })
+
   // Payout State
   const [bankName, setBankName] = useState(store.payout_bank_name || "")
   const [accountNumber, setAccountNumber] = useState(store.payout_account_number || "")
@@ -77,6 +82,8 @@ export default function StoreSettingsForm({ store }: { store: any }) {
     formData.set("payout_account_number", accountNumber)
     formData.set("payout_account_name", accountName)
     formData.set("category_tags", selectedCategories.join(","))
+    formData.set("features", JSON.stringify(features))
+    formData.set("card_config", JSON.stringify(cardConfig))
     if (logoFile) formData.set("logo", logoFile)
 
     const result = await updateStore(store.id, formData)
@@ -120,6 +127,33 @@ export default function StoreSettingsForm({ store }: { store: any }) {
             </div>
           </div>
 
+          {/* Intelligence Suite Toggles */}
+          <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 shadow-sm">
+            <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
+              <Zap className="h-6 w-6 text-blue-600" />
+              Intelligence Suite
+            </h2>
+            <div className="space-y-3">
+              {[
+                { id: 'ai_agents', label: 'AI Inventory Manager', sub: 'Enable agents to handle products.' },
+                { id: 'branded_cards', label: 'Identity Card System', sub: 'Generate premium digital cards.' },
+                { id: 'analytics', label: 'Market Insights', sub: 'Activate revenue tracking.' },
+              ].map((feat) => (
+                <button
+                  key={feat.id} type="button"
+                  onClick={() => setFeatures((prev: any) => ({ ...prev, [feat.id]: !prev[feat.id] }))}
+                  className={`flex items-center justify-between w-full p-4 rounded-2xl border-2 transition-all text-left ${features[feat.id] ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/20' : 'border-gray-50 dark:border-gray-900'}`}
+                >
+                  <div className="flex-1">
+                    <h3 className="text-sm font-black tracking-tight">{feat.label}</h3>
+                    <p className="text-[10px] text-gray-400 font-medium">{feat.sub}</p>
+                  </div>
+                  {features[feat.id] && <ShieldCheck className="h-5 w-5 text-blue-600" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 shadow-sm">
             <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
               <Tag className="h-6 w-6 text-emerald-600" />
@@ -137,19 +171,19 @@ export default function StoreSettingsForm({ store }: { store: any }) {
               ))}
             </div>
           </div>
+
           <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 shadow-sm">
             <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
               <CreditCard className="h-6 w-6 text-orange-600" />
               Payout & Revenue
             </h2>
-            
             <div className="space-y-6">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Settlement Bank</Label>
                 <select 
                   value={bankName} 
                   onChange={e => setBankName(e.target.value)}
-                  className="w-full h-12 rounded-xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 px-4 text-sm font-bold appearance-none cursor-pointer focus:ring-4 focus:ring-blue-600/10 transition-all"
+                  className="w-full h-12 rounded-xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 px-4 text-sm font-bold appearance-none cursor-pointer focus:ring-4 focus:ring-blue-600/10 transition-all font-sans"
                 >
                   <option value="" disabled>Select your bank...</option>
                   {GHANA_BANKS.map(bank => <option key={bank} value={bank}>{bank}</option>)}
@@ -176,17 +210,65 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                   />
                 </div>
               </div>
-              <p className="text-[10px] text-gray-400 font-medium italic">Enter the details where you want your store earnings to be sent via Paystack.</p>
             </div>
           </div>
         </div>
 
         {/* Right Column: Aesthetics */}
         <div className="space-y-6">
+          {/* Card Stylist Live Preview */}
           <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 shadow-sm">
             <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
               <Palette className="h-6 w-6 text-purple-600" />
-              Boutique Style Studio
+              Identity Stylist (Live)
+            </h2>
+            
+            <div className="space-y-6">
+              <ChoiceCardPreview 
+                name={name} 
+                tagline={tagline} 
+                color={cardConfig.primary_color || brandColor}
+                layout={cardConfig.layout || "landscape"}
+                theme={cardConfig.theme || "midnight"}
+              />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Card Layout</Label>
+                  <div className="flex gap-2">
+                    {['landscape', 'portrait'].map((l) => (
+                      <button 
+                        key={l} type="button"
+                        onClick={() => setCardConfig((prev: any) => ({ ...prev, layout: l }))}
+                        className={`flex-1 h-10 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${cardConfig.layout === l ? 'border-blue-600 bg-blue-50/50 text-blue-600' : 'border-gray-50'}`}
+                      >
+                        {l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Card Theme</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['midnight', 'gold', 'neon', 'minimal'].map((t) => (
+                      <button 
+                        key={t} type="button"
+                        onClick={() => setCardConfig((prev: any) => ({ ...prev, theme: t }))}
+                        className={`h-10 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${cardConfig.theme === t ? 'border-blue-600 text-blue-600' : 'border-gray-50'}`}
+                      >
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-gray-950 border border-gray-100 dark:border-gray-800 rounded-[2.5rem] p-8 shadow-sm">
+            <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
+              <ImageIcon className="h-6 w-6 text-blue-600" />
+              Brand Accents
             </h2>
             
             <div className="space-y-8">
@@ -227,29 +309,17 @@ export default function StoreSettingsForm({ store }: { store: any }) {
                 </div>
               </div>
 
-              {/* Font Selection */}
-              <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Typography Preset</Label>
-                <div className="flex gap-4">
-                  {FONTS.map(f => (
-                    <button
-                      key={f.id} type="button" onClick={() => setFontPreset(f.id)}
-                      className={`flex-1 p-5 rounded-2xl border-2 transition-all text-center ${fontPreset === f.id ? 'border-blue-600 ring-4 ring-blue-500/10' : 'border-gray-50 dark:border-gray-900'}`}
-                    >
-                      <p className={`text-base font-black ${f.class}`}>{f.label}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Brand Color */}
               <div className="space-y-3 pt-4 border-t border-gray-50 dark:border-gray-900">
                 <Label className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Brand Color Accent</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Signature Color</span>
                   <span className="font-mono text-xs font-bold uppercase text-gray-500">{brandColor}</span>
                 </Label>
                 <div className="flex items-center gap-4">
-                  <input type="color" value={brandColor} onChange={e => setBrandColor(e.target.value)}
+                  <input type="color" value={brandColor} onChange={e => {
+                    setBrandColor(e.target.value);
+                    setCardConfig((prev: any) => ({ ...prev, primary_color: e.target.value }));
+                  }}
                     className="h-12 w-24 rounded-xl border border-gray-100 dark:border-gray-800 bg-transparent cursor-pointer" />
                   <div className="flex-1 h-12 rounded-xl shadow-inner animate-in fade-in transition-all" style={{ background: brandColor, opacity: 0.15 }} />
                 </div>

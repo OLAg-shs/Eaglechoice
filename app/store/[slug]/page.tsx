@@ -30,14 +30,16 @@ export default async function SellerDashboard({ params }: { params: Promise<{ sl
   ])
 
   const brandColor = store.brand_color || "#2563eb"
+  const storeFeatures = (store.features as any) || { ai_agents: true, branded_cards: true, analytics: true }
+  
   const hasAgents = (agentCount ?? 0) > 0
 
   const stats = [
-    { label: "Total Products", value: productCount ?? 0, icon: Package, href: `/store/${slug}/products` },
-    { label: "Total Orders", value: orderCount ?? 0, icon: ClipboardList, href: `/store/${slug}/orders` },
-    { label: "Pending Orders", value: pendingCount ?? 0, icon: TrendingUp, href: `/store/${slug}/orders` },
-    { label: "Active Agents", value: agentCount ?? 0, icon: Users, href: `/store/${slug}/agents` },
-  ]
+    { label: "Total Products", value: productCount ?? 0, icon: Package, href: `/store/${slug}/products`, show: true },
+    { label: "Total Orders", value: orderCount ?? 0, icon: ClipboardList, href: `/store/${slug}/orders`, show: true },
+    { label: "Pending Orders", value: pendingCount ?? 0, icon: TrendingUp, href: `/store/${slug}/orders`, show: true },
+    { label: "Active Agents", value: agentCount ?? 0, icon: Users, href: `/store/${slug}/agents`, show: storeFeatures.ai_agents },
+  ].filter(s => s.show)
 
   const statusColors: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-700",
@@ -54,8 +56,8 @@ export default async function SellerDashboard({ params }: { params: Promise<{ sl
         <p className="text-sm text-gray-500 mt-1">Here's what's happening with <span className="font-semibold" style={{ color: brandColor }}>{store.name}</span></p>
       </div>
 
-      {/* No-agent banner */}
-      {!hasAgents && (
+      {/* No-agent banner - only show if AI Agents module is enabled */}
+      {storeFeatures.ai_agents && !hasAgents && (
         <div className="rounded-2xl border p-4 flex items-center justify-between gap-4"
           style={{ borderColor: brandColor + "44", background: brandColor + "11" }}>
           <div>

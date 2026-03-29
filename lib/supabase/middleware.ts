@@ -121,6 +121,23 @@ export async function updateSession(request: NextRequest) {
       }
     }
 
+    // Buyers must have preferences. If they don't, push to discovery wizard.
+    if (role === "user") {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("preferences")
+        .eq("id", user.id)
+        .single()
+
+      const onboardingComplete = profile?.preferences && (profile.preferences as any).onboarding_complete
+      
+      if (!onboardingComplete && !pathname.startsWith("/register/buyer/setup")) {
+        const url = request.nextUrl.clone()
+        url.pathname = "/register/buyer/setup"
+        return NextResponse.redirect(url)
+      }
+    }
+
     if (pathname !== "/") {
       const requestedRole = pathname.split("/")[1]
       if (requestedRole !== urlPrefix && !(role === "seller" && requestedRole === "store")) {

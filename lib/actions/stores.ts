@@ -23,6 +23,13 @@ export async function createStore(formData: FormData): Promise<{ error?: string;
   const theme_id = (formData.get("theme_id") as string) || "modern"
   const font_preset = (formData.get("font_preset") as string) || "sans"
   
+  // Master Architect Config
+  const features_raw = formData.get("features") as string
+  const features = features_raw ? JSON.parse(features_raw) : { ai_agents: true, branded_cards: true, analytics: true }
+  
+  const card_config_raw = formData.get("card_config") as string
+  const card_config = card_config_raw ? JSON.parse(card_config_raw) : { theme: "midnight", layout: "landscape" }
+
   const payout_bank_name = formData.get("payout_bank_name") as string
   const payout_account_number = formData.get("payout_account_number") as string
   const payout_account_name = formData.get("payout_account_name") as string
@@ -49,6 +56,8 @@ export async function createStore(formData: FormData): Promise<{ error?: string;
     category_tags,
     theme_id,
     font_preset,
+    features,
+    card_config,
     payout_bank_name,
     payout_account_number,
     payout_account_name,
@@ -146,6 +155,12 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
   const description = (formData.get("description") as string)?.trim()
   const brand_color = formData.get("brand_color") as string
   const theme_id = formData.get("theme_id") as string
+  const features_raw = formData.get("features") as string
+  const features = features_raw ? JSON.parse(features_raw) : undefined
+  
+  const card_config_raw = formData.get("card_config") as string
+  const card_config = card_config_raw ? JSON.parse(card_config_raw) : undefined
+
   const font_preset = formData.get("font_preset") as string
   const payout_bank_name = formData.get("payout_bank_name") as string
   const payout_account_number = formData.get("payout_account_number") as string
@@ -170,6 +185,8 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
     name, tagline, description, brand_color, category_tags, theme_id, font_preset,
     payout_bank_name, payout_account_number, payout_account_name
   }
+  if (features) updates.features = features
+  if (card_config) updates.card_config = card_config
   if (logo_url) updates.logo_url = logo_url
 
   const { error } = await supabase.from("stores").update(updates).eq("id", storeId)

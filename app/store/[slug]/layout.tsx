@@ -25,15 +25,17 @@ export default async function SellerDashboardLayout({
   const { data: store } = await supabase.from("stores").select("*").eq("slug", slug).single()
   if (!store || store.owner_id !== user.id) redirect("/store")
 
+  const storeFeatures = (store.features as any) || { ai_agents: true, branded_cards: true, analytics: true }
+
   const navItems = [
-    { href: `/store/${slug}`, label: "Dashboard", icon: LayoutDashboard },
-    { href: `/store/${slug}/products`, label: "Products", icon: Package },
-    { href: `/store/${slug}/orders`, label: "Orders", icon: ClipboardList },
-    { href: `/store/${slug}/agents`, label: "Agents", icon: Users },
-    { href: `/store/${slug}/messages`, label: "Messages", icon: MessageSquare },
-    { href: `/store/${slug}/branded-card`, label: "Branded Card", icon: Palette },
-    { href: `/store/${slug}/settings`, label: "Settings", icon: Settings },
-  ]
+    { href: `/store/${slug}`, label: "Dashboard", icon: LayoutDashboard, show: true },
+    { href: `/store/${slug}/products`, label: "Products", icon: Package, show: true },
+    { href: `/store/${slug}/orders`, label: "Orders", icon: ClipboardList, show: true },
+    { href: `/store/${slug}/agents`, label: "Agents", icon: Users, show: storeFeatures.ai_agents },
+    { href: `/store/${slug}/messages`, label: "Messages", icon: MessageSquare, show: true },
+    { href: `/store/${slug}/branded-card`, label: "Identity Card", icon: Palette, show: storeFeatures.branded_cards },
+    { href: `/store/${slug}/settings`, label: "Settings", icon: Settings, show: true },
+  ].filter(item => item.show)
 
   const brandColor = store.brand_color || "#2563eb"
 

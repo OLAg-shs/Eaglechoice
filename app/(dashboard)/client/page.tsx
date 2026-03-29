@@ -11,8 +11,11 @@ export default async function UserDashboard() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect("/login")
 
-  const { data: profile } = await supabase.from("profiles").select("role, full_name").eq("id", user.id).single()
+  const { data: profile } = await supabase.from("profiles").select("role, full_name, preferences").eq("id", user.id).single()
   if (profile?.role !== "user") redirect("/login")
+
+  const buyerPrefs = (profile.preferences as any) || {}
+  const features = buyerPrefs.features || { priority_discovery: true, member_identity_card: true, smart_alerts: true }
 
   const [
     { count: totalOrders },
@@ -39,9 +42,30 @@ export default async function UserDashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Welcome, {profile.full_name?.split(" ")[0]}!</h1>
-        <p className="text-sm text-gray-500 mt-1">What can we help you with today?</p>
+      <div className="flex flex-col md:flex-row gap-6 items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-black text-gray-900 leading-tight">Welcome, {profile.full_name?.split(" ")[0]}!</h1>
+          <p className="text-sm text-gray-500 mt-1">Your personalized marketplace experience is active.</p>
+        </div>
+
+        {/* Member Card Component (only if enabled) */}
+        {features.member_identity_card && (
+          <div className="w-full md:w-80 h-48 rounded-3xl bg-black shadow-xl overflow-hidden relative group border border-white/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-transparent pointer-events-none" />
+            <div className="p-6 h-full flex flex-col justify-between relative z-10 font-sans">
+              <div className="flex justify-between items-start">
+                <div className="h-8 w-8 rounded-lg bg-blue-600/20 flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-blue-500" />
+                </div>
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/40 italic">Eagle Choice Member</span>
+              </div>
+              <div>
+                <p className="text-lg font-black text-white leading-none">{profile.full_name}</p>
+                <p className="text-[9px] font-bold text-blue-400 mt-1 uppercase tracking-widest">Verified Buyer</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quick Actions */}

@@ -10,6 +10,7 @@ export default function RegisterChoicePage() {
       {/* ── LEFT PANEL (BUYER) ── */}
       <Link 
         href="/register/buyer"
+        target="_blank"
         className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5] z-10"
       >
         {/* Background Image */}

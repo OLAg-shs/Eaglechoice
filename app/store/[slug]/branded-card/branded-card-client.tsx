@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { Download, Store, Users, Package, QrCode, ToggleLeft, ToggleRight, Loader2 } from "lucide-react"
+import { useState } from "react"
+import { Download, Monitor, Share2, Loader2, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
+import ChoiceCardPreview from "@/components/ChoiceCardPreview"
 
 interface BrandedCardProps {
   store: any
@@ -13,164 +13,109 @@ interface BrandedCardProps {
 }
 
 export default function BrandedCardClient({ store, productCount, agentCount }: BrandedCardProps) {
-  const [showAgents, setShowAgents] = useState(true)
-  const [showProducts, setShowProducts] = useState(true)
-  const [showQR, setShowQR] = useState(true)
   const [downloading, setDownloading] = useState(false)
-  const cardRef = useRef<HTMLDivElement>(null)
-
-  const brandColor = store.brand_color || "#2563eb"
-  const storeUrl = `https://eaglechoice.vercel.app/stores/${store.slug}`
+  
+  // -- EXTRACT CONFIG FROM MASTER ARCHITECT --
+  const cardConfig = store.card_config || { theme: "midnight", layout: "landscape", primary_color: "#2563eb" }
+  const brandColor = store.brand_color || cardConfig.primary_color || "#2563eb"
 
   async function handleDownload() {
+    // Note: In a production environment, this would ideally use a library like html2canvas 
+    // or a specialized API route to generate a high-res PNG.
     setDownloading(true)
-    try {
-      const cardEl = cardRef.current
-      if (!cardEl) return
-
-      const styles = Array.from(document.styleSheets)
-        .map(s => { try { return Array.from(s.cssRules).map(r => r.cssText).join("\n") } catch { return "" } })
-        .join("\n")
-
-      const printWindow = window.open("", "_blank", "width=720,height=450")
-      if (!printWindow) { setDownloading(false); return }
-
-      printWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"/>
-        <title>${store.name} Store Card</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
-        <style>${styles} body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Inter',sans-serif;}
-        @media print{@page{margin:0;size:700px 420px;}}</style></head>
-        <body><div style="width:680px;">${cardEl.outerHTML}</div>
-        <script>window.onload=function(){setTimeout(function(){window.print();window.close();},600);}<\/script>
-        </body></html>`)
-      printWindow.document.close()
-    } finally {
+    setTimeout(() => {
       setDownloading(false)
-    }
+      window.print() // Fallback to print for this demo
+    }, 1000)
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Branded Store Card</h1>
-        <p className="text-sm text-gray-500 mt-1">Generate a shareable card for WhatsApp, Instagram, and more</p>
-      </div>
-
-      {/* Controls */}
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-5 space-y-4">
-        <h2 className="font-semibold text-gray-900 dark:text-white text-sm">Card Options</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { label: "Show Agent Count", value: showAgents, set: setShowAgents },
-            { label: "Show Product Count", value: showProducts, set: setShowProducts },
-            { label: "Show QR Code", value: showQR, set: setShowQR },
-          ].map(({ label, value, set }) => (
-            <div key={label} className="flex items-center gap-3">
-              <Switch id={label} checked={value} onCheckedChange={set} />
-              <Label htmlFor={label} className="text-sm text-gray-600 dark:text-gray-400 cursor-pointer">{label}</Label>
-            </div>
-          ))}
+    <div className="space-y-10 max-w-4xl animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter uppercase">Boutique Identity.</h1>
+          <p className="text-sm text-gray-500 mt-2 font-medium">Your Choices, perfectly branded. Share your digital card anywhere.</p>
+        </div>
+        
+        <div className="flex gap-3">
+          <Button variant="outline" className="h-12 rounded-2xl font-bold px-6 gap-2 border-gray-200 dark:border-gray-800">
+            <Share2 className="h-4 w-4" /> Share Link
+          </Button>
+          <Button 
+            onClick={handleDownload} 
+            disabled={downloading} 
+            className="h-12 rounded-2xl font-black px-8 gap-2 text-white shadow-xl bg-blue-600 hover:bg-black transition-all"
+          >
+            {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            Download Card
+          </Button>
         </div>
       </div>
 
-      {/* Card Preview */}
-      <div>
-        <p className="text-xs text-gray-400 mb-3 uppercase tracking-wider font-semibold">Preview</p>
-        <div
-          ref={cardRef}
-          className="relative rounded-3xl overflow-hidden shadow-2xl"
-          style={{
-            background: `linear-gradient(135deg, ${brandColor}ee 0%, ${brandColor} 60%, #000000aa 100%)`,
-            minHeight: 280,
-            fontFamily: "'Inter', sans-serif",
-          }}>
-          {/* Background texture */}
-          <div className="absolute inset-0 opacity-10"
-            style={{ backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`, backgroundSize: "24px 24px" }} />
-
-          {/* Eagle Choice watermark */}
-          <div className="absolute bottom-4 right-4 opacity-30 text-white text-[10px] font-bold tracking-widest">
-            EAGLE CHOICE
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        {/* REPLICATING THE MASTER ARCHITECT PREVIEW */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-gray-50/50 dark:bg-white/5 p-12 rounded-[3.5rem] border border-gray-100 dark:border-white/10 shadow-inner flex items-center justify-center min-h-[500px]">
+            <div className="w-full max-w-md">
+               <ChoiceCardPreview 
+                name={store.name}
+                tagline={store.tagline || ""}
+                color={brandColor}
+                theme={cardConfig.theme}
+                layout={cardConfig.layout}
+               />
+            </div>
           </div>
-
-          <div className="relative z-10 p-8">
-            {/* Store identity */}
-            <div className="flex items-center gap-4 mb-6">
-              {store.logo_url ? (
-                <img src={store.logo_url} alt={store.name}
-                  className="h-16 w-16 rounded-2xl object-cover border-2 border-white/30 shadow-xl" />
-              ) : (
-                <div className="h-16 w-16 rounded-2xl bg-white/20 border-2 border-white/30 flex items-center justify-center text-white text-2xl font-extrabold shadow-xl">
-                  {store.name[0]}
-                </div>
-              )}
-              <div>
-                <h2 className="text-2xl font-extrabold text-white tracking-tight">{store.name}</h2>
-                {store.tagline && <p className="text-white/70 text-sm mt-0.5">{store.tagline}</p>}
-              </div>
-            </div>
-
-            {/* Category tags */}
-            {(store.category_tags?.length ?? 0) > 0 && (
-              <div className="flex flex-wrap gap-2 mb-5">
-                {store.category_tags.map((tag: string) => (
-                  <span key={tag} className="px-2.5 py-1 rounded-full bg-white/15 border border-white/20 text-white text-xs font-medium backdrop-blur-sm">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Stats row */}
-            <div className="flex items-center gap-5 mb-6">
-              {showProducts && (
-                <div className="flex items-center gap-2 text-white">
-                  <div className="h-8 w-8 rounded-xl bg-white/15 flex items-center justify-center">
-                    <Package className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold leading-none">{productCount}</p>
-                    <p className="text-white/60 text-[10px]">Products</p>
-                  </div>
-                </div>
-              )}
-              {showAgents && agentCount > 0 && (
-                <div className="flex items-center gap-2 text-white">
-                  <div className="h-8 w-8 rounded-xl bg-white/15 flex items-center justify-center">
-                    <Users className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold leading-none">{agentCount}</p>
-                    <p className="text-white/60 text-[10px]">Agents</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* URL + QR */}
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white/50 text-[10px] uppercase tracking-wider font-bold mb-1">Find us at</p>
-                <p className="text-white font-mono text-xs break-all">{storeUrl}</p>
-              </div>
-              {showQR && (
-                <div className="h-14 w-14 rounded-xl bg-white flex items-center justify-center shrink-0 ml-4">
-                  {/* Simple QR placeholder — real implementation can use qrcode library */}
-                  <QrCode className="h-10 w-10 text-gray-800" />
-                </div>
-              )}
-            </div>
+          
+          <div className="flex items-center justify-center gap-8 text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">
+            <div className="flex items-center gap-2 italic"><RefreshCcw className="h-3 w-3" /> Auto-Synced</div>
+            <div className="flex items-center gap-2 italic"><Monitor className="h-3 w-3" /> Digital Ready</div>
           </div>
         </div>
+
+        {/* DETAILS PANEL */}
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-8 rounded-[2.5rem] shadow-sm space-y-8">
+            <div className="space-y-4">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Card Intelligence</Label>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-4 rounded-2xl bg-gray-50 dark:bg-white/5">
+                  <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Live Theme</span>
+                  <span className="text-xs font-black uppercase text-blue-600 tracking-wider">{cardConfig.theme}</span>
+                </div>
+                <div className="flex justify-between items-center p-4 rounded-2xl bg-gray-50 dark:bg-white/5">
+                  <span className="text-xs font-bold text-gray-600 dark:text-gray-400">Card Layout</span>
+                  <span className="text-xs font-black uppercase text-blue-600 tracking-wider">{cardConfig.layout}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4 pb-4">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Visibility Stats</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-4 rounded-2xl border border-gray-100 dark:border-gray-800 text-center">
+                  <p className="text-xl font-black text-gray-900 dark:text-white">{productCount}</p>
+                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Products</p>
+                </div>
+                <div className="p-4 rounded-2xl border border-gray-100 dark:border-gray-800 text-center">
+                  <p className="text-xl font-black text-gray-900 dark:text-white">{agentCount}</p>
+                  <p className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-1">Team</p>
+                </div>
+              </div>
+            </div>
+
+            <Button variant="outline" className="w-full h-14 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 transition-all">
+              Update Card Styling
+            </Button>
+          </div>
+        </div>
+
       </div>
 
-      {/* Download button */}
-      <Button onClick={handleDownload} disabled={downloading} className="w-full text-white border-none font-semibold h-12"
-        style={{ background: brandColor }}>
-        {downloading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Generating...</> : <><Download className="h-4 w-4 mr-2" />Download as PNG</>}
-      </Button>
-
-      <p className="text-center text-xs text-gray-400">Share this card on WhatsApp, Instagram, X, or print it as a flyer.</p>
+      <p className="text-center text-[10px] text-gray-400 font-medium italic">
+        This card is your official boutique digital asset. Updates in the Stylist Studio are applied instantly.
+      </p>
     </div>
   )
 }

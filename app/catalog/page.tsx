@@ -12,10 +12,32 @@ export default async function CatalogPage() {
   const adminSupabase = await createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ data: products }, { data: services }] = await Promise.all([
+  // ── FETCH DATA ──
+  const [
+    { data: products }, 
+    { data: services },
+    { data: profile }
+  ] = await Promise.all([
     adminSupabase.from("products").select("*, agent:profiles!client_id(full_name, is_verified, avatar_url)").eq("is_available", true).order("created_at", { ascending: false }),
     adminSupabase.from("services").select("*, agent:profiles!client_id(full_name, is_verified, avatar_url)").eq("is_available", true).order("created_at", { ascending: false }),
+    supabase.from("profiles").select("preferences").eq("id", user?.id || "").single()
   ])
+
+  // ── SORTING LOGIC: IN-RANGE FIRST ──
+  const buyerPrefs = (profile?.preferences as any) || {}
+  const interests = buyerPrefs.interests || []
+
+  const sortedProducts = products ? [...products].sort((a, b) => {
+    const prefA = interests.find((i: any) => i.id === a.category)
+    const prefB = interests.find((i: any) => i.id === b.category)
+
+    const inRangeA = prefA ? (a.price >= (prefA.min || 0) && a.price <= (prefA.budget_limit || 999999)) : false
+    const inRangeB = prefB ? (b.price >= (prefB.min || 0) && b.price <= (prefB.budget_limit || 999999)) : false
+
+    if (inRangeA && !inRangeB) return -1
+    if (!inRangeA && inRangeB) return 1
+    return 0
+  }) : []
 
   const categoryLabels: Record<string, string> = {
     ghana_card: "Ghana Card",
@@ -51,7 +73,7 @@ export default async function CatalogPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {products.map((product: any) => {
+            {sortedProducts.map((product: any) => {
               const highlights = product.specifications && typeof product.specifications === 'object'
                 ? Object.entries(product.specifications).slice(0, 3).map(([k, v]) => `${k}: ${v}`)
                 : []
