@@ -93,7 +93,7 @@ export default function StoreSetupWizard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-black font-sans selection:bg-blue-600 selection:text-white flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-black font-sans selection:bg-blue-600 selection:text-white flex items-start justify-center p-6 py-12 md:py-20">
       
       {/* ── SETUP WIZARD CONTAINER ── */}
       <div className="w-full max-w-5xl bg-white dark:bg-gray-950 rounded-[4rem] shadow-[0_40px_100px_rgba(0,0,0,0.1)] border border-white dark:border-gray-800 overflow-hidden flex flex-col md:flex-row min-h-[700px]">
@@ -127,7 +127,7 @@ export default function StoreSetupWizard() {
         </div>
 
         {/* Right Panel: Step Content */}
-        <div className="flex-1 p-8 md:p-16 flex flex-col overflow-y-auto max-h-screen">
+        <div className="flex-1 p-8 md:p-16 flex flex-col">
           
           {/* STEP 1: IDENTITY */}
           {step === 1 && (
