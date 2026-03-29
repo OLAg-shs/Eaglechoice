@@ -69,7 +69,7 @@ export default function BuyerRegisterPage() {
             <Shield className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-7xl font-black tracking-tighter leading-[0.9] mb-6">
-            Join the <br /> <span className="text-blue-400">Choice.</span>
+            Join <br /> <span className="text-blue-400">Eagle Choice.</span>
           </h1>
           <p className="text-xl font-light text-blue-100/80 mb-10 leading-relaxed italic">
             "Shop from thousands of verified stores, track your orders in real-time, and get precisely what you need, when you need it."
@@ -86,7 +86,7 @@ export default function BuyerRegisterPage() {
         </div>
 
         <div className="absolute bottom-10 left-12 text-[10px] font-black tracking-[0.5em] text-blue-300/30 uppercase pointer-events-none">
-          Choice Member Network
+          Eagle Choice Member Network
         </div>
       </div>
 
@@ -124,7 +124,7 @@ export default function BuyerRegisterPage() {
                 <span className="inline-block px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-blue-600">
                   New Member Account
                 </span>
-                <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tighter uppercase">Join Choice</h2>
+                <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tighter uppercase">Join Eagle Choice</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium italic">Shop from anywhere, delivered everywhere.</p>
               </div>
 

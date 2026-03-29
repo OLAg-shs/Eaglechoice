@@ -39,7 +39,7 @@ export default function RegisterChoicePage() {
               Explore thousands of products and services from verified stores across Ghana.
             </p>
             <div className="inline-flex items-center gap-3 text-sm font-bold uppercase tracking-widest border-b-2 border-blue-400 pb-2">
-              Join the Choice <ArrowRight className="h-5 w-5" />
+              Join Eagle Choice <ArrowRight className="h-5 w-5" />
             </div>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function RegisterChoicePage() {
         </div>
         <div className="flex items-center gap-1">
           <div className="h-px w-8 bg-gradient-to-r from-transparent to-white/30" />
-          <span className="text-xs font-bold text-white/50 tracking-[0.3em] uppercase">Choice</span>
+          <span className="text-xs font-bold text-white/50 tracking-[0.3em] uppercase">Eagle Choice</span>
           <div className="h-px w-8 bg-gradient-to-l from-transparent to-white/30" />
         </div>
       </div>
