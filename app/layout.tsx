@@ -5,6 +5,7 @@ import { ToastProvider } from "@/components/ui/toaster"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ThemeProvider } from "@/components/theme-provider"
 import { CartProvider } from "@/components/cart/cart-context"
+import { GlobalPresence } from "@/components/global-presence"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,6 +27,7 @@ export default function RootLayout({
           <CartProvider>
             <TooltipProvider>
               <ToastProvider>
+                <GlobalPresence />
                 {children}
               </ToastProvider>
             </TooltipProvider>
