@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
-import { ShoppingBag, ClipboardList, CreditCard, MessageSquare } from "lucide-react"
+import { ShoppingBag, ClipboardList, CreditCard, MessageSquare, Sparkles } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatCurrency } from "@/lib/utils"
 import Link from "next/link"
