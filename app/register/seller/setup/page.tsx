@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Store, Palette, Users, ChevronRight, ChevronLeft, Loader2, Sparkles, ShieldCheck, Tag, CreditCard, Zap, Layout, Monitor } from "lucide-react"
+import { Store, Palette, Users, ChevronRight, ChevronLeft, Loader2, Sparkles, ShieldCheck, Tag, CreditCard, Zap, Layout, Monitor, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
