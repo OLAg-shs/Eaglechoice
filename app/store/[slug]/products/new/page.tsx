@@ -14,15 +14,18 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/components/ui/use-toast"
-import { createProduct } from "@/lib/actions/products"
+import { createProduct, updateProduct, deleteProduct } from "@/lib/actions/products"
 import { getStoreAgents, getStoreBySlug, updateStore } from "@/lib/actions/stores"
 import { cn } from "@/lib/utils"
 import DesignStudioCanvas from "@/components/DesignStudioCanvas"
+import BrandedProductCard from "@/components/BrandedProductCard"
 
 const DEFAULT_PRODUCT_ELEMENTS = [
-  { id: "price", label: "Price Badge", x: 85, y: 10, visible: true },
-  { id: "branding", label: "Boutique Logo", x: 50, y: 90, visible: true },
-  { id: "name", label: "Product Name", x: 50, y: 10, visible: false },
+  { id: "image", label: "Product Image", x: 50, y: 45, visible: true },
+  { id: "branding", label: "Store Identity", x: 15, y: 10, visible: true },
+  { id: "name", label: "Product Name", x: 15, y: 85, visible: true },
+  { id: "specs", label: "Tech Specs", x: 15, y: 65, visible: true },
+  { id: "price", label: "Price Tag", x: 80, y: 85, visible: true },
 ]
 
 export default function SellerNewProductPage() {
@@ -48,7 +51,8 @@ export default function SellerNewProductPage() {
     { key: "", value: "" }
   ])
   const [displayConfig, setDisplayConfig] = useState({
-    background: "solid",
+    background: "white" as "solid" | "gradient" | "glass" | "white",
+    cardColor: "#ffffff",
     padding: "md",
     objectFit: "contain",
     showBranding: true,
@@ -271,56 +275,63 @@ export default function SellerNewProductPage() {
                 {/* Media Upload */}
                 <div className="relative group">
                    <div className={cn(
-                     "aspect-[4/5] rounded-[2.5rem] border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500",
+                     "aspect-[1.4/1] rounded-[2.5rem] border-2 border-dashed flex flex-col items-center justify-center relative overflow-visible transition-all duration-500",
                      imagePreview ? "border-transparent" : "border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900 hover:border-gray-200 dark:hover:border-gray-700"
                    )}>
                       {imagePreview ? (
-                        <div className="w-full h-full relative" style={{ 
-                          background: displayConfig.background === "solid" ? brandColor : 
-                                      displayConfig.background === "gradient" ? `linear-gradient(135deg, ${brandColor}, #000)` : 
-                                      "#f3f4f6"
-                        }}>
+                        <div className="w-full h-full relative group">
                            <DesignStudioCanvas
-                             elements={displayConfig.elements || DEFAULT_PRODUCT_ELEMENTS}
+                             elements={displayConfig.elements.map(el => ({
+                               ...el,
+                               renderHandle: (handleEl) => {
+                                 // Render the ACTUAL component as the handle
+                                 const specsObj: Record<string, string> = {}
+                                 specs.forEach(s => { if (s.key && s.value) specsObj[s.key] = s.value })
+
+                                 return (
+                                   <div className="pointer-events-none transform scale-[1.2] origin-center">
+                                      <BrandedProductCard
+                                        name={liveName}
+                                        price={livePrice}
+                                        brand={storeData?.name}
+                                        specifications={specsObj}
+                                        imageUrl={imagePreview}
+                                        brandColor={brandColor}
+                                        storeName={slug}
+                                        displayConfig={{
+                                           ...displayConfig,
+                                           backdropStyle: displayConfig.background,
+                                           padding: displayConfig.padding as "sm" | "md" | "lg",
+                                           elements: (displayConfig.elements || DEFAULT_PRODUCT_ELEMENTS).map((e: any) => ({
+                                             ...e,
+                                             visible: e.id === handleEl.id
+                                           }))
+                                        }}
+                                      />
+                                   </div>
+                                 )
+                               }
+                             }))}
                              onUpdate={setProductElements}
-                             containerWidth={400}
-                             containerHeight={500}
+                             containerWidth={500}
+                             containerHeight={400}
                            >
-                             <div className="w-full h-full relative">
-                                <img 
-                                  src={imagePreview} 
-                                  alt="Preview" 
-                                  className={cn(
-                                    "w-full h-full transition-all duration-500",
-                                    displayConfig.objectFit === "contain" ? "object-contain" : "object-cover",
-                                    displayConfig.padding === "sm" ? "p-4" : displayConfig.padding === "md" ? "p-8" : "p-12"
-                                  )} 
+                             <div className="w-full h-full">
+                               <BrandedProductCard
+                                  name={liveName}
+                                  price={livePrice}
+                                  brand={storeData?.name}
+                                  specifications={{}}
+                                  imageUrl={imagePreview}
+                                  brandColor={brandColor}
+                                  storeName={slug}
+                                  displayConfig={{
+                                    ...displayConfig,
+                                    backdropStyle: displayConfig.background,
+                                    padding: displayConfig.padding as "sm" | "md" | "lg",
+                                    elements: (displayConfig.elements || DEFAULT_PRODUCT_ELEMENTS).map((e: any) => ({ ...e, visible: false }))
+                                  }}
                                 />
-                                
-                                {/* Dynamic Product Elements */}
-                                {(displayConfig.elements || DEFAULT_PRODUCT_ELEMENTS).map(el => el.visible && (
-                                  <div 
-                                    key={el.id}
-                                    className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-                                    style={{ left: `${el.x}%`, top: `${el.y}%` }}
-                                  >
-                                    {el.id === 'price' && (
-                                      <div className="bg-black/90 text-white px-3 py-1.5 rounded-xl font-black text-xs shadow-2xl border border-white/20 whitespace-nowrap">
-                                        ₵ {livePrice || '0.00'}
-                                      </div>
-                                    )}
-                                    {el.id === 'branding' && (
-                                      <div className="px-3 py-1.5 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap">
-                                        {storeData?.name || "Boutique"} Choice
-                                      </div>
-                                    )}
-                                    {el.id === 'name' && (
-                                      <div className="bg-white/90 dark:bg-black/90 text-gray-900 dark:text-white px-3 py-1.5 rounded-xl font-black text-[10px] shadow-2xl border border-gray-100 dark:border-gray-800 whitespace-nowrap">
-                                        {liveName || 'Product Title'}
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
                              </div>
                            </DesignStudioCanvas>
                         </div>
@@ -350,11 +361,11 @@ export default function SellerNewProductPage() {
                 <div className="space-y-6 pt-4">
                   <div className="space-y-3">
                     <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Backdrop Style</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                       {["solid", "gradient", "glass"].map(b => (
+                    <div className="grid grid-cols-4 gap-2">
+                       {["white", "solid", "gradient", "glass"].map(b => (
                          <button 
                           key={b} type="button"
-                          onClick={() => setDisplayConfig({...displayConfig, background: b})}
+                          onClick={() => setDisplayConfig({...displayConfig, background: b as any})}
                           className={cn(
                             "h-10 rounded-xl text-[9px] font-black uppercase tracking-widest border-2 transition-all",
                             displayConfig.background === b ? "border-blue-600 text-blue-600 bg-blue-50/50" : "border-gray-50 dark:border-gray-900 text-gray-400"
@@ -365,6 +376,26 @@ export default function SellerNewProductPage() {
                        ))}
                     </div>
                   </div>
+
+                  {displayConfig.background === "solid" && (
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Custom Card Color</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          type="color" 
+                          value={displayConfig.cardColor} 
+                          onChange={(e) => setDisplayConfig({...displayConfig, cardColor: e.target.value})}
+                          className="w-12 h-10 p-1 rounded-lg cursor-pointer"
+                        />
+                        <Input 
+                          type="text" 
+                          value={displayConfig.cardColor} 
+                          onChange={(e) => setDisplayConfig({...displayConfig, cardColor: e.target.value})}
+                          className="flex-1 h-10 rounded-xl font-mono text-xs"
+                        />
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-3">

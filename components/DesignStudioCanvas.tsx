@@ -9,6 +9,7 @@ interface ElementPosition {
   x: number // 0-100 percentage
   y: number // 0-100 percentage
   visible: boolean
+  renderHandle?: (el: ElementPosition) => React.ReactNode
 }
 
 interface DesignStudioCanvasProps {
@@ -101,22 +102,33 @@ export default function DesignStudioCanvas({
     <div 
       ref={containerRef}
       className={cn(
-        "relative select-none",
-        isEditing ? "cursor-crosshair" : "cursor-default"
+        "relative select-none rounded-[2.5rem] overflow-hidden bg-white/5 backdrop-blur-sm",
+        isEditing ? "cursor-crosshair overflow-visible" : "cursor-default"
       )}
       style={{ width: "100%", height: "100%" }}
     >
+      {/* Grid Pattern Background for Editing */}
+      {isEditing && (
+        <div className="absolute inset-0 z-0 opacity-[0.03]" style={{ 
+          backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)",
+          backgroundSize: "20px 20px"
+        }} />
+      )}
+
       {/* The Actual Content (ChoiceCard, Product Listing etc) */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+      <div className={cn(
+        "absolute inset-0 z-0 pointer-events-none transition-all duration-300",
+        isEditing ? "opacity-20 scale-[0.98] blur-sm" : "opacity-100 scale-100 blur-0"
+      )}>
         {children}
       </div>
 
       {/* Snap Guides */}
       {showGuides && showSnapX && (
-        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-red-500/50 z-50 pointer-events-none" />
+        <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-blue-500/50 z-50 pointer-events-none shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
       )}
       {showGuides && showSnapY && (
-        <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-red-500/50 z-50 pointer-events-none" />
+        <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-blue-500/50 z-50 pointer-events-none shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
       )}
 
       {/* Design Overlay (Draggable Handles) */}
@@ -126,8 +138,8 @@ export default function DesignStudioCanvas({
             key={el.id}
             onMouseDown={(e) => handleMouseDown(el.id, e)}
             className={cn(
-              "absolute -translate-x-1/2 -translate-y-1/2 px-4 py-2 rounded-xl transition-all select-none",
-              activeElement === el.id ? "bg-blue-600/20 border-2 border-blue-600 z-30" : "bg-white/10 border border-white/20 hover:border-white/50 z-20",
+              "absolute -translate-x-1/2 -translate-y-1/2 transition-shadow select-none",
+              activeElement === el.id ? "z-30 scale-105" : "z-20 hover:scale-[1.02]",
               isEditing ? "cursor-move" : "pointer-events-none opacity-0"
             )}
             style={{ 
@@ -135,9 +147,24 @@ export default function DesignStudioCanvas({
               top: `${el.y}%`,
             }}
           >
-            <span className="text-[9px] font-black uppercase tracking-widest text-white whitespace-nowrap drop-shadow-md">
-              {el.label}
-            </span>
+            {/* Real UI Preview or Generic Label */}
+            <div className={cn(
+              "rounded-xl ring-2 transition-all",
+              activeElement === el.id ? "ring-blue-600 shadow-[0_0_20px_rgba(59,130,246,0.3)]" : "ring-transparent hover:ring-white/30"
+            )}>
+              {el.renderHandle ? el.renderHandle(el) : (
+                <div className="px-4 py-2 bg-black/60 backdrop-blur-md border border-white/20 rounded-xl text-[9px] font-black uppercase tracking-widest text-white whitespace-nowrap drop-shadow-md">
+                   {el.label}
+                </div>
+              )}
+            </div>
+            
+            {/* Context Position HUD */}
+            {activeElement === el.id && (
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[8px] font-black px-2 py-0.5 rounded-full pointer-events-none">
+                {Math.round(el.x)}%, {Math.round(el.y)}%
+              </div>
+            )}
           </div>
         ))}
       </div>
