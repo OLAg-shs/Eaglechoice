@@ -13,7 +13,7 @@ export default function LoginChoicePage() {
         className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5] z-10"
       >
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] group-hover:scale-110 grayscale-[0.3] group-hover:grayscale-0"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-[4000ms] ease-in-out group-hover:scale-110 grayscale-[0.4] group-hover:grayscale-0 group-hover:brightness-110"
           style={{ backgroundImage: "url('/images/auth/buyer-choice.png')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/80 via-blue-900/40 to-transparent transition-opacity duration-700 group-hover:opacity-40" />
@@ -58,7 +58,7 @@ export default function LoginChoicePage() {
         className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5] z-10"
       >
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] group-hover:scale-110 grayscale-[0.3] group-hover:grayscale-0"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-[4000ms] ease-in-out group-hover:scale-110 grayscale-[0.4] group-hover:grayscale-0 group-hover:brightness-110"
           style={{ backgroundImage: "url('/images/auth/seller-choice.png')" }}
         />
         <div className="absolute inset-0 bg-gradient-to-l from-purple-900/80 via-purple-900/40 to-transparent transition-opacity duration-700 group-hover:opacity-40" />

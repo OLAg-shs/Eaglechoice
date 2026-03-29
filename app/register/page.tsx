@@ -14,7 +14,7 @@ export default function RegisterChoicePage() {
       >
         {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] group-hover:scale-110 grayscale-[0.3] group-hover:grayscale-0"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-[4000ms] ease-in-out group-hover:scale-110 grayscale-[0.4] group-hover:grayscale-0 group-hover:brightness-110"
           style={{ backgroundImage: "url('/images/auth/buyer-choice.png')" }}
         />
         
@@ -65,7 +65,7 @@ export default function RegisterChoicePage() {
       >
         {/* Background Image */}
         <div 
-          className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] group-hover:scale-110 grayscale-[0.3] group-hover:grayscale-0"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-[4000ms] ease-in-out group-hover:scale-110 grayscale-[0.4] group-hover:grayscale-0 group-hover:brightness-110"
           style={{ backgroundImage: "url('/images/auth/seller-choice.png')" }}
         />
         

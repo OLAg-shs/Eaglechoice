@@ -57,12 +57,12 @@ export default function SellerRegisterPage() {
     <div className="fixed inset-0 z-[9999] bg-black flex overflow-hidden font-sans select-none">
       
       {/* ── LEFT PANEL: PREMIUM BACKGROUND VISUAL ── */}
-      <div className="relative hidden lg:flex flex-1 overflow-hidden">
+      <div className="relative hidden lg:flex flex-1 overflow-hidden group/bg">
         <div 
-          className="absolute inset-0 bg-cover bg-center grayscale-[0.2] hover:grayscale-0 transition-all duration-[3000ms] scale-105 hover:scale-100"
+          className="absolute inset-0 bg-cover bg-center transition-all duration-[8000ms] ease-in-out group-hover/bg:scale-110 grayscale-[0.3] group-hover/bg:grayscale-0 group-hover/bg:brightness-110"
           style={{ backgroundImage: "url('/images/auth/seller-choice.png')" }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/90 via-purple-900/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/95 via-purple-900/60 to-transparent transition-opacity duration-1000 group-hover/bg:opacity-80" />
         
         <div className="relative h-full flex flex-col justify-center px-12 md:px-20 text-white max-w-2xl">
           <div className="h-16 w-16 rounded-2xl bg-purple-600/20 backdrop-blur-3xl border border-purple-400/30 flex items-center justify-center mb-8 shadow-2xl">
