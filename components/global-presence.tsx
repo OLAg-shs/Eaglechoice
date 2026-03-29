@@ -41,7 +41,7 @@ export function GlobalPresence() {
   }, [])
 
   return (
-    <div className="fixed bottom-6 left-6 z-[99999] flex items-center justify-center animate-in slide-in-from-bottom-5 fade-in duration-1000 pointer-events-none">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[99999] flex items-center justify-center animate-in slide-in-from-bottom-5 fade-in duration-1000 pointer-events-none">
       <div className="bg-white/80 dark:bg-black/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 shadow-2xl rounded-full px-4 py-2 flex items-center gap-2.5 transition-all hover:scale-105 pointer-events-auto">
         <div className="relative flex h-2.5 w-2.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
