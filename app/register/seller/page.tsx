@@ -42,13 +42,15 @@ function InputField({ label, name, type = "text", placeholder, icon: Icon }: any
 
 export default function SellerRegisterPage() {
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
 
   async function handleSubmit(fd: FormData) {
     setError("")
+    setSuccess(false)
     fd.set("role", "seller")
     const result = await signUp(fd)
     if (result?.error) setError(result.error)
-    else window.location.href = "/register/seller/setup?new=1"
+    else setSuccess(true)
   }
 
   return (
@@ -98,27 +100,48 @@ export default function SellerRegisterPage() {
         </div>
 
         <div className="w-full max-w-md my-auto">
-          <div className="mb-10 text-center lg:text-left">
-            <span className="inline-block px-3 py-1 rounded-full bg-purple-50 border border-purple-100 text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-purple-600">
-              New Boutique Owner
-            </span>
-            <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tighter">Create Your Account</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium italic">Join thousands of verified stores on Eagle Choice.</p>
-          </div>
-
-          <form action={handleSubmit} className="space-y-6">
-            <InputField label="Owner Name" name="full_name" placeholder="John Mensah" icon={User} />
-            <InputField label="Business Email" name="email" type="email" placeholder="shop@example.com" icon={Mail} />
-            <InputField label="Contact Number" name="phone" type="tel" placeholder="+233 XXX XXX XXX" icon={Phone} />
-            <InputField label="Secure Password" name="password" type="password" placeholder="Min. 8 characters" icon={Lock} />
-
-            <div className="pt-6">
-              <SubmitBtn />
-              <p className="mt-4 text-[10px] text-gray-400 font-medium text-center italic">
-                By creating an account, you agree to the Eagle Choice <Link href="#" className="underline">Merchant Terms</Link>.
+          {success ? (
+            <div className="text-center animate-in zoom-in-95 duration-500">
+              <div className="h-24 w-24 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mx-auto mb-8 shadow-2xl">
+                <ShieldCheck className="h-12 w-12 text-purple-600" />
+              </div>
+              <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-4 tracking-tighter">Account Created!</h2>
+              <p className="text-lg text-gray-500 dark:text-gray-400 mb-10 leading-relaxed italic">
+                "Fantastic start. Now, click the <span className="text-purple-600 font-black">Sign In</span> button at the top right to log in and launch your boutique!"
               </p>
+              <ArrowRight className="h-8 w-8 text-purple-600 animate-bounce mx-auto" />
             </div>
-          </form>
+          ) : (
+            <>
+              <div className="mb-10 text-center lg:text-left">
+                <span className="inline-block px-3 py-1 rounded-full bg-purple-50 border border-purple-100 text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-purple-600">
+                  New Boutique Owner
+                </span>
+                <h2 className="text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tighter">Create Your Account</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium italic">Join thousands of verified stores on Eagle Choice.</p>
+              </div>
+
+              {error && (
+                <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-bold animate-in zoom-in-95">
+                  {error}
+                </div>
+              )}
+
+              <form action={handleSubmit} className="space-y-6">
+                <InputField label="Owner Name" name="full_name" placeholder="John Mensah" icon={User} />
+                <InputField label="Business Email" name="email" type="email" placeholder="shop@example.com" icon={Mail} />
+                <InputField label="Contact Number" name="phone" type="tel" placeholder="+233 XXX XXX XXX" icon={Phone} />
+                <InputField label="Secure Password" name="password" type="password" placeholder="Min. 8 characters" icon={Lock} />
+
+                <div className="pt-6">
+                  <SubmitBtn />
+                  <p className="mt-4 text-[10px] text-gray-400 font-medium text-center italic">
+                    By creating an account, you agree to the Eagle Choice <Link href="#" className="underline">Merchant Terms</Link>.
+                  </p>
+                </div>
+              </form>
+            </>
+          )}
         </div>
 
         <div className="absolute bottom-10 text-[10px] font-black text-gray-300 tracking-[0.5em] uppercase pointer-events-none">

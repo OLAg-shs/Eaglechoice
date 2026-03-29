@@ -5,12 +5,12 @@ import { Shield, ArrowRight } from "lucide-react"
 
 export default function RegisterChoicePage() {
   return (
-    <div className="fixed inset-0 z-[9999] bg-black flex overflow-hidden font-sans select-none">
+    <div className="fixed inset-0 z-[9999] bg-black flex overflow-hidden font-sans">
       
       {/* ── LEFT PANEL (BUYER) ── */}
       <Link 
         href="/register/buyer"
-        className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5]"
+        className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5] z-10"
       >
         {/* Background Image */}
         <div 
@@ -60,7 +60,8 @@ export default function RegisterChoicePage() {
       {/* ── RIGHT PANEL (SELLER) ── */}
       <Link 
         href="/register/seller"
-        className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5]"
+        target="_blank"
+        className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5] z-10"
       >
         {/* Background Image */}
         <div 

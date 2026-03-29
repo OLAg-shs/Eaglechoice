@@ -5,12 +5,12 @@ import { Shield, ArrowRight } from "lucide-react"
 
 export default function LoginChoicePage() {
   return (
-    <div className="fixed inset-0 z-[9999] bg-black flex overflow-hidden font-sans select-none">
+    <div className="fixed inset-0 z-[9999] bg-black flex overflow-hidden font-sans">
       
       {/* ── LEFT PANEL (BUYER LOGIN) ── */}
       <Link 
         href="/login/buyer"
-        className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5]"
+        className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5] z-10"
       >
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] group-hover:scale-110 grayscale-[0.3] group-hover:grayscale-0"
@@ -55,7 +55,7 @@ export default function LoginChoicePage() {
       {/* ── RIGHT PANEL (SELLER LOGIN) ── */}
       <Link 
         href="/login/seller"
-        className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5]"
+        className="group relative flex-1 overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] hover:flex-[1.5] z-10"
       >
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-[2000ms] group-hover:scale-110 grayscale-[0.3] group-hover:grayscale-0"
@@ -101,6 +101,15 @@ export default function LoginChoicePage() {
         </div>
       </div>
 
+      {/* ── TOP RIGHT: REGISTER BUTTON ── */}
+      <div className="absolute top-10 right-10 z-30">
+        <Link 
+          href="/register" 
+          className="px-6 py-3 rounded-full bg-white/10 backdrop-blur-2xl border border-white/20 text-xs font-black uppercase tracking-widest text-white hover:bg-white hover:text-black transition-all shadow-2xl"
+        >
+          Sign Up
+        </Link>
+      </div>
     </div>
   )
 }
