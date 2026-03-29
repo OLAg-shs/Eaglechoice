@@ -5,7 +5,7 @@ import { Shield, ArrowRight } from "lucide-react"
 
 export default function RegisterChoicePage() {
   return (
-    <div className="fixed inset-0 z-[9999] bg-black flex overflow-hidden font-sans">
+    <div className="fixed inset-0 z-[9999] bg-black flex flex-col md:flex-row overflow-hidden font-sans">
       
       {/* ── LEFT PANEL (BUYER) ── */}
       <Link 
@@ -51,10 +51,10 @@ export default function RegisterChoicePage() {
       </Link>
 
       {/* ── CENTRAL DIVIDER LINE ── */}
-      <div className="relative w-px shrink-0 z-20">
-        <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/40 to-white/0" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/80 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)]">
-          <span className="text-white/40 text-[10px] font-black tracking-tighter">OR</span>
+      <div className="relative md:w-px md:h-full w-full h-px shrink-0 z-20">
+        <div className="absolute inset-0 bg-gradient-to-r md:bg-gradient-to-b from-white/0 via-white/40 to-white/0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-10 w-10 md:h-12 md:w-12 rounded-full bg-black/80 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+          <span className="text-white/40 text-[8px] md:text-[10px] font-black tracking-tighter">OR</span>
         </div>
       </div>
 
