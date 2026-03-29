@@ -50,7 +50,7 @@ export function GlobalPresence() {
         <div className="flex items-center gap-1.5">
           <Users className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-500 transition-colors" />
           <span className="text-[10px] sm:text-xs font-black tracking-widest uppercase text-gray-700 dark:text-gray-200">
-            {onlineCount} {onlineCount === 1 ? 'Agent' : 'Agents'} Online
+            {onlineCount} Online
           </span>
         </div>
       </div>
