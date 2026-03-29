@@ -92,10 +92,25 @@ export default function ChoiceCardPreview({ name, tagline, color, layout, theme,
 
           {/* Social Links Strip */}
           {socials && (socials.instagram || socials.x || socials.facebook) && (
-            <div className="flex gap-2 pt-1 opacity-60">
-              {socials.instagram && <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black", isMidnight || isGold || isNeon ? "bg-white/10 text-white" : "bg-gray-100 text-gray-600")}>IG</div>}
-              {socials.x && <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black", isMidnight || isGold || isNeon ? "bg-white/10 text-white" : "bg-gray-100 text-gray-600")}>X</div>}
-              {socials.facebook && <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black", isMidnight || isGold || isNeon ? "bg-white/10 text-white" : "bg-gray-100 text-gray-600")}>FB</div>}
+            <div className="flex gap-4 pt-1 opacity-80">
+              {socials.instagram && (
+                <div className="flex items-center gap-1.5">
+                  <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black", isMidnight || isGold || isNeon ? "bg-white/10 text-white" : "bg-gray-100 text-gray-500")}>IG</div>
+                  <span className={cn("text-[8px] font-bold tracking-widest", isMidnight || isGold || isNeon ? "text-white/60" : "text-gray-500")}>{socials.instagram}</span>
+                </div>
+              )}
+              {socials.x && (
+                <div className="flex items-center gap-1.5">
+                  <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black", isMidnight || isGold || isNeon ? "bg-white/10 text-white" : "bg-gray-100 text-gray-500")}>X</div>
+                  <span className={cn("text-[8px] font-bold tracking-widest", isMidnight || isGold || isNeon ? "text-white/60" : "text-gray-500")}>{socials.x}</span>
+                </div>
+              )}
+              {socials.facebook && (
+                <div className="flex items-center gap-1.5">
+                  <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black", isMidnight || isGold || isNeon ? "bg-white/10 text-white" : "bg-gray-100 text-gray-500")}>FB</div>
+                  <span className={cn("text-[8px] font-bold tracking-widest", isMidnight || isGold || isNeon ? "text-white/60" : "text-gray-500")}>{socials.facebook}</span>
+                </div>
+              )}
             </div>
           )}
         </div>

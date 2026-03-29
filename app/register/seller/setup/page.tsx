@@ -52,11 +52,13 @@ export default function StoreSetupWizard() {
   const [cardConfig, setCardConfig] = useState<{
     theme: "midnight" | "gold" | "neon" | "minimal",
     layout: "landscape" | "portrait",
-    primary_color: string
+    primary_color: string,
+    product_style: "supreme" | "minimal" | "glass" | "bulky"
   }>({
     theme: "midnight",
     layout: "landscape",
-    primary_color: "#2563eb"
+    primary_color: "#2563eb",
+    product_style: "supreme"
   })
   
   // -- PAYOUT STATE --
@@ -280,19 +282,36 @@ export default function StoreSetupWizard() {
                 </div>
               </div>
 
-              <div className="space-y-4">
-                 <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Signature Color</Label>
-                 <div className="flex gap-3">
-                   {['#2563eb', '#7c3aed', '#db2777', '#059669', '#d97706', '#000000'].map(c => (
-                     <button 
-                       key={c}
-                       onClick={() => setCardConfig(prev => ({ ...prev, primary_color: c }))}
-                       className={`h-10 w-10 rounded-full border-4 transition-transform ${cardConfig.primary_color === c ? 'border-blue-600 scale-110' : 'border-transparent'}`}
-                       style={{ backgroundColor: c }}
-                     />
-                   ))}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="space-y-4">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Signature Color</Label>
+                    <div className="flex flex-wrap gap-3">
+                      {['#2563eb', '#7c3aed', '#db2777', '#059669', '#d97706', '#000000'].map(c => (
+                        <button 
+                          key={c}
+                          onClick={() => setCardConfig(prev => ({ ...prev, primary_color: c }))}
+                          className={`h-10 w-10 rounded-full border-4 transition-transform ${cardConfig.primary_color === c ? 'border-blue-600 scale-110 shadow-lg' : 'border-transparent'}`}
+                          style={{ backgroundColor: c }}
+                        />
+                      ))}
+                    </div>
                  </div>
-              </div>
+
+                 <div className="space-y-4">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Product Card Style</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['supreme', 'minimal', 'glass', 'bulky'].map((s) => (
+                        <button 
+                          key={s}
+                          onClick={() => setCardConfig(prev => ({ ...prev, product_style: s as any }))}
+                          className={`h-10 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${cardConfig.product_style === s ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/20 text-blue-600' : 'border-gray-50 dark:border-gray-800'}`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                 </div>
+               </div>
 
                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-50 dark:border-gray-900 pt-8 mt-8">
                  <div className="space-y-3">
