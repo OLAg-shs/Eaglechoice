@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { 
   ArrowLeft, Palette, Layout, Save, RotateCcw, 
   Eye, MousePointer2, Sliders, CheckCircle2, Loader2, Sparkles, 
-  Maximize, Minimize, Type, Shield, Info, Plus, Trash2, Image as ImageIcon, Zap, Users
+  Maximize, Minimize, Type, Shield, Info, Plus, Trash2, Image as ImageIcon, Zap, Users, ShieldCheck
 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -284,32 +284,54 @@ export default function SellerNewProductPage() {
                              elements={displayConfig.elements.map(el => ({
                                ...el,
                                renderHandle: (handleEl) => {
-                                 // Render the ACTUAL component as the handle
                                  const specsObj: Record<string, string> = {}
                                  specs.forEach(s => { if (s.key && s.value) specsObj[s.key] = s.value })
+                                 const specsList = Object.entries(specsObj)
 
-                                 return (
-                                   <div className="pointer-events-none transform scale-[1.2] origin-center">
-                                      <BrandedProductCard
-                                        name={liveName}
-                                        price={livePrice}
-                                        brand={storeData?.name}
-                                        specifications={specsObj}
-                                        imageUrl={imagePreview}
-                                        brandColor={brandColor}
-                                        storeName={slug}
-                                        displayConfig={{
-                                           ...displayConfig,
-                                           backdropStyle: displayConfig.background,
-                                           padding: displayConfig.padding as "sm" | "md" | "lg",
-                                           elements: (displayConfig.elements || DEFAULT_PRODUCT_ELEMENTS).map((e: any) => ({
-                                             ...e,
-                                             visible: e.id === handleEl.id
-                                           }))
-                                        }}
-                                      />
+                                 if (handleEl.id === 'image') return (
+                                   <div className="w-48 h-48 flex items-center justify-center">
+                                      <img src={imagePreview} alt="Drag Subject" className="w-full h-full object-contain drop-shadow-2xl" />
                                    </div>
                                  )
+
+                                 if (handleEl.id === 'branding') return (
+                                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white shadow-xl border border-gray-100 whitespace-nowrap">
+                                      <div className="h-5 w-5 rounded-lg flex items-center justify-center text-white" style={{ background: brandColor }}>
+                                        <ShieldCheck className="h-3 w-3" />
+                                      </div>
+                                      <span className="text-[9px] font-black uppercase tracking-widest text-gray-900">{storeData?.name || slug}</span>
+                                   </div>
+                                 )
+
+                                 if (handleEl.id === 'name') return (
+                                   <div className="bg-white px-4 py-2 rounded-2xl shadow-xl border border-gray-100 whitespace-nowrap">
+                                      <h3 className="text-xl font-black tracking-tighter text-gray-900">{liveName || "Product Name"}</h3>
+                                   </div>
+                                 )
+
+                                 if (handleEl.id === 'price') return (
+                                   <div className="flex flex-col items-center bg-white px-4 py-2 rounded-2xl shadow-xl border border-gray-100">
+                                      <div className="text-2xl font-black tracking-tighter text-orange-500">
+                                        <span className="text-xs mr-0.5 opacity-60">₵</span>
+                                        {Number(livePrice || 0).toLocaleString()}
+                                      </div>
+                                   </div>
+                                 )
+
+                                 if (handleEl.id === 'specs') return (
+                                   <div className="flex flex-wrap gap-1 max-w-[200px] bg-white p-2 rounded-xl shadow-xl border border-gray-100">
+                                      {specsList.length > 0 ? specsList.map(([k, v], i) => (
+                                        <div key={i} className="px-2 py-1 rounded-lg bg-gray-50 border border-gray-100 flex items-center gap-1.5">
+                                          <span className="text-[7px] font-medium text-gray-400 uppercase">{k}</span>
+                                          <span className="text-[8px] font-black text-gray-900">{v}</span>
+                                        </div>
+                                      )) : (
+                                        <span className="text-[8px] font-black text-gray-300 uppercase p-1">Detailed Intel</span>
+                                      )}
+                                   </div>
+                                 )
+
+                                 return null
                                }
                              }))}
                              onUpdate={setProductElements}

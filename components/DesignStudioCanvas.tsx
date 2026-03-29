@@ -102,23 +102,23 @@ export default function DesignStudioCanvas({
     <div 
       ref={containerRef}
       className={cn(
-        "relative select-none rounded-[2.5rem] overflow-hidden bg-white/5 backdrop-blur-sm",
+        "relative select-none rounded-[2.5rem]",
         isEditing ? "cursor-crosshair overflow-visible" : "cursor-default"
       )}
       style={{ width: "100%", height: "100%" }}
     >
       {/* Grid Pattern Background for Editing */}
       {isEditing && (
-        <div className="absolute inset-0 z-0 opacity-[0.03]" style={{ 
+        <div className="absolute inset-0 z-0 opacity-[0.05]" style={{ 
           backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)",
-          backgroundSize: "20px 20px"
+          backgroundSize: "24px 24px"
         }} />
       )}
 
       {/* The Actual Content (ChoiceCard, Product Listing etc) */}
       <div className={cn(
         "absolute inset-0 z-0 pointer-events-none transition-all duration-300",
-        isEditing ? "opacity-20 scale-[0.98] blur-sm" : "opacity-100 scale-100 blur-0"
+        isEditing ? "opacity-50 scale-[0.98]" : "opacity-100 scale-100"
       )}>
         {children}
       </div>
