@@ -127,7 +127,7 @@ export default function StoreSetupWizard() {
         </div>
 
         {/* Right Panel: Step Content */}
-        <div className="flex-1 p-12 md:p-16 flex flex-col justify-center overflow-y-auto max-h-screen">
+        <div className="flex-1 p-8 md:p-16 flex flex-col overflow-y-auto max-h-screen">
           
           {/* STEP 1: IDENTITY */}
           {step === 1 && (
