@@ -9,9 +9,10 @@ interface ChoiceCardProps {
   color: string
   layout: "landscape" | "portrait"
   theme: "midnight" | "gold" | "neon" | "minimal"
+  socials?: { instagram?: string; x?: string; facebook?: string }
 }
 
-export default function ChoiceCardPreview({ name, tagline, color, layout, theme }: ChoiceCardProps) {
+export default function ChoiceCardPreview({ name, tagline, color, layout, theme, socials }: ChoiceCardProps) {
   const isMidnight = theme === "midnight"
   const isGold = theme === "gold"
   const isNeon = theme === "neon"
@@ -48,7 +49,7 @@ export default function ChoiceCardPreview({ name, tagline, color, layout, theme 
               "text-[8px] font-black uppercase tracking-[0.4em] ml-1 mt-2",
               isMidnight || isGold || isNeon ? "text-white/40" : "text-gray-400"
             )}>
-              Choice Identity Card
+              Eagle Choice Official ID
             </span>
           </div>
           
@@ -88,6 +89,15 @@ export default function ChoiceCardPreview({ name, tagline, color, layout, theme 
               <span className="text-[7px] font-black uppercase tracking-widest text-white/50">Instant Access</span>
             </div>
           </div>
+
+          {/* Social Links Strip */}
+          {socials && (socials.instagram || socials.x || socials.facebook) && (
+            <div className="flex gap-2 pt-1 opacity-60">
+              {socials.instagram && <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black", isMidnight || isGold || isNeon ? "bg-white/10 text-white" : "bg-gray-100 text-gray-600")}>IG</div>}
+              {socials.x && <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black", isMidnight || isGold || isNeon ? "bg-white/10 text-white" : "bg-gray-100 text-gray-600")}>X</div>}
+              {socials.facebook && <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black", isMidnight || isGold || isNeon ? "bg-white/10 text-white" : "bg-gray-100 text-gray-600")}>FB</div>}
+            </div>
+          )}
         </div>
 
         {/* Footer */}

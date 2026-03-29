@@ -10,6 +10,7 @@ export const productSchema = z.object({
   images: z.array(z.string()).optional(),
   stock_quantity: z.coerce.number().int().min(0).default(0),
   is_available: z.boolean().default(true),
+  is_negotiation_enabled: z.boolean().default(false),
   store_id: z.string().uuid().optional(),
   agent_id: z.string().uuid().optional(),
 })

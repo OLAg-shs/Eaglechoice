@@ -43,6 +43,11 @@ export default function StoreSetupWizard() {
     analytics: true
   })
 
+  // -- SUPREME METADATA --
+  const [categoryFocus, setCategoryFocus] = useState("Technology")
+  const [socialLinks, setSocialLinks] = useState({ instagram: "", x: "", facebook: "" })
+  const [dashboardConfig, setDashboardConfig] = useState({ theme: "system", sidebar_style: "glass", primary_color: "#2563eb" })
+
   // -- CARD CONFIG STATE --
   const [cardConfig, setCardConfig] = useState<{
     theme: "midnight" | "gold" | "neon" | "minimal",
@@ -67,6 +72,9 @@ export default function StoreSetupWizard() {
     formData.set("tagline", tagline)
     formData.set("features", JSON.stringify(features))
     formData.set("card_config", JSON.stringify(cardConfig))
+    formData.set("dashboard_config", JSON.stringify(dashboardConfig))
+    formData.set("social_links", JSON.stringify(socialLinks))
+    formData.set("category_focus", categoryFocus)
     formData.set("brand_color", cardConfig.primary_color)
     
     formData.set("payout_bank_name", bankName)
@@ -139,6 +147,7 @@ export default function StoreSetupWizard() {
                     className="h-16 rounded-2xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-xl font-bold px-6 focus:ring-4 focus:ring-blue-600/10"
                   />
                 </div>
+                
                 <div className="space-y-3">
                   <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Short Catchy Tagline</Label>
                   <Input 
@@ -147,6 +156,21 @@ export default function StoreSetupWizard() {
                     placeholder="e.g. Your choice, our priority" 
                     className="h-16 rounded-2xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-base font-medium px-6"
                   />
+                </div>
+
+                <div className="space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Main Product Focus</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {['Technology', 'Fashion', 'Beauty', 'Services', 'Home', 'Other'].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setCategoryFocus(cat)}
+                        className={`h-12 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${categoryFocus === cat ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 shadow-[0_10px_30px_rgba(37,99,235,0.1)]' : 'border-gray-50 dark:border-gray-900 opacity-60 hover:opacity-100'}`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -220,6 +244,7 @@ export default function StoreSetupWizard() {
                     color={cardConfig.primary_color}
                     layout={cardConfig.layout}
                     theme={cardConfig.theme}
+                    socials={socialLinks}
                   />
                 </div>
               </div>
@@ -269,7 +294,59 @@ export default function StoreSetupWizard() {
                  </div>
               </div>
 
-              <div className="flex gap-4 pt-4 border-t border-gray-50 mt-8">
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-gray-50 dark:border-gray-900 pt-8 mt-8">
+                 <div className="space-y-3">
+                   <Label className="text-[10px] font-black uppercase tracking-[.2em] text-gray-400">Instagram</Label>
+                   <Input value={socialLinks.instagram} onChange={e => setSocialLinks(p => ({...p, instagram: e.target.value}))} placeholder="@username" className="h-12 rounded-xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-sm font-bold px-4" />
+                 </div>
+                 <div className="space-y-3">
+                   <Label className="text-[10px] font-black uppercase tracking-[.2em] text-gray-400">X (Twitter)</Label>
+                   <Input value={socialLinks.x} onChange={e => setSocialLinks(p => ({...p, x: e.target.value}))} placeholder="@username" className="h-12 rounded-xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-sm font-bold px-4" />
+                 </div>
+                 <div className="space-y-3">
+                   <Label className="text-[10px] font-black uppercase tracking-[.2em] text-gray-400">Facebook</Label>
+                   <Input value={socialLinks.facebook} onChange={e => setSocialLinks(p => ({...p, facebook: e.target.value}))} placeholder="Page URL/Name" className="h-12 rounded-xl bg-gray-50/50 dark:bg-gray-900 border-gray-100 dark:border-gray-800 text-sm font-bold px-4" />
+                 </div>
+               </div>
+
+               <div className="bg-gray-50 dark:bg-gray-900 p-8 rounded-[2.5rem] space-y-6 mt-8">
+                 <div>
+                   <h3 className="text-base font-black uppercase tracking-widest text-gray-900 dark:text-white">Workspace Stylist</h3>
+                   <p className="text-[10px] text-gray-400 font-medium">Customize your private seller dashboard view.</p>
+                 </div>
+                 <div className="flex items-center gap-8">
+                   <div className="space-y-3 flex-1">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Dashboard Theme</Label>
+                     <div className="flex gap-2">
+                       {['light', 'dark', 'system'].map(t => (
+                         <button
+                           key={t}
+                           onClick={() => setDashboardConfig(p => ({...p, theme: t}))}
+                           className={`flex-1 h-10 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${dashboardConfig.theme === t ? 'border-blue-600 bg-white dark:bg-black text-blue-600 shadow-sm' : 'border-gray-100 dark:border-gray-800 opacity-40'}`}
+                         >
+                           {t}
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+                   <div className="space-y-3 shrink-0">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sidebar Style</Label>
+                     <div className="flex gap-2">
+                       {['solid', 'glass'].map(s => (
+                         <button
+                           key={s}
+                           onClick={() => setDashboardConfig(p => ({...p, sidebar_style: s}))}
+                           className={`px-4 h-10 rounded-xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${dashboardConfig.sidebar_style === s ? 'border-blue-600 bg-white dark:bg-black text-blue-600 shadow-sm' : 'border-gray-100 dark:border-gray-800 opacity-40'}`}
+                         >
+                           {s}
+                         </button>
+                       ))}
+                     </div>
+                   </div>
+                 </div>
+               </div>
+
+              <div className="flex gap-4 pt-4 border-t border-gray-50 dark:border-gray-900 mt-8">
                 <Button variant="ghost" onClick={() => setStep(2)} className="h-16 px-8 rounded-2xl font-bold text-gray-400">Back</Button>
                 <Button 
                   onClick={() => setStep(4)} 

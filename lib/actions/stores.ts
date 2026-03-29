@@ -30,6 +30,14 @@ export async function createStore(formData: FormData): Promise<{ error?: string;
   const card_config_raw = formData.get("card_config") as string
   const card_config = card_config_raw ? JSON.parse(card_config_raw) : { theme: "midnight", layout: "landscape" }
 
+  const dashboard_config_raw = formData.get("dashboard_config") as string
+  const dashboard_config = dashboard_config_raw ? JSON.parse(dashboard_config_raw) : { theme: "system", sidebar_style: "glass" }
+  
+  const social_links_raw = formData.get("social_links") as string
+  const social_links = social_links_raw ? JSON.parse(social_links_raw) : {}
+
+  const category_focus = (formData.get("category_focus") as string) || "General"
+
   const payout_bank_name = formData.get("payout_bank_name") as string
   const payout_account_number = formData.get("payout_account_number") as string
   const payout_account_name = formData.get("payout_account_name") as string
@@ -58,6 +66,9 @@ export async function createStore(formData: FormData): Promise<{ error?: string;
     font_preset,
     features,
     card_config,
+    dashboard_config,
+    social_links,
+    category_focus,
     payout_bank_name,
     payout_account_number,
     payout_account_name,
@@ -161,6 +172,14 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
   const card_config_raw = formData.get("card_config") as string
   const card_config = card_config_raw ? JSON.parse(card_config_raw) : undefined
 
+  const dashboard_config_raw = formData.get("dashboard_config") as string
+  const dashboard_config = dashboard_config_raw ? JSON.parse(dashboard_config_raw) : undefined
+
+  const social_links_raw = formData.get("social_links") as string
+  const social_links = social_links_raw ? JSON.parse(social_links_raw) : undefined
+
+  const category_focus = (formData.get("category_focus") as string) || undefined
+
   const font_preset = formData.get("font_preset") as string
   const payout_bank_name = formData.get("payout_bank_name") as string
   const payout_account_number = formData.get("payout_account_number") as string
@@ -187,6 +206,9 @@ export async function updateStore(storeId: string, formData: FormData): Promise<
   }
   if (features) updates.features = features
   if (card_config) updates.card_config = card_config
+  if (dashboard_config) updates.dashboard_config = dashboard_config
+  if (social_links) updates.social_links = social_links
+  if (category_focus) updates.category_focus = category_focus
   if (logo_url) updates.logo_url = logo_url
 
   const { error } = await supabase.from("stores").update(updates).eq("id", storeId)

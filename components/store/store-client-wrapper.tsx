@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { AddToCartButton } from "@/components/cart/add-to-cart-button"
 import { InquiryModal } from "@/components/messaging/inquiry-modal"
+import ChoiceCardPreview from "@/components/ChoiceCardPreview"
 import Link from "next/link"
 
 interface StoreClientWrapperProps {
@@ -40,67 +41,90 @@ export function StoreClientWrapper({ store, products }: StoreClientWrapperProps)
       {/* ── STORE HERO ── */}
       <section className={`relative pt-32 pb-24 px-6 md:px-12 overflow-hidden border-b ${theme === 'luxury' ? 'border-gold-500/10' : 'bg-white dark:bg-gray-950 border-gray-100 dark:border-gray-800'}`}>
         
-        {/* Abstract Background Splashes */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full opacity-10 pointer-events-none">
-          <div className="absolute top-20 right-20 w-[600px] h-[600px] rounded-full blur-[140px] animate-pulse" style={{ background: brandColor }} />
-          <div className="absolute bottom-20 left-20 w-[400px] h-[400px] rounded-full blur-[140px] opacity-40 animate-pulse delay-700" style={{ background: brandColor }} />
+        {/* Layer 1: Abstract Background Spashes & Floating Card Effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full opacity-10">
+            <div className="absolute top-20 right-10 w-[800px] h-[800px] rounded-full blur-[140px] animate-pulse" style={{ background: brandColor }} />
+            <div className="absolute bottom-20 left-10 w-[600px] h-[600px] rounded-full blur-[140px] opacity-40 animate-pulse delay-700" style={{ background: brandColor }} />
+          </div>
+          {/* Floating Atmospheric Identity Card */}
+          <div className="absolute -top-32 -right-32 md:right-10 opacity-[0.03] dark:opacity-[0.05] rotate-12 scale-[1.5] md:scale-100 mix-blend-overlay blur-[2px] pointer-events-none">
+             {store.card_config && (
+               <ChoiceCardPreview 
+                 name={store.name} 
+                 tagline={store.tagline} 
+                 color={brandColor} 
+                 layout={store.card_config.layout || "landscape"} 
+                 theme={store.card_config.theme || "midnight"} 
+               />
+             )}
+          </div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto flex flex-col items-center text-center gap-12">
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col items-center justify-center text-center gap-14 min-h-[40vh]">
           
-          {/* Logo & ID */}
-          <div className="flex flex-col items-center gap-6">
-            <div className={`h-32 w-32 ${theme === 'luxury' ? 'rounded-full border-gold-500/50' : 'rounded-[2.5rem]'} bg-gray-50 dark:bg-gray-900 border-2 border-white dark:border-gray-800 shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform duration-700`}>
-              {store.logo_url ? (
-                <img src={store.logo_url} alt={store.name} className="h-full w-full object-cover" />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-5xl font-black text-white" style={{ background: brandColor }}>
-                  {store.name[0]}
-                </div>
-              )}
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-center gap-3">
-                <h1 className={`text-5xl md:text-8xl font-black tracking-tighter leading-none capitalize ${theme === 'luxury' ? 'text-gold-500' : 'text-gray-900 dark:text-white'}`}>
-                  {store.name}
-                </h1>
-                <ShieldCheck className={`h-8 w-8 ${theme === 'luxury' ? 'text-gold-500' : 'text-blue-500'}`} />
+          {/* Logo & Core Identity */}
+          <div className="flex flex-col items-center gap-8 fade-in slide-in-from-bottom-5 duration-1000">
+            <div className="relative">
+              <div className="absolute inset-0 blur-2xl opacity-40 animate-pulse" style={{ background: brandColor }} />
+              <div className={`relative h-40 w-40 ${theme === 'luxury' ? 'rounded-full border-gold-500/50' : 'rounded-[3rem]'} bg-gray-50 dark:bg-gray-900 border-4 border-white dark:border-gray-800 shadow-[0_30px_60px_rgba(0,0,0,0.15)] overflow-hidden flex items-center justify-center hover:scale-110 hover:-rotate-3 transition-transform duration-700 ease-out`}>
+                {store.logo_url ? (
+                  <img src={store.logo_url} alt={store.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full flex items-center justify-center text-6xl font-black text-white" style={{ background: brandColor }}>
+                    {store.name[0]}
+                  </div>
+                )}
               </div>
-              <p className="text-xl md:text-2xl text-gray-500 dark:text-gray-400 font-medium italic max-w-2xl mx-auto">
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex flex-col items-center justify-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border bg-white/50 dark:bg-black/50 backdrop-blur-md text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 border-gray-100 dark:border-gray-800 shadow-sm">
+                  <Tag className="h-3 w-3" /> {store.category_focus || "General Market"}
+                </div>
+                <div className="flex items-center gap-3">
+                  <h1 className={`text-6xl md:text-9xl font-black tracking-tighter leading-none capitalize ${theme === 'luxury' ? 'text-gold-500' : 'text-gray-900 dark:text-white drop-shadow-sm'}`}>
+                    {store.name}
+                  </h1>
+                  <ShieldCheck className={`h-10 w-10 md:h-14 md:w-14 -mt-4 animate-bounce ${theme === 'luxury' ? 'text-gold-500' : 'text-blue-500'}`} />
+                </div>
+              </div>
+              <p className="text-xl md:text-3xl text-gray-500 dark:text-gray-400 font-medium italic max-w-3xl mx-auto leading-relaxed">
                 &quot;{store.tagline || "Your trusted boutique for premium items and electronics."}&quot;
               </p>
             </div>
           </div>
 
-          {/* Verification Badge */}
-          <div className={`flex flex-wrap items-center justify-center gap-8 pt-4 border-t w-full max-w-2xl ${theme === 'luxury' ? 'border-gold-500/10' : 'border-gray-100 dark:border-gray-800'}`}>
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 border border-gray-100 dark:border-gray-800 shadow-inner">
+          {/* Premium Verification Banner */}
+          <div className="flex flex-wrap items-center justify-center gap-4 mt-4 fade-in slide-in-from-bottom-5 duration-1000 delay-150">
+             {store.successful_deals > 10 && (
+              <div className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/40 dark:to-yellow-900/10 border border-yellow-200 dark:border-yellow-700/50 shadow-lg shadow-yellow-500/10 hover:-translate-y-1 transition-transform">
+                <div className="h-10 w-10 flex items-center justify-center bg-yellow-400 rounded-xl text-yellow-900 shadow-inner">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-600 dark:text-yellow-500">Official Ranking</p>
+                  <p className={`text-sm font-black uppercase tracking-widest ${theme === 'luxury' ? 'text-gold-500' : 'text-yellow-700 dark:text-yellow-400'}`}>Gold Partner</p>
+                </div>
+              </div>
+            )}
+            <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl border bg-white/50 dark:bg-black/50 backdrop-blur-md shadow-sm hover:-translate-y-1 transition-transform ${theme === 'luxury' ? 'border-gold-500/30' : 'border-gray-100 dark:border-gray-800'}`}>
+              <div className="h-10 w-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500">
                 <ShieldCheck className="h-5 w-5" />
               </div>
               <div className="text-left">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Verified By</p>
-                <p className={`text-xs font-bold uppercase tracking-widest ${theme === 'luxury' ? 'text-gold-500' : 'text-gray-700 dark:text-gray-200'}`}>Eagle Choice Admin</p>
+                <p className={`text-sm font-black uppercase tracking-widest ${theme === 'luxury' ? 'text-gold-500' : 'text-gray-800 dark:text-gray-200'}`}>Eagle Choice Admin</p>
               </div>
             </div>
-            {store.successful_deals > 10 && (
-              <div className="flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white border border-yellow-300 shadow-xl shadow-yellow-500/20">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div className="text-left">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-yellow-600">Top Seller</p>
-                  <p className={`text-xs font-bold uppercase tracking-widest ${theme === 'luxury' ? 'text-gold-500' : 'text-gray-700 dark:text-gray-200'}`}>Gold Tier Partner</p>
-                </div>
-              </div>
-            )}
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gray-50 dark:bg-gray-900 flex items-center justify-center text-gray-400 border border-gray-100 dark:border-gray-800">
+            <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl border bg-white/50 dark:bg-black/50 backdrop-blur-md shadow-sm hover:-translate-y-1 transition-transform ${theme === 'luxury' ? 'border-gold-500/30' : 'border-gray-100 dark:border-gray-800'}`}>
+              <div className="h-10 w-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-xl text-gray-500">
                 <Gavel className="h-5 w-5" />
               </div>
               <div className="text-left">
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Compliance</p>
-                <p className={`text-xs font-bold uppercase tracking-widest ${theme === 'luxury' ? 'text-gold-500' : 'text-gray-700 dark:text-gray-200'}`}>5% Fee Protected</p>
+                <p className={`text-sm font-black uppercase tracking-widest ${theme === 'luxury' ? 'text-gold-500' : 'text-gray-800 dark:text-gray-200'}`}>Payment Protected</p>
               </div>
             </div>
           </div>
